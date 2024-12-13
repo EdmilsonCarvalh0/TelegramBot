@@ -1,0 +1,5 @@
+GENERAL REQUIREMENTS:
+
+    1. Send options to User for choice;
+    2. Perform chosen task;
+    3. Provide a good user experience;
