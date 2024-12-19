@@ -8,6 +8,7 @@ public class ShoppingData
 
     public string GetList()
     {
+        return "";
         //TODO: implement json deserialize for return list in method
         //      implementar deserialização json para retornar a lista no método
     }

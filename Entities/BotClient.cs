@@ -1,4 +1,7 @@
+using System.Data.Common;
 using Telegram.Bot;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using TelegramBot.Data;
 
 namespace TelegramBot.Entities;
@@ -9,6 +12,7 @@ public class BotClient
     public TelegramBotClient Bot;
     private readonly long Id = 1322812622;
     private ShoppingData _shoppingData = new ShoppingData();
+    private static string InputMessage = "";
 
     public BotClient()
     {
@@ -31,7 +35,6 @@ public class BotClient
                 break;
 
             case "/atualizarLista":
-                GetInputItem();
                 _shoppingData.UpdateList();
                 await Bot.SendMessage(Id, _shoppingData.GetList());
                 break;
@@ -48,11 +51,9 @@ public class BotClient
         }
     }
 
-    public async void GetInputItem()
+    public static void GetInputMessage(string inputItem)
     {
-        await Bot.SendMessage(Id, "Informe o item:");
-        //TODO: implement a listener to get the item via update
-        //      implemente uma 'escuta' para obter o item pelo update
+        InputMessage = inputItem;
     }
 
     public void ValidateInputItem(string input)
@@ -62,4 +63,6 @@ public class BotClient
             throw new ArgumentException("Por favor, informe uma opção ou uma item válido.");
         }
     }
+
+    
 }
