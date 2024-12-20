@@ -14,7 +14,7 @@ public class Program
 
         using var cts = new CancellationTokenSource();
 
-        // Configurações do Receiver
+        // Receiver configurations
         client.Bot.StartReceiving(
             BotConnection.HandleUpdateAsync,
             BotConnection.HandleErrorAsync,
