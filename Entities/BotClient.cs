@@ -11,7 +11,6 @@ public class BotClient
 {
     private readonly static string Token = "7560368958:AAGSWm6chmVviBNYSNF8P4Yh3aJdcka0vQw";
     public TelegramBotClient Bot;
-    private readonly long Id = 1322812622;
     private static ShoppingData _shoppingData = new ShoppingData();
     private static string InputMessage = "";
 
@@ -45,29 +44,30 @@ public class BotClient
     {
         switch (chosenOption)
         {
-            case "/verLista":
+            case "Ver lista":
                 return _shoppingData.GetList();
 
-            case "/atualizarLista":
+            case "Atualizar lista":
                 _shoppingData.UpdateList();
                 return "Lista atualizada";
             
-            case "/adicionarItem":
-                string item = Console.ReadLine()!;
+            case "Adicionar item":
+                string item = Console.ReadLine() ?? "Manteiga";
                 ValidateInputItem(item);
                 _shoppingData.AddItem(item);
                 //TODO: implement gender verification of items
                 //      implementar verificação de sexo dos itens
                 return $"{item} adicionado(a)!";
 
-            case "/criarNovaLista":
+            case "Criar nova lista":
                 return "Nova lista criada!";
+            
+            default:
+                return "Switch final.";
         }
-
-        return "";
     }
 
-    public static void GetInputMessage(string inputItem)
+    public static void SetInputMessage(string inputItem)
     {
         InputMessage = inputItem;
     }
@@ -76,7 +76,7 @@ public class BotClient
     {
         if(String.IsNullOrEmpty(input))
         {
-            throw new ArgumentException("Por favor, informe uma opção ou uma item válido.");
+            throw new ArgumentException("Por favor, informe uma opção ou um item válido.");
         }
     }
 }

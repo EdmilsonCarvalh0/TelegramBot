@@ -15,7 +15,7 @@ public class BotConnection
         if (update.Type == UpdateType.Message && update.Message is not null)
         {
             var message = update.Message;
-            BotClient.GetInputMessage(message.Text!);
+            BotClient.SetInputMessage(message.Text!);
 
             var startService = BotClient.StartService();
             await botClient.SendMessage(
@@ -25,19 +25,25 @@ public class BotConnection
                 cancellationToken: cancellationToken
             );
 
-            if (update.Type == UpdateType.CallbackQuery && update.CallbackQuery is not null)
-            {
-                var callbackQuery = update.CallbackQuery;
-                var originalMessage = callbackQuery.Message?.Text;
-
-                BotClient.ExecuteChosenOption(originalMessage!);
-            }
-
             Console.WriteLine($"{message.From?.Username} saying: {message.Text}");
+        }
+        else if (update.Type == UpdateType.CallbackQuery && update.CallbackQuery is not null)
+        {
+            var callbackQuery = update.CallbackQuery;
+            var originalMessage = callbackQuery.Data;
 
+            await botClient.AnswerCallbackQuery(
+                callbackQueryId: callbackQuery.Id,
+                text: $"Opção selecionada: {callbackQuery.Data}",
+                cancellationToken: cancellationToken
+            );
+            Console.WriteLine($"Opção selecionada: {callbackQuery.Data}");
+
+            string response = BotClient.ExecuteChosenOption(originalMessage!);
+            
             await botClient.SendMessage(
-                chatId: message.Chat.Id,
-                text: $"You saying: {message.Text}",
+                chatId: callbackQuery.Message!.Chat.Id,
+                text: response,
                 cancellationToken: cancellationToken
             );
         }
