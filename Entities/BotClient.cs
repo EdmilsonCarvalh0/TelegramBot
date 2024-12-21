@@ -48,16 +48,12 @@ public class BotClient
                 return _shoppingData.GetList();
 
             case "Atualizar lista":
-                _shoppingData.UpdateList();
                 return "Lista atualizada";
             
             case "Adicionar item":
-                string item = Console.ReadLine() ?? "Manteiga";
-                ValidateInputItem(item);
-                _shoppingData.AddItem(item);
                 //TODO: implement gender verification of items
                 //      implementar verificação de sexo dos itens
-                return $"{item} adicionado(a)!";
+                return "Item adicionado!";
 
             case "Criar nova lista":
                 return "Nova lista criada!";
@@ -65,6 +61,30 @@ public class BotClient
             default:
                 return "Switch final.";
         }
+    }
+
+    public static string AddItemInShoppingData(string item)
+    {
+        _shoppingData.AddItemInList(item);
+        return $"{item} adicionado(a).";
+    }
+
+    public static string SendItemToUpdateList(string item)
+    {
+        _shoppingData.UpdateList(item);
+        return "Lista atualizada.";
+    }
+
+    public static string ShowList()
+    {
+        return _shoppingData.GetList();
+    }
+
+    public static string GetItemsToCreatelist(string items)
+    {
+        //TODO: manipulate TimeStamp to formalize data
+        _shoppingData.CreateNewList(items);
+        return "Nova lista criada.";
     }
 
     public static void SetInputMessage(string inputItem)

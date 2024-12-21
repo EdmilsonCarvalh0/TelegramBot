@@ -13,19 +13,19 @@ public class ShoppingData
         //      implementar deserialização json para retornar a lista no método
     }
 
-    public void UpdateList()
+    public void UpdateList(string item)
     {
         //TODO: implement list update and correctly replace elements
         //      implementar atualização de lista e substituir corretamente os elementos
     }
 
-    public void AddItem(string item)
+    public void AddItemInList(string item)
     {
         //TODO: implement the serialization to add in list
         //      implemente a serialização para adicionar na lista
     }
 
-    public void CreateNewList()
+    public void CreateNewList(string items)
     {
 
     }

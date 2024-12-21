@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -5,9 +6,16 @@ using TelegramBot.Entities;
 
 public class BotConnection
 {
-    public BotConnection()
+    private static readonly ConcurrentDictionary<long, string> UserStates = new();
+    private static readonly Dictionary<string, string> States;
+    static BotConnection()
     {
-        
+        //TODO: check if the states are accessible in method
+        States = new Dictionary<string, string>
+        {
+            {"Option 01", "waiting_for_item_to_update_list"},
+            {"Option 02", "waiting_item"}
+        };
     }
 
     public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
@@ -16,6 +24,54 @@ public class BotConnection
         {
             var message = update.Message;
             BotClient.SetInputMessage(message.Text!);
+
+            long userId = message.From!.Id;
+
+            //Checks user status to send item for list atualization
+            if (UserStates.TryGetValue(userId, out var states) && states == "waiting_for_item_to_update_list")
+            {
+                var item = message.Text;
+
+                string methodResponse = BotClient.SendItemToUpdateList(item!);
+
+                await botClient.SendMessage(
+                    chatId: message.Chat.Id,
+                    text: methodResponse,
+                    cancellationToken: cancellationToken
+                );
+
+                UserStates.TryRemove(userId, out _);
+            }
+            
+            //Checks user status for item insertion
+            if (UserStates.TryGetValue(userId, out var stateOfWaitingItem) && stateOfWaitingItem == "waiting_item")
+            {
+                var item = message.Text;
+
+                string methodResponse = BotClient.AddItemInShoppingData(item!);
+                
+                await botClient.SendMessage(
+                    chatId: message.Chat.Id,
+                    text: methodResponse,
+                    cancellationToken: cancellationToken
+                );
+
+                UserStates.TryRemove(userId, out _);
+            }
+
+            //Checks user status to create new list with item
+            if (UserStates.TryGetValue(userId, out var state) && state == "waiting_items_to_create_new_list")
+            {
+                var item = message.Text;
+                
+                string methodResponse = BotClient.GetItemsToCreatelist(item!);
+                 
+                await botClient.SendMessage(
+                    chatId: message.Chat.Id,
+                    text: methodResponse,
+                    cancellationToken: cancellationToken
+                );
+            }
 
             var startService = BotClient.StartService();
             await botClient.SendMessage(
@@ -30,22 +86,56 @@ public class BotConnection
         else if (update.Type == UpdateType.CallbackQuery && update.CallbackQuery is not null)
         {
             var callbackQuery = update.CallbackQuery;
-            var originalMessage = callbackQuery.Data;
+            long userId = callbackQuery.From.Id;
 
-            await botClient.AnswerCallbackQuery(
-                callbackQueryId: callbackQuery.Id,
-                text: $"Opção selecionada: {callbackQuery.Data}",
-                cancellationToken: cancellationToken
-            );
+            //Checks option 'ver lista' and send list to user
+            if (callbackQuery.Data == "Ver lista")
+            {
+                await botClient.AnswerCallbackQuery(
+                    callbackQueryId: callbackQuery.Id,
+                    text: "Enviando lista...",
+                    cancellationToken: cancellationToken
+                );
+
+                var methodResponse = BotClient.ShowList();
+                await botClient.SendMessage(
+                    chatId: callbackQuery.Message!.Chat.Id,
+                    text: methodResponse,
+                    cancellationToken: cancellationToken
+                );
+            }
+
+            //Checks option 'adicionar item' and asks the user
+            if (callbackQuery.Data == "Adicionar item")
+            {
+                UserStates[userId] = "waiting_item";
+
+                await botClient.AnswerCallbackQuery(
+                    callbackQueryId: callbackQuery.Id,
+                    text: $"Digite o nome do item que deseja adicionar.",
+                    cancellationToken: cancellationToken
+                );
+                await botClient.SendMessage(
+                    chatId: callbackQuery.Message!.Chat.Id,
+                    text: "Por favor, envie o nome agora:",
+                    cancellationToken: cancellationToken
+                );
+            }
+
+            //Checks option 'criar nova lista' 
+            if (callbackQuery.Data == "Criar nova lista")
+            {
+                UserStates[userId] = "waiting_items_to_create_new_list";
+
+                await botClient.AnswerCallbackQuery(
+                    callbackQueryId: callbackQuery.Id,
+                    text: "Informe os itens da nova lista.",
+                    cancellationToken: cancellationToken
+                );
+
+            }
+
             Console.WriteLine($"Opção selecionada: {callbackQuery.Data}");
-
-            string response = BotClient.ExecuteChosenOption(originalMessage!);
-            
-            await botClient.SendMessage(
-                chatId: callbackQuery.Message!.Chat.Id,
-                text: response,
-                cancellationToken: cancellationToken
-            );
         }
     }
 
