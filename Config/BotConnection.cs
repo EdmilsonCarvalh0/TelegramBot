@@ -14,7 +14,8 @@ public class BotConnection
         States = new Dictionary<string, string>
         {
             {"Option 01", "waiting_for_item_to_update_list"},
-            {"Option 02", "waiting_item"}
+            {"Option 02", "waiting_item"},
+            {"Option 03", "waiting_items_to_create_new_list"}
         };
     }
 
@@ -27,7 +28,7 @@ public class BotConnection
 
             long userId = message.From!.Id;
 
-            //Checks user status to send item for list atualization
+            //Verify user status to send item for list atualization
             if (UserStates.TryGetValue(userId, out var states) && states == "waiting_for_item_to_update_list")
             {
                 var item = message.Text;
@@ -43,7 +44,7 @@ public class BotConnection
                 UserStates.TryRemove(userId, out _);
             }
             
-            //Checks user status for item insertion
+            //Verify user status for item insertion
             if (UserStates.TryGetValue(userId, out var stateOfWaitingItem) && stateOfWaitingItem == "waiting_item")
             {
                 var item = message.Text;
@@ -59,7 +60,7 @@ public class BotConnection
                 UserStates.TryRemove(userId, out _);
             }
 
-            //Checks user status to create new list with item
+            //Verify user status to create new list with item
             if (UserStates.TryGetValue(userId, out var state) && state == "waiting_items_to_create_new_list")
             {
                 var item = message.Text;
@@ -71,6 +72,8 @@ public class BotConnection
                     text: methodResponse,
                     cancellationToken: cancellationToken
                 );
+
+                UserStates.TryRemove(userId, out _);
             }
 
             var startService = BotClient.StartService();
@@ -88,7 +91,7 @@ public class BotConnection
             var callbackQuery = update.CallbackQuery;
             long userId = callbackQuery.From.Id;
 
-            //Checks option 'ver lista' and send list to user
+            //Verify option 'ver lista' and send list to user
             if (callbackQuery.Data == "Ver lista")
             {
                 await botClient.AnswerCallbackQuery(
@@ -105,7 +108,7 @@ public class BotConnection
                 );
             }
 
-            //Checks option 'adicionar item' and asks the user
+            //Verify option 'adicionar item' and asks the user
             if (callbackQuery.Data == "Adicionar item")
             {
                 UserStates[userId] = "waiting_item";
@@ -122,7 +125,27 @@ public class BotConnection
                 );
             }
 
-            //Checks option 'criar nova lista' 
+            //Verify option 'atualizar lista' and asks the user wich kind atualization
+            if (callbackQuery.Data == "Atualizar lista")
+            {
+                UserStates[userId] = "waiting_for_item_to_update_list";
+
+                await botClient.AnswerCallbackQuery(
+                    callbackQueryId: callbackQuery.Id,
+                    text: "Selecione o tipo da atualização.",
+                    cancellationToken: cancellationToken
+                );
+
+                var listUpdatesOptionsKeyboard = BotClient.GetOptionsOfListUpdate();
+                await botClient.SendMessage(
+                    chatId: callbackQuery.Message!.Chat.Id,
+                    text: "Tipos de atualizações disponíveis:",
+                    replyMarkup: listUpdatesOptionsKeyboard,
+                    cancellationToken: cancellationToken
+                );
+            }
+
+            //Verify option 'criar nova lista' 
             if (callbackQuery.Data == "Criar nova lista")
             {
                 UserStates[userId] = "waiting_items_to_create_new_list";
@@ -132,7 +155,11 @@ public class BotConnection
                     text: "Informe os itens da nova lista.",
                     cancellationToken: cancellationToken
                 );
-
+                await botClient.SendMessage(
+                    chatId: callbackQuery.Message!.Chat.Id,
+                    text: "Envie agora os itens da nova lista.\nUse o padrão adequado para registro correto dos itens. Nesse caso, separe os itens por vírgula sem espaços.\nEx: Pão,Manteiga,Queijo",
+                    cancellationToken: cancellationToken
+                );
             }
 
             Console.WriteLine($"Opção selecionada: {callbackQuery.Data}");

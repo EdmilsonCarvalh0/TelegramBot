@@ -7,6 +7,8 @@ using TelegramBot.Data;
 
 namespace TelegramBot.Entities;
 
+//TODO: Create Class about List/Data for encapsulate functionalities
+//      criar classe sobre list/dados para encapsular funcionalidades
 public class BotClient
 {
     private readonly static string Token = "7560368958:AAGSWm6chmVviBNYSNF8P4Yh3aJdcka0vQw";
@@ -21,9 +23,7 @@ public class BotClient
 
     public static InlineKeyboardMarkup StartService()
     {
-        //TODO: send the mesage with the user click option
-        //      enivar a mensagem com opção de clique pelo usuário
-        var inlineKeyboard = new InlineKeyboardMarkup(new[]
+        var builtInKeyboardOftheInitialOptions = new InlineKeyboardMarkup(new[]
             {
                 new[]
                 {
@@ -37,7 +37,8 @@ public class BotClient
                 }
             }
         );
-        return inlineKeyboard;
+
+        return builtInKeyboardOftheInitialOptions;
     }
 
     public static string ExecuteChosenOption(string chosenOption)
@@ -73,6 +74,20 @@ public class BotClient
     {
         _shoppingData.UpdateList(item);
         return "Lista atualizada.";
+    }
+
+    public static InlineKeyboardMarkup GetOptionsOfListUpdate()
+    {
+        var listUpdatesOptionsKeyboard = new InlineKeyboardMarkup(new[]
+            {
+                new []
+                {
+                    InlineKeyboardButton.WithCallbackData("")
+                }
+            }
+        );
+
+        return listUpdatesOptionsKeyboard;
     }
 
     public static string ShowList()
