@@ -139,7 +139,7 @@ public class BotConnection
                 var listUpdatesOptionsKeyboard = BotClient.GetOptionsOfListUpdate();
                 await botClient.SendMessage(
                     chatId: callbackQuery.Message!.Chat.Id,
-                    text: "Tipos de atualizações disponíveis:",
+                    text: "Selecione o tipo de atualização que deseja fazer:",
                     replyMarkup: listUpdatesOptionsKeyboard,
                     cancellationToken: cancellationToken
                 );

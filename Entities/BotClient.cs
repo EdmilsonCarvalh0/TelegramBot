@@ -82,7 +82,9 @@ public class BotClient
             {
                 new []
                 {
-                    InlineKeyboardButton.WithCallbackData("")
+                    InlineKeyboardButton.WithCallbackData("Alterar um item"),
+                    InlineKeyboardButton.WithCallbackData("Remover um item"),
+                    InlineKeyboardButton.WithCallbackData("Adicionar um item")
                 }
             }
         );
