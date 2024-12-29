@@ -28,8 +28,24 @@ public class BotConnection
 
             long userId = message.From!.Id;
 
+            //Verify user status for item insertion
+            if (UserStates.TryGetValue(userId, out var stateOfWaitingItem) && stateOfWaitingItem == "waiting_item_to_add")
+            {
+                var item = message.Text;
+
+                string methodResponse = BotClient.AddItemInShoppingData(item!);
+                
+                await botClient.SendMessage(
+                    chatId: message.Chat.Id,
+                    text: methodResponse,
+                    cancellationToken: cancellationToken
+                );
+
+                UserStates.TryRemove(userId, out _);
+            }
+
             //Verify user status to send item for list atualization
-            if (UserStates.TryGetValue(userId, out var states) && states == "waiting_for_item_to_update_list")
+            if (UserStates.TryGetValue(userId, out var states) && states == "waiting_for_items_to_updated")
             {
                 var item = message.Text;
 
@@ -43,21 +59,19 @@ public class BotConnection
 
                 UserStates.TryRemove(userId, out _);
             }
-            
-            //Verify user status for item insertion
-            if (UserStates.TryGetValue(userId, out var stateOfWaitingItem) && stateOfWaitingItem == "waiting_item")
+
+            //Verify user status to remove item from list
+            if (UserStates.TryGetValue(userId, out var stateToRemove) && stateToRemove == "waiting_item_to_remove")
             {
                 var item = message.Text;
 
-                string methodResponse = BotClient.AddItemInShoppingData(item!);
-                
+                string methodResponse = BotClient.SendItemToRemoveFromList(item!);
+
                 await botClient.SendMessage(
                     chatId: message.Chat.Id,
                     text: methodResponse,
                     cancellationToken: cancellationToken
                 );
-
-                UserStates.TryRemove(userId, out _);
             }
 
             //Verify user status to create new list with item
@@ -108,10 +122,29 @@ public class BotConnection
                 );
             }
 
-            //Verify option 'adicionar item' and asks the user
-            if (callbackQuery.Data == "Adicionar item")
+
+            //Verify option 'atualizar lista' and asks the user wich kind atualization
+            if (callbackQuery.Data == "Atualizar lista")
             {
-                UserStates[userId] = "waiting_item";
+                await botClient.AnswerCallbackQuery(
+                    callbackQueryId: callbackQuery.Id,
+                    text: "Selecione o tipo da atualização.",
+                    cancellationToken: cancellationToken
+                );
+
+                var listUpdatesOptionsKeyboard = BotClient.GetOptionsOfListUpdate();
+                await botClient.SendMessage(
+                    chatId: callbackQuery.Message!.Chat.Id,
+                    text: "Selecione o tipo de atualização que deseja fazer:",
+                    replyMarkup: listUpdatesOptionsKeyboard,
+                    cancellationToken: cancellationToken
+                );
+            }
+
+            //Verify option 'adicionar item' and asks the user
+            if (callbackQuery.Data == "Adicionar um item")
+            {
+                UserStates[userId] = "waiting_item_to_add";
 
                 await botClient.AnswerCallbackQuery(
                     callbackQueryId: callbackQuery.Id,
@@ -125,22 +158,38 @@ public class BotConnection
                 );
             }
 
-            //Verify option 'atualizar lista' and asks the user wich kind atualization
-            if (callbackQuery.Data == "Atualizar lista")
+            //Verify option 'alterar um item' and asks the user
+            if (callbackQuery.Data == "Alterar um item")
             {
-                UserStates[userId] = "waiting_for_item_to_update_list";
+                UserStates[userId] = "waiting_for_items_to_updated";
 
                 await botClient.AnswerCallbackQuery(
                     callbackQueryId: callbackQuery.Id,
-                    text: "Selecione o tipo da atualização.",
+                    text: "Digite o nome do item que deseja alterar.",
                     cancellationToken: cancellationToken
                 );
 
-                var listUpdatesOptionsKeyboard = BotClient.GetOptionsOfListUpdate();
                 await botClient.SendMessage(
                     chatId: callbackQuery.Message!.Chat.Id,
-                    text: "Selecione o tipo de atualização que deseja fazer:",
-                    replyMarkup: listUpdatesOptionsKeyboard,
+                    text: "Por favor, informe agora o nome dos itens que deseja fazer alteração.\nSendo o primeiro a ser substituído e o segundo a ser feita a substituição.\nEx: Digamos que deseje substituir Pão por Bolacha. Então informe 'Pão, Bolacha'.",
+                    cancellationToken: cancellationToken
+                );
+            }
+
+            //Verify option 'remover um item' and asks the user
+            if (callbackQuery.Data == "Remover um item")
+            {
+                UserStates[userId] = "waiting_item_to_remove";
+
+                await botClient.AnswerCallbackQuery(
+                    callbackQueryId: callbackQuery.Id,
+                    text: "Digite o nome do item que deseja remover.",
+                    cancellationToken: cancellationToken
+                );
+
+                await botClient.SendMessage(
+                    chatId: callbackQuery.Message!.Chat.Id,
+                    text: "Por favor, informe agora o nome do item que deseja remover:",
                     cancellationToken: cancellationToken
                 );
             }

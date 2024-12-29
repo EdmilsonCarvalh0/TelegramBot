@@ -28,11 +28,7 @@ public class BotClient
                 new[]
                 {
                     InlineKeyboardButton.WithCallbackData("Ver lista"),
-                    InlineKeyboardButton.WithCallbackData("Atualizar lista")
-                },
-                new[]
-                {
-                    InlineKeyboardButton.WithCallbackData("Adicionar item"),
+                    InlineKeyboardButton.WithCallbackData("Atualizar lista"),
                     InlineKeyboardButton.WithCallbackData("Criar nova lista")
                 }
             }
@@ -70,10 +66,16 @@ public class BotClient
         return $"{item} adicionado(a).";
     }
 
-    public static string SendItemToUpdateList(string item)
+    public static string SendItemToUpdateList(string items)
     {
-        _shoppingData.UpdateList(item);
+        _shoppingData.UpdateList(items);
         return "Lista atualizada.";
+    }
+
+    public static string SendItemToRemoveFromList(string item)
+    {
+        _shoppingData.RemoveItemFromList(item);
+        return "Item removido.";
     }
 
     public static InlineKeyboardMarkup GetOptionsOfListUpdate()
@@ -82,9 +84,9 @@ public class BotClient
             {
                 new []
                 {
+                    InlineKeyboardButton.WithCallbackData("Adicionar um item"),
                     InlineKeyboardButton.WithCallbackData("Alterar um item"),
-                    InlineKeyboardButton.WithCallbackData("Remover um item"),
-                    InlineKeyboardButton.WithCallbackData("Adicionar um item")
+                    InlineKeyboardButton.WithCallbackData("Remover um item")
                 }
             }
         );
