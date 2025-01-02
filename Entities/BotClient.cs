@@ -23,7 +23,7 @@ public class BotClient
 
     public static InlineKeyboardMarkup StartService()
     {
-        var builtInKeyboardOftheInitialOptions = new InlineKeyboardMarkup(new[]
+        return new InlineKeyboardMarkup(new[]
             {
                 new[]
                 {
@@ -33,8 +33,26 @@ public class BotClient
                 }
             }
         );
+    }
 
-        return builtInKeyboardOftheInitialOptions;
+    public static InlineKeyboardMarkup GetOptionsOfListUpdate()
+    {
+        return new InlineKeyboardMarkup(new[]
+            {
+                new []
+                {
+                    InlineKeyboardButton.WithCallbackData("Adicionar um item"),
+                },
+                new[]
+                {
+                    InlineKeyboardButton.WithCallbackData("Alterar um item")
+                },
+                new[]
+                {
+                    InlineKeyboardButton.WithCallbackData("Remover um item")
+                }
+            }
+        );
     }
 
     public static string ExecuteChosenOption(string chosenOption)
@@ -49,7 +67,7 @@ public class BotClient
             
             case "Adicionar item":
                 //TODO: implement gender verification of items
-                //      implementar verificação de sexo dos itens
+                //      implementar verificação de gênero dos itens
                 return "Item adicionado!";
 
             case "Criar nova lista":
@@ -78,21 +96,6 @@ public class BotClient
         return "Item removido.";
     }
 
-    public static InlineKeyboardMarkup GetOptionsOfListUpdate()
-    {
-        var listUpdatesOptionsKeyboard = new InlineKeyboardMarkup(new[]
-            {
-                new []
-                {
-                    InlineKeyboardButton.WithCallbackData("Adicionar um item"),
-                    InlineKeyboardButton.WithCallbackData("Alterar um item"),
-                    InlineKeyboardButton.WithCallbackData("Remover um item")
-                }
-            }
-        );
-
-        return listUpdatesOptionsKeyboard;
-    }
 
     public static string ShowList()
     {

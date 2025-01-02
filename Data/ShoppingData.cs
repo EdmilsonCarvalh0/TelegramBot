@@ -1,11 +1,9 @@
-
+using System.Runtime.Serialization.Json;
 
 namespace TelegramBot.Data;
 
 public class ShoppingData
 {
-
-
     public string GetList()
     {
         return "Lista vazia";
