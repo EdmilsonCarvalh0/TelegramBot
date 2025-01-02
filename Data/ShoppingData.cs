@@ -1,8 +1,6 @@
-using System.Runtime.Serialization.Json;
-
 namespace TelegramBot.Data;
 
-public class ShoppingData
+public class ShoppingData : IShoppingData
 {
     public string GetList()
     {

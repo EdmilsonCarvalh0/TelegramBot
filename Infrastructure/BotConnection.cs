@@ -2,12 +2,15 @@ using System.Collections.Concurrent;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBot.Entities;
 
 public class BotConnection
 {
     private static readonly ConcurrentDictionary<long, string> UserStates = new();
     private static readonly Dictionary<string, string> States;
+    private static readonly IBotClient _botClient = new BotClient();
+
     static BotConnection()
     {
         //TODO: check if the states are accessible in method
@@ -24,7 +27,6 @@ public class BotConnection
         if (update.Type == UpdateType.Message && update.Message is not null)
         {
             var message = update.Message;
-            BotClient.SetInputMessage(message.Text!);
 
             long userId = message.From!.Id;
 
@@ -33,7 +35,7 @@ public class BotConnection
             {
                 var item = message.Text;
 
-                string methodResponse = BotClient.AddItemInShoppingData(item!);
+                string methodResponse = _botClient.AddItemInShoppingData(item!);
                 
                 await botClient.SendMessage(
                     chatId: message.Chat.Id,
@@ -49,7 +51,7 @@ public class BotConnection
             {
                 var item = message.Text;
 
-                string methodResponse = BotClient.SendItemToUpdateList(item!);
+                string methodResponse = _botClient.SendItemToUpdateList(item!);
 
                 await botClient.SendMessage(
                     chatId: message.Chat.Id,
@@ -65,7 +67,7 @@ public class BotConnection
             {
                 var item = message.Text;
 
-                string methodResponse = BotClient.SendItemToRemoveFromList(item!);
+                string methodResponse = _botClient.SendItemToRemoveFromList(item!);
 
                 await botClient.SendMessage(
                     chatId: message.Chat.Id,
@@ -79,7 +81,7 @@ public class BotConnection
             {
                 var item = message.Text;
                 
-                string methodResponse = BotClient.GetItemsToCreatelist(item!);
+                string methodResponse = _botClient.GetItemsToCreatelist(item!);
                  
                 await botClient.SendMessage(
                     chatId: message.Chat.Id,
@@ -90,7 +92,7 @@ public class BotConnection
                 UserStates.TryRemove(userId, out _);
             }
 
-            var startService = BotClient.StartService();
+            var startService = _botClient.StartService();
             await botClient.SendMessage(
                 chatId: message.Chat.Id,
                 text: $"Olá, bem vindo ao Bot de Compras Mensais!\nEscolha uma opção:",
@@ -114,7 +116,7 @@ public class BotConnection
                     cancellationToken: cancellationToken
                 );
 
-                var methodResponse = BotClient.ShowList();
+                var methodResponse = _botClient.ShowList();
                 await botClient.SendMessage(
                     chatId: callbackQuery.Message!.Chat.Id,
                     text: methodResponse,
@@ -132,7 +134,7 @@ public class BotConnection
                     cancellationToken: cancellationToken
                 );
 
-                var listUpdatesOptionsKeyboard = BotClient.GetOptionsOfListUpdate();
+                var listUpdatesOptionsKeyboard = _botClient.GetOptionsOfListUpdate();
                 await botClient.SendMessage(
                     chatId: callbackQuery.Message!.Chat.Id,
                     text: "Selecione o tipo de atualização que deseja fazer:",
@@ -219,5 +221,40 @@ public class BotConnection
     {
         Console.WriteLine($"Erro recebido: {exception.Message}");
         return Task.CompletedTask;
+    }
+
+    public InlineKeyboardMarkup StartService()
+    {
+        throw new NotImplementedException();
+    }
+
+    public InlineKeyboardMarkup GetOptionsOfListUpdate()
+    {
+        throw new NotImplementedException();
+    }
+
+    public string AddItemInShoppingData(string item)
+    {
+        throw new NotImplementedException();
+    }
+
+    public string SendItemToUpdateList(string item)
+    {
+        throw new NotImplementedException();
+    }
+
+    public string SendItemToRemoveFromList(string item)
+    {
+        throw new NotImplementedException();
+    }
+
+    public string ShowList()
+    {
+        throw new NotImplementedException();
+    }
+
+    public string GetItemsToCreatelist(string item)
+    {
+        throw new NotImplementedException();
     }
 }
