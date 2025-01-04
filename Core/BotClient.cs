@@ -75,7 +75,7 @@ public class BotClient : IBotClient
 
     public string ShowList()
     {
-        var list = _shoppingData.GetList();
+        // var list = _shoppingData.GetList();
         return _shoppingData.GetList();
     }
 

@@ -4,6 +4,12 @@ namespace TelegramBot.Data;
 
 public abstract class DataModel
 {
+    [JsonProperty("id")]
+    public int Id { get; set; }
+
+    [JsonProperty("nome")]
+    public string Nome { get; set; } = "Não informado";
+    
     [JsonProperty("marca")]
     public string Marca { get; set; } = "Não informada";
 

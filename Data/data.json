@@ -1,0 +1,17 @@
+{
+    "items": [
+      {
+        "id": 0,
+        "nome": "Produto1",
+        "marca": "MarcaA",
+        "preco": 199.99
+      },
+      {
+        "id": 1,
+        "nome": "Produto2",
+        "marca": "MarcaB",
+        "preco": 299.99
+      }
+    ]
+  }
+  

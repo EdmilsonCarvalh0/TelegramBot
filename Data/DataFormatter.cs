@@ -7,6 +7,6 @@ namespace TelegramBot.Data;
 public class DataFormatter
 {
     [JsonProperty("items")]
-    public List<Item> Items { get; set; }
+    public List<Item> Items { get; set; } = new();
 
 }
