@@ -4,8 +4,13 @@ namespace TelegramBot.Data;
 
 public class ShoppingData : IShoppingData
 {
-    public DataFormatter ListOfItems = new();
+    public DataFormatter ListData = new();
     public string JsonFilePath = "C:/Users/ANGELA SOUZA/OneDrive/Área de Trabalho/ED/Programação/C#/Projects/TelegramBot/Data/data.json";
+
+    public ShoppingData()
+    {
+        ListData = LoadData();
+    }
 
     public DataFormatter LoadData()
     {
@@ -15,37 +20,41 @@ public class ShoppingData : IShoppingData
 
     public string GetList()
     {
-        // DataFormatter formatter = new DataFormatter{
-        //     Items = new List<Item>
-        //     {
-        //         new Item { Nome = "Pão", Marca = "Bauducco", Preco = 4.9m },
-        //         new Item { Nome = "Queijo", Marca = "Piracanjuba", Preco = 8.3m }
-        //     }
-        // };
+        string list = string.Empty;
 
-        return JsonConvert.SerializeObject(LoadData(), Formatting.Indented);
-        //TODO: implement json deserialize for return list in method
-        //      implementar deserialização json para retornar a lista no método
+        foreach (var item in ListData.Items)
+        {
+            list += $"{item.Nome} - {item.Marca} - {item.Preco}\n";
+        }
+
+        return list;
     }
 
-    public void UpdateList(string items)
+    public void UpdateList(string userItems)
     {
         //TODO: implement list update and correctly replace elements
         //      implementar atualização de lista e substituir corretamente os elementos
     }
 
-    public void AddItemInList(string item)
+    public void AddItemInList(string userItem)
     {
         //TODO: implement the serialization to add in list
         //      implemente a serialização para adicionar na lista
     }
 
-    public void RemoveItemFromList(string item)
+    public void RemoveItemFromList(string userItem)
     {
-        
+        List<Item> temporaryList = ListData.Items;
+
+        var itemsForRemove = new List<string>();
+
+        itemsForRemove.AddRange(userItem.Split(", ", StringSplitOptions.None).ToList());
+        temporaryList.RemoveAll(item => itemsForRemove.Contains(item.Nome));
+
+        ListData.Items = temporaryList;
     }
 
-    public void CreateNewList(string items)
+    public void CreateNewList(string userItems)
     {
 
     }

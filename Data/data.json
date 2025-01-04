@@ -11,6 +11,18 @@
         "nome": "Produto2",
         "marca": "MarcaB",
         "preco": 299.99
+      },
+      {
+        "id": 2,
+        "nome": "Produto3",
+        "marca": "MarcaC",
+        "preco": 299.99
+      },
+      {
+        "id": 3,
+        "nome": "Produto4",
+        "marca": "MarcaD",
+        "preco": 299.99
       }
     ]
   }

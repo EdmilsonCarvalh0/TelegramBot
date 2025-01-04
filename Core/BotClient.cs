@@ -71,12 +71,11 @@ public class BotClient : IBotClient
         _shoppingData.RemoveItemFromList(item);
         return "Item removido.";
     }
-
-
+    
     public string ShowList()
     {
-        // var list = _shoppingData.GetList();
-        return _shoppingData.GetList();
+        var list = _shoppingData.GetList();
+        return list;
     }
 
     public string GetItemsToCreatelist(string items)
