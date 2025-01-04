@@ -1,4 +1,5 @@
 using Telegram.Bot.Types.ReplyMarkups;
+using TelegramBot.Data;
 
 public interface IBotClient
 {
