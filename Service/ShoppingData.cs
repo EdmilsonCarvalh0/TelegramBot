@@ -1,3 +1,4 @@
+using System.Data.Common;
 using Microsoft.AspNetCore.Http.Features;
 using Newtonsoft.Json;
 
@@ -44,20 +45,35 @@ public class ShoppingData : IShoppingData
 
     public void AddItemInList(string userItem)
     {
-        //TODO: implement the serialization to add in list
-        //      implemente a serialização para adicionar na lista
-        List<Item> temporaryList = ListData.Items;
+        List<string> itemsForAdd = new();
 
-        var itemsForAdd = new List<string>();
+        //TODO: refactor to create function
+        if (userItem.Contains('\n'))
+        {
+            List<string> linesWithItems =
+            [
+                .. userItem.Trim().Split("\n"),
+            ];
 
-        itemsForAdd.AddRange(userItem.Split(" - ").ToList());
-        temporaryList.Add(new Item {
+            // linesWithItems.ForEach(x => itemsForAdd.AddRange(x.Trim().Split(" - ")));
+            foreach (var line in linesWithItems)
+            {
+                itemsForAdd.Clear();
+                itemsForAdd.AddRange(line.Trim().Split(" - "));
+                ListData.Items.Add(CheckLineOfItem(itemsForAdd));
+            }
+            
+            // ListData.Items.Add(CheckLineOfItem());
+        }
+
+        itemsForAdd.AddRange(userItem.Trim().Split(" - "));
+
+        ListData.Items.Add(new Item {
             Nome = itemsForAdd[0],
             Marca = itemsForAdd[1],
             Preco = FormatPrice(itemsForAdd[2])
         });
 
-        ListData.Items = temporaryList;
         SaveData();
     }
 
@@ -67,7 +83,9 @@ public class ShoppingData : IShoppingData
 
         var itemsForRemove = new List<string>();
 
-        itemsForRemove.AddRange(userItem.Split(", ", StringSplitOptions.None).ToList());
+        itemsForRemove.AddRange(userItem.Trim()
+                                        .Split(", ", StringSplitOptions.None)
+                                        .ToList());
         temporaryList.RemoveAll(item => itemsForRemove.Contains(item.Nome));
 
         ListData.Items = temporaryList;
@@ -82,5 +100,24 @@ public class ShoppingData : IShoppingData
     public static decimal FormatPrice(string preco)
     {
         return Convert.ToDecimal(preco);
+    }
+
+    public static Item CheckLineOfItem(List<string> linesOfItems)
+    {
+        var indefinedItem = linesOfItems[1].Split(",").ToList();
+        bool isPrice = indefinedItem[0].All(char.IsDigit) && indefinedItem[1].All(char.IsDigit);
+        
+        return isPrice ? 
+            new Item {
+                Nome = linesOfItems[0],
+                Marca = default!,
+                Preco = FormatPrice(linesOfItems[1])
+            } : 
+            new Item 
+            {
+                Nome = linesOfItems[0],
+                Marca = linesOfItems[1],
+                Preco = FormatPrice(linesOfItems[2])
+            };
     }
 }
