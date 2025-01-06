@@ -1,29 +1,46 @@
 {
-    "items": [
-      {
-        "id": 0,
-        "nome": "Produto1",
-        "marca": "MarcaA",
-        "preco": 199.99
-      },
-      {
-        "id": 1,
-        "nome": "Produto2",
-        "marca": "MarcaB",
-        "preco": 299.99
-      },
-      {
-        "id": 2,
-        "nome": "Produto3",
-        "marca": "MarcaC",
-        "preco": 299.99
-      },
-      {
-        "id": 3,
-        "nome": "Produto4",
-        "marca": "MarcaD",
-        "preco": 299.99
-      }
-    ]
-  }
-  
+  "items": [
+    {
+      "id": 0,
+      "nome": "Pão",
+      "marca": "Bauducco",
+      "preco": 4.9
+    },
+    {
+      "id": 0,
+      "nome": "Manteiga",
+      "marca": "Delicata",
+      "preco": 5.8
+    },
+    {
+      "id": 0,
+      "nome": "Queijo",
+      "marca": "Piracanjuba",
+      "preco": 6.4
+    },
+    {
+      "id": 0,
+      "nome": "Cuscuz",
+      "marca": "Coringa",
+      "preco": 4.3
+    },
+    {
+      "id": 0,
+      "nome": "Feijão",
+      "marca": "Tio João",
+      "preco": 8.7
+    },
+    {
+      "id": 0,
+      "nome": "Cerveja",
+      "marca": "Devassa",
+      "preco": 3.2
+    },
+    {
+      "id": 0,
+      "nome": "Biscoito",
+      "marca": "Bono",
+      "preco": 2.4
+    }
+  ]
+}

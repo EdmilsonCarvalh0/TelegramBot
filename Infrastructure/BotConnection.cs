@@ -155,7 +155,12 @@ public class BotConnection
                 );
                 await botClient.SendMessage(
                     chatId: callbackQuery.Message!.Chat.Id,
-                    text: "Por favor, envie o nome agora:",
+                    text: "Ótimo! Para fazer a inserção você pode enviar um ou mais itens se desejar.\nLembrando que apenas o nome é obrigatório, mas é ideal que você informe a Marca e o Preço também para uma melhor experiência!",
+                    cancellationToken: cancellationToken
+                );
+                await botClient.SendMessage(
+                    chatId: callbackQuery.Message!.Chat.Id,
+                    text: "Vamos lá! Para inserir o item, siga a seguinte extrutura:\nProduto - Marca - Preco\nProduto - Marca - Preco\n\nAgora, por favor, informe os itens que deseja adicionar:",
                     cancellationToken: cancellationToken
                 );
             }

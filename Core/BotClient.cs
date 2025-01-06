@@ -54,15 +54,15 @@ public class BotClient : IBotClient
         );
     }
 
-    public string AddItemInShoppingData(string item)
+    public string AddItemInShoppingData(string userItems)
     {
-        _shoppingData.AddItemInList(item);
-        return $"{item} adicionado(a).";
+        _shoppingData.AddItemInList(userItems);
+        return $"{userItems} adicionado(a).";
     }
 
-    public string SendItemToUpdateList(string items)
+    public string SendItemToUpdateList(string userItems)
     {
-        _shoppingData.UpdateList(items);
+        _shoppingData.UpdateList(userItems);
         return "Lista atualizada.";
     }
 
