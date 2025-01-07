@@ -45,33 +45,20 @@ public class ShoppingData : IShoppingData
 
     public void AddItemInList(string userItem)
     {
-        List<string> itemsForAdd = new();
+        List<string> itemsToAdd = new();
 
-        //TODO: refactor to create function
         if (userItem.Contains('\n'))
         {
-            List<string> linesWithItems =
-            [
-                .. userItem.Trim().Split("\n"),
-            ];
-
-            // linesWithItems.ForEach(x => itemsForAdd.AddRange(x.Trim().Split(" - ")));
-            foreach (var line in linesWithItems)
-            {
-                itemsForAdd.Clear();
-                itemsForAdd.AddRange(line.Trim().Split(" - "));
-                ListData.Items.Add(CheckLineOfItem(itemsForAdd));
-            }
-            
-            // ListData.Items.Add(CheckLineOfItem());
+            AddIfThereIsMoreOneItem(userItem);
+            return;
         }
 
-        itemsForAdd.AddRange(userItem.Trim().Split(" - "));
+        itemsToAdd.AddRange(userItem.Trim().Split(" - "));
 
         ListData.Items.Add(new Item {
-            Nome = itemsForAdd[0],
-            Marca = itemsForAdd[1],
-            Preco = FormatPrice(itemsForAdd[2])
+            Nome = itemsToAdd[0],
+            Marca = itemsToAdd[1],
+            Preco = FormatPrice(itemsToAdd[2])
         });
 
         SaveData();
@@ -97,12 +84,29 @@ public class ShoppingData : IShoppingData
 
     }
 
-    public static decimal FormatPrice(string preco)
+    private static decimal FormatPrice(string preco)
     {
         return Convert.ToDecimal(preco);
     }
 
-    public static Item CheckLineOfItem(List<string> linesOfItems)
+    private void AddIfThereIsMoreOneItem(string userItem)
+    {
+        List<string> linesWithItems =
+        [
+            .. userItem.Trim().Split('\n'),
+        ];
+
+        List<string> attributesOfTheItemToBeChecked = new();
+        
+        foreach (var line in linesWithItems)
+        {
+            attributesOfTheItemToBeChecked.Clear();
+            attributesOfTheItemToBeChecked.AddRange(line.Trim().Split(" - "));
+            ListData.Items.Add(CheckLineOfItem(attributesOfTheItemToBeChecked));
+        }
+    }
+
+    private static Item CheckLineOfItem(List<string> linesOfItems)
     {
         var indefinedItem = linesOfItems[1].Split(",").ToList();
         bool isPrice = indefinedItem[0].All(char.IsDigit) && indefinedItem[1].All(char.IsDigit);

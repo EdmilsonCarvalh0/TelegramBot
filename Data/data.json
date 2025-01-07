@@ -41,24 +41,6 @@
       "nome": "Guaraná",
       "marca": "Qtal",
       "preco": 5.7
-    },
-    {
-      "id": 0,
-      "nome": "Cerveja",
-      "marca": "Devassa",
-      "preco": 2.6
-    },
-    {
-      "id": 0,
-      "nome": "Cerveja",
-      "marca": "Itaipava",
-      "preco": 2.4
-    },
-    {
-      "id": 0,
-      "nome": "Cerveja",
-      "marca": "Itaipava",
-      "preco": 2.4
     }
   ]
 }
