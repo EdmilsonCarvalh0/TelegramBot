@@ -54,15 +54,29 @@ public class BotClient : IBotClient
         );
     }
 
+    public InlineKeyboardMarkup GetAttributeOptions()
+    {
+        return new InlineKeyboardMarkup(new[]
+            {  
+                new[]
+                {
+                    InlineKeyboardButton.WithCallbackData("Nome"),
+                    InlineKeyboardButton.WithCallbackData("Marca"),
+                    InlineKeyboardButton.WithCallbackData("Preço")
+                }
+            }
+        );
+    }
+
     public string AddItemInShoppingData(string userItems)
     {
         _shoppingData.AddItemInList(userItems);
         return $"{userItems} adicionado(a).";
     }
 
-    public string SendItemToUpdateList(string userItems)
+    public string SendItemToUpdateList(string item)
     {
-        _shoppingData.UpdateList(userItems);
+        _shoppingData.UpdateList(item);
         return "Lista atualizada.";
     }
 
@@ -84,4 +98,6 @@ public class BotClient : IBotClient
         _shoppingData.CreateNewList(items);
         return "Nova lista criada.";
     }
+
+    //TODO: implement verify function automatic of item
 }

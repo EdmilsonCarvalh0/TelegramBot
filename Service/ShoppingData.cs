@@ -37,10 +37,17 @@ public class ShoppingData : IShoppingData
         return list;
     }
 
-    public void UpdateList(string userItems)
+    public void UpdateList(string item)
     {
         //TODO: implement list update and correctly replace elements
         //      implementar atualização de lista e substituir corretamente os elementos
+        /*
+            In a way that it correctly changed the passed attribute.
+            Perhaps the secret lies in the BotClient's automatic item verification
+            
+            De uma forma que ele altere corretamente o atributo passado.
+            Talvez o segredo esteja na verificação automática de item do BotClient
+        */
     }
 
     public void AddItemInList(string userItem)
@@ -91,10 +98,7 @@ public class ShoppingData : IShoppingData
 
     private void AddIfThereIsMoreOneItem(string userItem)
     {
-        List<string> linesWithItems =
-        [
-            .. userItem.Trim().Split('\n'),
-        ];
+        List<string> linesWithItems = [.. userItem.Trim().Split('\n')];
 
         List<string> attributesOfTheItemToBeChecked = new();
         

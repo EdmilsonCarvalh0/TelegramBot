@@ -47,15 +47,31 @@ public class BotConnection
             }
 
             //Verify user status to send item for list atualization
-            if (UserStates.TryGetValue(userId, out var states) && states == "waiting_for_items_to_updated")
+            if (UserStates.TryGetValue(userId, out var states) && states == "waiting_for_attribute_to_updated")
             {
-                var item = message.Text;
+                var attribute = message.Text;
 
-                string methodResponse = _botClient.SendItemToUpdateList(item!);
+                string methodResponse = _botClient.SendItemToUpdateList(attribute!);
 
                 await botClient.SendMessage(
                     chatId: message.Chat.Id,
                     text: methodResponse,
+                    cancellationToken: cancellationToken
+                );
+
+                UserStates.TryRemove(userId, out _);
+            }
+
+            //implementar a resposta "waiting_for_name_attribute_to_updated" para seguir o fluxo
+            if (UserStates.TryGetValue(userId, out var stateToUpdate) && stateToUpdate == "waiting_for_name_attribute_to_updated")
+            {
+                var attributeName = message.Text;
+
+                var attributeOptionsKeyboard = _botClient.GetAttributeOptions();
+                await botClient.SendMessage(
+                    chatId: message.Chat.Id,
+                    text: "O que deseja alterar?",
+                    replyMarkup: attributeOptionsKeyboard,
                     cancellationToken: cancellationToken
                 );
 
@@ -168,7 +184,7 @@ public class BotConnection
             //Verify option 'alterar um item' and asks the user
             if (callbackQuery.Data == "Alterar um item")
             {
-                UserStates[userId] = "waiting_for_items_to_updated";
+                UserStates[userId] = "waiting_for_name_attribute_to_updated";
 
                 await botClient.AnswerCallbackQuery(
                     callbackQueryId: callbackQuery.Id,
@@ -178,7 +194,19 @@ public class BotConnection
 
                 await botClient.SendMessage(
                     chatId: callbackQuery.Message!.Chat.Id,
-                    text: "Por favor, informe agora o nome dos itens que deseja fazer alteração.\nSendo o primeiro a ser substituído e o segundo a ser feita a substituição.\nEx: Digamos que deseje substituir Pão por Bolacha. Então informe 'Pão, Bolacha'.",
+                    text: "Por favor, informe agora o nome do item que deseja fazer alteração:",
+                    cancellationToken: cancellationToken
+                );
+            }
+
+            if (callbackQuery.Data == "Nome" || callbackQuery.Data == "Marca" || callbackQuery.Data == "Preço")
+            {
+                UserStates[userId] = "waiting_for_attribute_to_update";
+
+                string verifyGener = callbackQuery.Data[callbackQuery.Data.Length -1] == 'a' ? "a" : "o";
+                await botClient.SendMessage(
+                    chatId: callbackQuery.Message!.Chat.Id,
+                    text: $"Informe {verifyGener} {callbackQuery.Data}:",
                     cancellationToken: cancellationToken
                 );
             }
