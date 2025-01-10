@@ -26,21 +26,21 @@
     },
     {
       "id": 0,
-      "nome": "Feijão",
-      "marca": "Tio João",
-      "preco": 8.7
-    },
-    {
-      "id": 0,
-      "nome": "Biscoito",
-      "marca": "Bono",
-      "preco": 2.4
-    },
-    {
-      "id": 0,
       "nome": "Guaraná",
       "marca": "Qtal",
       "preco": 5.7
+    },
+    {
+      "id": 0,
+      "nome": "Peito de frango",
+      "marca": "Friato",
+      "preco": 24.99
+    },
+    {
+      "id": 0,
+      "nome": "Leite",
+      "marca": "Lassereníssima",
+      "preco": 6.4
     }
   ]
 }

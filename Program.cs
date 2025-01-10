@@ -10,7 +10,7 @@ public class Program
 {
     static async Task Main(string[] args)
     {
-        BotClient client = new BotClient();
+        MessageHandler client = new MessageHandler();
 
         using var cts = new CancellationTokenSource();
 

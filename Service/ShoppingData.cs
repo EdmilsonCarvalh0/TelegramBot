@@ -7,7 +7,7 @@ namespace TelegramBot.Data;
 public class ShoppingData : IShoppingData
 {
     public DataFormatter ListData = new();
-    public string JsonFilePath = "C:/Users/ANGELA SOUZA/OneDrive/Área de Trabalho/ED/Programação/C#/Projects/TelegramBot/Data/data.json";
+    public string JsonFilePath = "C:\\Users\\edcar\\Documents\\ED\\Programação\\C#\\C#\\Projects\\TelegramBot\\Data\\data.json";
 
     public ShoppingData()
     {

@@ -9,7 +9,7 @@ public class BotConnection
 {
     private static readonly ConcurrentDictionary<long, string> UserStates = new();
     private static readonly Dictionary<string, string> States;
-    private static readonly IBotClient _botClient = new BotClient();
+    private static readonly IMessageHandler _botClient = new MessageHandler();
 
     static BotConnection()
     {
@@ -122,137 +122,175 @@ public class BotConnection
         {
             var callbackQuery = update.CallbackQuery;
             long userId = callbackQuery.From.Id;
-
-            //Verify option 'ver lista' and send list to user
-            if (callbackQuery.Data == "Ver lista")
+            
+            switch (callbackQuery.Data)
             {
-                await botClient.AnswerCallbackQuery(
-                    callbackQueryId: callbackQuery.Id,
-                    text: "Enviando lista...",
-                    cancellationToken: cancellationToken
-                );
+                //Verify option 'ver lista' and send list to user
+                case "Ver lista":
+                    await HandleSendOfList(botClient, userId, callbackQuery, cancellationToken);
+                    break;
+                
+                //Verify option 'atualizar lista' and asks the user wich kind atualization
+                case "Atualizar lista":
+                    await HandleToUpdateList(botClient, userId, callbackQuery, cancellationToken);
+                    break;
 
-                var methodResponse = _botClient.ShowList();
-                await botClient.SendMessage(
-                    chatId: callbackQuery.Message!.Chat.Id,
-                    text: methodResponse,
-                    cancellationToken: cancellationToken
-                );
-            }
+                //Verify option 'adicionar item' and asks the user
+                case "Adicionar um item":
+                    await HandleToAddItem(botClient, userId, callbackQuery, cancellationToken);
+                    break;
 
+                //Verify option 'alterar um item' and asks the user
+                case "Alterar um item":
+                    await HandleItemChange(botClient, userId, callbackQuery, cancellationToken);
+                    break;
 
-            //Verify option 'atualizar lista' and asks the user wich kind atualization
-            if (callbackQuery.Data == "Atualizar lista")
-            {
-                await botClient.AnswerCallbackQuery(
-                    callbackQueryId: callbackQuery.Id,
-                    text: "Selecione o tipo da atualização.",
-                    cancellationToken: cancellationToken
-                );
+                case "Nome":
+                    await HandleAttributeChange(botClient, userId, callbackQuery, cancellationToken);
+                    break;
+                
+                case "Marca":
+                    await HandleAttributeChange(botClient, userId, callbackQuery, cancellationToken);
+                    break;
+                
+                case "Preço":
+                    await HandleAttributeChange(botClient, userId, callbackQuery, cancellationToken);
+                    break;
 
-                var listUpdatesOptionsKeyboard = _botClient.GetOptionsOfListUpdate();
-                await botClient.SendMessage(
-                    chatId: callbackQuery.Message!.Chat.Id,
-                    text: "Selecione o tipo de atualização que deseja fazer:",
-                    replyMarkup: listUpdatesOptionsKeyboard,
-                    cancellationToken: cancellationToken
-                );
-            }
-
-            //Verify option 'adicionar item' and asks the user
-            if (callbackQuery.Data == "Adicionar um item")
-            {
-                UserStates[userId] = "waiting_item_to_add";
-
-                await botClient.AnswerCallbackQuery(
-                    callbackQueryId: callbackQuery.Id,
-                    text: $"Digite o nome do item que deseja adicionar.",
-                    cancellationToken: cancellationToken
-                );
-                await botClient.SendMessage(
-                    chatId: callbackQuery.Message!.Chat.Id,
-                    text: "Ótimo! Para fazer a inserção você pode enviar um ou mais itens se desejar.\nLembrando que apenas o nome é obrigatório, mas é ideal que você informe a Marca e o Preço também para uma melhor experiência!",
-                    cancellationToken: cancellationToken
-                );
-                await botClient.SendMessage(
-                    chatId: callbackQuery.Message!.Chat.Id,
-                    text: "Vamos lá! Para inserir o item, siga a seguinte extrutura:\nProduto - Marca - Preco\nProduto - Marca - Preco\n\nAgora, por favor, informe os itens que deseja adicionar:",
-                    cancellationToken: cancellationToken
-                );
-            }
-
-            //Verify option 'alterar um item' and asks the user
-            if (callbackQuery.Data == "Alterar um item")
-            {
-                UserStates[userId] = "waiting_for_name_attribute_to_updated";
-
-                await botClient.AnswerCallbackQuery(
-                    callbackQueryId: callbackQuery.Id,
-                    text: "Digite o nome do item que deseja alterar.",
-                    cancellationToken: cancellationToken
-                );
-
-                await botClient.SendMessage(
-                    chatId: callbackQuery.Message!.Chat.Id,
-                    text: "Por favor, informe agora o nome do item que deseja fazer alteração:",
-                    cancellationToken: cancellationToken
-                );
-            }
-
-            if (callbackQuery.Data == "Nome" || callbackQuery.Data == "Marca" || callbackQuery.Data == "Preço")
-            {
-                UserStates[userId] = "waiting_for_attribute_to_update";
-
-                string verifyGener = callbackQuery.Data[callbackQuery.Data.Length -1] == 'a' ? "a" : "o";
-                await botClient.SendMessage(
-                    chatId: callbackQuery.Message!.Chat.Id,
-                    text: $"Informe {verifyGener} {callbackQuery.Data}:",
-                    cancellationToken: cancellationToken
-                );
-            }
-
-            //Verify option 'remover um item' and asks the user
-            if (callbackQuery.Data == "Remover um item")
-            {
-                UserStates[userId] = "waiting_item_to_remove";
-
-                await botClient.AnswerCallbackQuery(
-                    callbackQueryId: callbackQuery.Id,
-                    text: "Digite o nome do item que deseja remover.",
-                    cancellationToken: cancellationToken
-                );
-
-                await botClient.SendMessage(
-                    chatId: callbackQuery.Message!.Chat.Id,
-                    text: "Por favor, informe agora o nome do item que deseja remover:",
-                    cancellationToken: cancellationToken
-                );
-            }
-
-            //Verify option 'criar nova lista' 
-            if (callbackQuery.Data == "Criar nova lista")
-            {
-                UserStates[userId] = "waiting_items_to_create_new_list";
-
-                await botClient.AnswerCallbackQuery(
-                    callbackQueryId: callbackQuery.Id,
-                    text: "Informe os itens da nova lista.",
-                    cancellationToken: cancellationToken
-                );
-                await botClient.SendMessage(
-                    chatId: callbackQuery.Message!.Chat.Id,
-                    text: "Envie agora os itens da nova lista.\nUse o padrão adequado para registro correto dos itens. Nesse caso, separe os itens por vírgula sem espaços.\nEx: Pão,Manteiga,Queijo",
-                    cancellationToken: cancellationToken
-                );
+                //Verify option 'remover um item' and asks the user
+                case "Remover um item":
+                    await HandleItemRemove(botClient, userId, callbackQuery, cancellationToken);
+                    break;
+                
+                case "Criar nova lista":
+                //Verify option 'criar nova lista' 
+                    await HandleCreatingNewList(botClient, userId, callbackQuery, cancellationToken);
+                    break;
             }
 
             Console.WriteLine($"Opção selecionada: {callbackQuery.Data}");
         }
     }
 
+    public static async Task HandleSendOfList(ITelegramBotClient botClient, long id, CallbackQuery callbackQuery, CancellationToken cancellationToken)
+    {
+        await botClient.AnswerCallbackQuery(
+            callbackQueryId: callbackQuery.Id,
+            text: "Enviando lista...",
+            cancellationToken: cancellationToken
+        );
+
+        var methodResponse = _botClient.ShowList();
+        await botClient.SendMessage(
+            chatId: id,
+            text: methodResponse,
+            cancellationToken: cancellationToken
+        );
+    }
+
+    public static async Task HandleToUpdateList(ITelegramBotClient botClient, long id, CallbackQuery callbackQuery, CancellationToken cancellationToken)
+    {
+        await botClient.AnswerCallbackQuery(
+            callbackQueryId: callbackQuery.Id,
+            text: "Selecione o tipo da atualização.",
+            cancellationToken: cancellationToken
+        );
+
+        var listUpdatesOptionsKeyboard = _botClient.GetOptionsOfListUpdate();
+        await botClient.SendMessage(
+            chatId: id,
+            text: "Selecione o tipo de atualização que deseja fazer:",
+            replyMarkup: listUpdatesOptionsKeyboard,
+            cancellationToken: cancellationToken
+        );
+    }
+
+    public static async Task HandleToAddItem(ITelegramBotClient botClient, long id, CallbackQuery callbackQuery, CancellationToken cancellationToken)
+    {
+        UserStates[callbackQuery.From.Id] = "waiting_item_to_add";
+
+        await botClient.AnswerCallbackQuery(
+            callbackQueryId: callbackQuery.Id,
+            text: $"Digite o nome do item que deseja adicionar.",
+            cancellationToken: cancellationToken
+        );
+        await botClient.SendMessage(
+            chatId: id,
+            text: "Ótimo! Para fazer a inserção você pode enviar um ou mais itens se desejar.\nLembrando que apenas o nome é obrigatório, mas é ideal que você informe a Marca e o Preço também para uma melhor experiência!",
+            cancellationToken: cancellationToken
+        );
+        await botClient.SendMessage(
+            chatId: id,
+            text: "Vamos lá! Para inserir o item, siga a seguinte extrutura:\nProduto - Marca - Preco\nProduto - Marca - Preco\n\nAgora, por favor, informe os itens que deseja adicionar:",
+            cancellationToken: cancellationToken
+        );
+    }
+
+    public static async Task HandleItemChange(ITelegramBotClient botClient, long id, CallbackQuery callbackQuery, CancellationToken cancellationToken)
+    {
+        UserStates[callbackQuery.From.Id] = "waiting_for_name_attribute_to_updated";
+
+        await botClient.AnswerCallbackQuery(
+            callbackQueryId: callbackQuery.Id,
+            text: "Digite o nome do item que deseja alterar.",
+            cancellationToken: cancellationToken
+        );
+
+        await botClient.SendMessage(
+            chatId: id,
+            text: "Por favor, informe agora o nome do item que deseja fazer alteração:",
+            cancellationToken: cancellationToken
+        );
+    }
+
+    public static async Task HandleCreatingNewList(ITelegramBotClient botClient, long id, CallbackQuery callbackQuery, CancellationToken cancellationToken)
+    {
+        UserStates[callbackQuery.From.Id] = "waiting_items_to_create_new_list";
+
+        await botClient.AnswerCallbackQuery(
+            callbackQueryId: callbackQuery.Id,
+            text: "Informe os itens da nova lista.",
+            cancellationToken: cancellationToken
+        );
+        await botClient.SendMessage(
+            chatId: id,
+            text: "Envie agora os itens da nova lista.\nUse o padrão adequado para registro correto dos itens. Nesse caso, separe os itens por vírgula sem espaços.\nEx: Pão,Manteiga,Queijo",
+            cancellationToken: cancellationToken
+        );
+    }
+
+    public static async Task HandleAttributeChange(ITelegramBotClient botClient, long id, CallbackQuery callbackQuery, CancellationToken cancellationToken)
+    {
+        UserStates[callbackQuery.From.Id] = "waiting_for_attribute_to_update";
+
+        string verifyGener = callbackQuery.Data![callbackQuery.Data.Length -1] == 'a' ? "a" : "o";
+        await botClient.SendMessage(
+            chatId: id,
+            text: $"Informe {verifyGener} {callbackQuery.Data}:",
+            cancellationToken: cancellationToken
+        );
+    }
+
+    public static async Task HandleItemRemove(ITelegramBotClient botClient, long id, CallbackQuery callbackQuery, CancellationToken cancellationToken)
+    {
+        UserStates[callbackQuery.From.Id] = "waiting_item_to_remove";
+
+        await botClient.AnswerCallbackQuery(
+            callbackQueryId: callbackQuery.Id,
+            text: "Digite o nome do item que deseja remover.",
+            cancellationToken: cancellationToken
+        );
+
+        await botClient.SendMessage(
+            chatId: callbackQuery.Message!.Chat.Id,
+            text: "Por favor, informe agora o nome do item que deseja remover:",
+            cancellationToken: cancellationToken
+        );
+    }
+
     public static Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
     {
-        Console.WriteLine($"Erro recebido: {exception.Message}");
+        Console.WriteLine($"Erro recebido: {exception.Message}\nData: {exception.Data}");
         return Task.CompletedTask;
     }
 

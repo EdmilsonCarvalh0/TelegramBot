@@ -9,13 +9,13 @@ namespace TelegramBot.Entities;
 
 //TODO: Create Class about List/Data for encapsulate functionalities
 //      criar classe sobre list/dados para encapsular funcionalidades
-public class BotClient : IBotClient
+public class MessageHandler : IMessageHandler
 {
     private readonly static string Token = "7560368958:AAGSWm6chmVviBNYSNF8P4Yh3aJdcka0vQw";
     public TelegramBotClient Bot;
     private static readonly IShoppingData _shoppingData = new ShoppingData();
 
-    public BotClient()
+    public MessageHandler()
     {
         Bot = new TelegramBotClient(Token);
     }
