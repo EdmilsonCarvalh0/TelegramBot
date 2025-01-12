@@ -5,7 +5,7 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBot.Data;
 
-namespace TelegramBot.Entities;
+namespace TelegramBot.Core;
 
 //TODO: Create Class about List/Data for encapsulate functionalities
 //      criar classe sobre list/dados para encapsular funcionalidades

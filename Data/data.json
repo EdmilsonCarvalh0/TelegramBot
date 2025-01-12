@@ -14,21 +14,9 @@
     },
     {
       "id": 0,
-      "nome": "Queijo",
-      "marca": "Piracanjuba",
-      "preco": 6.4
-    },
-    {
-      "id": 0,
       "nome": "Cuscuz",
       "marca": "Coringa",
       "preco": 4.3
-    },
-    {
-      "id": 0,
-      "nome": "Guaraná",
-      "marca": "Qtal",
-      "preco": 5.7
     },
     {
       "id": 0,
@@ -41,6 +29,12 @@
       "nome": "Leite",
       "marca": "Lassereníssima",
       "preco": 6.4
+    },
+    {
+      "id": 0,
+      "nome": "Pipoca",
+      "marca": "Cheetos",
+      "preco": 2.4
     }
   ]
 }
