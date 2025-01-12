@@ -24,88 +24,89 @@ public class BotConnection
 
     public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
+        long userId = update.CallbackQuery?.From.Id ?? update.Message?.Chat.Id ?? 0;
+
+        var context = new BotRequestContext(
+            botClient,
+            userId,
+            update.CallbackQuery,
+            update.Message,
+            cancellationToken
+        );
+
+        var handlers = new UpdateHandlers();
+
+        if (update.Message != null)
+        {
+            await handlers.HandleMessageAsync(context);
+        }
+        else if (update.CallbackQuery != null)
+        {
+            await handlers.HandleCallbackQueryAsync(context);
+        }
+
+        /*
+            Enviar toda a lógica de update.Message e update.CallbackQuery para
+            UpdateHandlers e implementar suas funções.
+        */
+
         if (update.Type == UpdateType.Message && update.Message is not null)
         {
             var message = update.Message;
 
-            long userId = message.From!.Id;
+            long id = message.From!.Id;
+
+            switch (UserStates[userId])
+            {
+                case "waiting_item_to_add":
+                    await HandleWaitingToAddOfItem(botClient, userId, message, cancellationToken);
+                    break;
+                
+                case "waiting_for_attribute_to_updated":
+                    await HandleWaitingForAttributeToUpdated(botClient, userId, message, cancellationToken);
+                    break;
+
+                case "waiting_for_name_attribute_to_updated":
+                    await HandleWaitingForNameAttributeToUpdated(botClient, userId, message, cancellationToken);
+                    break;
+                
+                case "waiting_item_to_remove":
+                    await HandleWaitingItemToRemove(botClient, userId, message, cancellationToken);
+                    break;
+
+                case "waiting_items_to_create_new_list":
+                    await HandleWaitingItemsCreatingNewList(botClient, userId, message, cancellationToken);
+                    break;
+            }
 
             //Verify user status for item insertion
             if (UserStates.TryGetValue(userId, out var stateOfWaitingItem) && stateOfWaitingItem == "waiting_item_to_add")
             {
-                var item = message.Text;
-
-                string methodResponse = _botClient.AddItemInShoppingData(item!);
                 
-                await botClient.SendMessage(
-                    chatId: message.Chat.Id,
-                    text: methodResponse,
-                    cancellationToken: cancellationToken
-                );
-
-                UserStates.TryRemove(userId, out _);
             }
 
             //Verify user status to send item for list atualization
             if (UserStates.TryGetValue(userId, out var states) && states == "waiting_for_attribute_to_updated")
             {
-                var attribute = message.Text;
-
-                string methodResponse = _botClient.SendItemToUpdateList(attribute!);
-
-                await botClient.SendMessage(
-                    chatId: message.Chat.Id,
-                    text: methodResponse,
-                    cancellationToken: cancellationToken
-                );
-
-                UserStates.TryRemove(userId, out _);
+                
             }
 
             //implementar a resposta "waiting_for_name_attribute_to_updated" para seguir o fluxo
             if (UserStates.TryGetValue(userId, out var stateToUpdate) && stateToUpdate == "waiting_for_name_attribute_to_updated")
             {
-                var attributeName = message.Text;
-
-                var attributeOptionsKeyboard = _botClient.GetAttributeOptions();
-                await botClient.SendMessage(
-                    chatId: message.Chat.Id,
-                    text: "O que deseja alterar?",
-                    replyMarkup: attributeOptionsKeyboard,
-                    cancellationToken: cancellationToken
-                );
-
-                UserStates.TryRemove(userId, out _);
+                
             }
 
             //Verify user status to remove item from list
             if (UserStates.TryGetValue(userId, out var stateToRemove) && stateToRemove == "waiting_item_to_remove")
             {
-                var item = message.Text;
-
-                string methodResponse = _botClient.SendItemToRemoveFromList(item!);
-
-                await botClient.SendMessage(
-                    chatId: message.Chat.Id,
-                    text: methodResponse,
-                    cancellationToken: cancellationToken
-                );
+                
             }
 
             //Verify user status to create new list with item
             if (UserStates.TryGetValue(userId, out var state) && state == "waiting_items_to_create_new_list")
             {
-                var item = message.Text;
                 
-                string methodResponse = _botClient.GetItemsToCreatelist(item!);
-                 
-                await botClient.SendMessage(
-                    chatId: message.Chat.Id,
-                    text: methodResponse,
-                    cancellationToken: cancellationToken
-                );
-
-                UserStates.TryRemove(userId, out _);
             }
 
             var startService = _botClient.StartService();
@@ -121,7 +122,7 @@ public class BotConnection
         else if (update.Type == UpdateType.CallbackQuery && update.CallbackQuery is not null)
         {
             var callbackQuery = update.CallbackQuery;
-            long userId = callbackQuery.From.Id;
+            long id = callbackQuery.From.Id;
             
             switch (callbackQuery.Data)
             {
@@ -171,6 +172,80 @@ public class BotConnection
             Console.WriteLine($"Opção selecionada: {callbackQuery.Data}");
         }
     }
+
+    public static async Task HandleWaitingToAddOfItem(ITelegramBotClient botClient, long id, Message message, CancellationToken cancellationToken)
+    {
+        var item = message.Text;
+
+        string methodResponse = _botClient.AddItemInShoppingData(item!);
+                
+        await botClient.SendMessage(
+            chatId: id,
+            text: methodResponse,
+            cancellationToken: cancellationToken
+        );
+
+        UserStates.TryRemove(id, out _);
+    }
+
+    public static async Task HandleWaitingForAttributeToUpdated(ITelegramBotClient botClient, long id, Message message, CancellationToken cancellationToken)
+    {
+        var attribute = message.Text;
+
+        string methodResponse = _botClient.SendItemToUpdateList(attribute!);
+        await botClient.SendMessage(
+            chatId: message.Chat.Id,
+            text: methodResponse,
+            cancellationToken: cancellationToken
+        );
+
+        UserStates.TryRemove(id, out _);
+    }
+
+    public static async Task HandleWaitingForNameAttributeToUpdated(ITelegramBotClient botClient, long id, Message message, CancellationToken cancellationToken)
+    {
+        var attributeName = message.Text;
+
+        var attributeOptionsKeyboard = _botClient.GetAttributeOptions();
+        await botClient.SendMessage(
+            chatId: message.Chat.Id,
+            text: "O que deseja alterar?",
+            replyMarkup: attributeOptionsKeyboard,
+            cancellationToken: cancellationToken
+        );
+
+        UserStates.TryRemove(id, out _);
+    }
+
+    public static async Task HandleWaitingItemToRemove(ITelegramBotClient botClient, long id, Message message, CancellationToken cancellationToken)
+    {
+        var item = message.Text;
+
+        string methodResponse = _botClient.SendItemToRemoveFromList(item!);
+
+        await botClient.SendMessage(
+            chatId: message.Chat.Id,
+            text: methodResponse,
+            cancellationToken: cancellationToken
+        );
+    }
+
+    public static async Task HandleWaitingItemsCreatingNewList(ITelegramBotClient botClient, long id, Message message, CancellationToken cancellationToken)
+    {
+        var item = message.Text;
+                
+        string methodResponse = _botClient.GetItemsToCreatelist(item!);
+                 
+        await botClient.SendMessage(
+            chatId: message.Chat.Id,
+            text: methodResponse,
+            cancellationToken: cancellationToken
+        );
+
+        UserStates.TryRemove(id, out _);
+    }
+
+
 
     public static async Task HandleSendOfList(ITelegramBotClient botClient, long id, CallbackQuery callbackQuery, CancellationToken cancellationToken)
     {

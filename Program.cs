@@ -32,34 +32,5 @@ public class Program
 
         //Encerra o bot
         cts.Cancel();
-
-
-        // while(true)
-        // {
-        //     //TODO: implement BotClient methods to handle options
-        //     //      implementar os métodos de BotClient pra manusear as opções
-        //     var updates = await client.Bot.GetUpdates();
-
-        //     foreach (var update in updates)
-        //     {
-        //         if(update.Message != null)
-        //         {
-        //             var chatId = update.Message.Chat.Id;
-        //             var messageText = update.Message.Text;
-
-        //             Console.WriteLine($"Mensagem recebida: {messageText}");
-
-        //             await client.Bot.SendMessage(chatId, $"Você disse: {messageText}");
-        //         }
-        //     }
-
-        //     await Task.Delay(1000);
-        // }
-
-    
     }
-
-    
-
-    
 }
