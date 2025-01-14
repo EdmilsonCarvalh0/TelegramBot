@@ -20,15 +20,14 @@ public class BotConnection
             cancellationToken
         );
 
+        var handlers = new UpdateHandlers(context);
 
         if (update.Type == UpdateType.Message && update.Message != null)
         {
-            var handlers = new UpdateHandlers(context);
             await handlers.HandleMessageAsync();
         }
         else if (update.Type == UpdateType.CallbackQuery && update.CallbackQuery != null)
         {
-            var handlers = new UpdateHandlers(context);
             await handlers.HandleCallbackQueryAsync();
         }
     }
