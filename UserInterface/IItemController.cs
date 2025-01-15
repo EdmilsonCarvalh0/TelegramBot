@@ -1,7 +1,7 @@
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBot.Data;
 
-public interface IMessageHandler
+public interface IItemController
 {
     InlineKeyboardMarkup StartService();
     InlineKeyboardMarkup GetOptionsOfListUpdate();

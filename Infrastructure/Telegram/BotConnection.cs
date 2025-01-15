@@ -3,11 +3,14 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using TelegramBot.Application;
 using TelegramBot.Core;
 using TelegramBot.Infrastructure.Handlers;
 
 public class BotConnection
 {
+    public readonly UserStateManager _userStateManager = new();
+
     public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
         long userId = update.CallbackQuery?.From.Id ?? update.Message?.Chat.Id ?? 0;
@@ -19,6 +22,10 @@ public class BotConnection
             update.Message,
             cancellationToken
         );
+
+        //TODO: Implement logic for each user state 
+        //      Implementar lógica para cada estado de usuário
+
 
         var handlers = new UpdateHandlers(context);
 

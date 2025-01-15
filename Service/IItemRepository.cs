@@ -1,8 +1,7 @@
 using TelegramBot.Data;
 
-public interface IShoppingData
+public interface IItemRepository
 {
-    DataFormatter LoadData();
     string GetList();
     void UpdateList(string items);
     void AddItemInList(string items);

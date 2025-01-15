@@ -1,30 +1,39 @@
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Diagnostics;
 using Telegram.Bot;
-using Telegram.Bot.Types;
+using TelegramBot.Application;
 using TelegramBot.Core;
+using TelegramBot.Domain;
 
 namespace TelegramBot.Infrastructure.Handlers;
 
 public class UpdateHandlers
 {
-    private static readonly ConcurrentDictionary<long, string> UserStates = new();
+    private static readonly ConcurrentDictionary<long, UserStateData> UserStates = new();
     private readonly BotRequestContext Context;
-    private static readonly IMessageHandler messageHandler = new MessageHandler();
+    private static readonly IItemController messageHandler = new ItemController();
 
     public UpdateHandlers(BotRequestContext context)
     {
         Context = context;
-        UserStates.TryAdd(context.UserId, "");
+        UserStates.TryAdd(
+            context.UserId,
+            new UserStateData {
+                State = UserState.None,
+                LastUpdated = DateTime.UtcNow,
+                AdditionalInfo = ""
+            }
+        );
     }
 
     public async Task HandleMessageAsync()
     {
         InitialMessageResult result = await HandleInitialMessage();
         
-        if (result == InitialMessageResult.InvalidInput && UserStates[Context.UserId] == "service_paused") return;
+        if (result == InitialMessageResult.InvalidInput && 
+            UserStates[Context.UserId].State == UserState.ServicePaused) return;
 
-        switch (UserStates[Context.UserId])
+        switch (UserStates[Context.UserId].AdditionalInfo)
         {
             case "waiting_item_to_add":
             await HandleWaitingToAddOfItem();
@@ -114,9 +123,16 @@ public class UpdateHandlers
 
     private async Task<InitialMessageResult> HandleInitialMessage()
     {
-        if (UserStates[Context.UserId] == "")
+        if (UserStates[Context.UserId].AdditionalInfo == "")
         {
-            UserStates!.TryAdd(Context.UserId, "service_paused");
+            UserStates!.TryAdd(
+                Context.UserId,
+                new UserStateData {
+                    State = UserState.ServicePaused,
+                    LastUpdated = DateTime.UtcNow,
+                    AdditionalInfo = ""
+                }
+            );
 
             if (Context.Message?.Text != "Menu")
             {
@@ -130,7 +146,14 @@ public class UpdateHandlers
 
             if (Context.Message?.Text == "Menu")
             {
-                UserStates.TryAdd(Context.UserId, "service_started");
+                UserStates.TryAdd(
+                    Context.UserId,
+                    new UserStateData {
+                        State = UserState.ServiceStarted,
+                        LastUpdated = DateTime.UtcNow,
+                        AdditionalInfo = ""
+                    }
+                );
                 await SendMenuOfBot();
                 return InitialMessageResult.MenuPlayed;
             }
@@ -229,6 +252,12 @@ public class UpdateHandlers
 
     public async Task HandleToUpdateList()
     {
+        UserStates[Context.UserId] = new UserStateData {
+            State = UserState.UpdateList,
+            LastUpdated = DateTime.UtcNow,
+            AdditionalInfo = ""
+        };
+
         await Context.BotClient.AnswerCallbackQuery(
             callbackQueryId: Context.CallbackQuery!.Id,
             text: "Selecione o tipo da atualização.",
@@ -246,10 +275,10 @@ public class UpdateHandlers
 
     public async Task HandleToAddItem()
     {
-        UserStates[Context.CallbackQuery!.From.Id] = "waiting_item_to_add";
+        UserStates[Context.UserId].AdditionalInfo = "waiting_item_to_add";
 
         await Context.BotClient.AnswerCallbackQuery(
-            callbackQueryId: Context.CallbackQuery.Id,
+            callbackQueryId: Context.CallbackQuery!.Id,
             text: $"Digite o nome do item que deseja adicionar.",
             cancellationToken: Context.CancellationToken
         );
@@ -267,10 +296,10 @@ public class UpdateHandlers
 
     public async Task HandleItemChange()
     {
-        UserStates[Context.CallbackQuery!.From.Id] = "waiting_for_name_attribute_to_updated";
+        UserStates[Context.UserId].AdditionalInfo = "waiting_for_name_attribute_to_updated";
 
         await Context.BotClient.AnswerCallbackQuery(
-            callbackQueryId: Context.CallbackQuery.Id,
+            callbackQueryId: Context.CallbackQuery!.Id,
             text: "Digite o nome do item que deseja alterar.",
             cancellationToken: Context.CancellationToken
         );
@@ -284,10 +313,10 @@ public class UpdateHandlers
 
     public async Task HandleCreatingNewList()
     {
-        UserStates[Context.CallbackQuery!.From.Id] = "waiting_items_to_create_new_list";
+        UserStates[Context.UserId].AdditionalInfo = "waiting_items_to_create_new_list";
 
         await Context.BotClient.AnswerCallbackQuery(
-            callbackQueryId: Context.CallbackQuery.Id,
+            callbackQueryId: Context.CallbackQuery!.Id,
             text: "Informe os itens da nova lista.",
             cancellationToken: Context.CancellationToken
         );
@@ -300,9 +329,9 @@ public class UpdateHandlers
 
     public async Task HandleAttributeChange()
     {
-        UserStates[Context.CallbackQuery!.From.Id] = "waiting_for_attribute_to_update";
+        UserStates[Context.UserId].AdditionalInfo = "waiting_for_attribute_to_update";
 
-        string genderVerified = Context.CallbackQuery.Data![Context.CallbackQuery.Data.Length -1] == 'a' ? "a" : "o";
+        string genderVerified = Context.CallbackQuery!.Data![Context.CallbackQuery.Data.Length -1] == 'a' ? "a" : "o";
         await Context.BotClient.SendMessage(
             chatId: Context.UserId,
             text: $"Informe {genderVerified} {Context.CallbackQuery.Data}:",
@@ -312,7 +341,7 @@ public class UpdateHandlers
 
     public async Task HandleItemRemove()
     {
-        UserStates[Context.UserId] = "waiting_item_to_remove";
+        UserStates[Context.UserId].AdditionalInfo = "waiting_item_to_remove";
 
         await Context.BotClient.AnswerCallbackQuery(
             callbackQueryId: Context.CallbackQuery!.Id,

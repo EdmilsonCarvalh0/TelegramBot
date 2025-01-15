@@ -4,12 +4,12 @@ using Newtonsoft.Json;
 
 namespace TelegramBot.Data;
 
-public class ShoppingData : IShoppingData
+public class JsonItemRepository : IItemRepository
 {
     public DataFormatter ListData = new();
     public string JsonFilePath = "C:\\Users\\edcar\\Documents\\ED\\Programação\\C#\\C#\\Projects\\TelegramBot\\Data\\data.json";
 
-    public ShoppingData()
+    public JsonItemRepository()
     {
         ListData = LoadData();
     }
