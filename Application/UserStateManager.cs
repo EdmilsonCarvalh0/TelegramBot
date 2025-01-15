@@ -10,6 +10,11 @@ public class UserStateManager
 {
     private readonly Dictionary<long, UserState> _userStates = new();
 
+    public UserStateManager()
+    {
+        _userStates.Add(default, UserState.None);
+    }
+
     public UserState GetState(long userId)
     {
         return _userStates.TryGetValue(userId, out var state) ? state : UserState.None;

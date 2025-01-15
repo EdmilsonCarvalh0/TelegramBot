@@ -5,11 +5,12 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBot.Application;
 using TelegramBot.Core;
+using TelegramBot.Domain;
 using TelegramBot.Infrastructure.Handlers;
 
 public class BotConnection
 {
-    public readonly UserStateManager _userStateManager = new();
+    public static readonly UserStateManager _userStateManager = new();
 
     public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
@@ -26,16 +27,36 @@ public class BotConnection
         //TODO: Implement logic for each user state 
         //      Implementar lógica para cada estado de usuário
 
-
         var handlers = new UpdateHandlers(context);
+        var userState = _userStateManager.GetState(context.UserId);
+
+        UserState responseState;
+
 
         if (update.Type == UpdateType.Message && update.Message != null)
         {
-            await handlers.HandleMessageAsync();
+            switch (userState)
+            {
+                case UserState.None:
+                    responseState = await handlers.HandleInitialMessage(userState);
+                    _userStateManager.SetState(context.UserId, responseState);
+                    Console.WriteLine($"Estado atual {_userStateManager.GetState(context.UserId)}");
+                    return;
+                    
+                case UserState.ServicePaused:
+                    break;
+                    
+            }
+
+            responseState = await handlers.HandleMessageAsync();
+            _userStateManager.SetState(context.UserId, responseState);
+            Console.WriteLine($"Estado atual {_userStateManager.GetState(context.UserId)}");
         }
         else if (update.Type == UpdateType.CallbackQuery && update.CallbackQuery != null)
         {
-            await handlers.HandleCallbackQueryAsync();
+            responseState = await handlers.HandleCallbackQueryAsync();
+            _userStateManager.SetState(context.UserId, responseState);
+            Console.WriteLine($"Estado atual {_userStateManager.GetState(context.UserId)}");
         }
     }
 

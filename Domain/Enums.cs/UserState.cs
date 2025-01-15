@@ -4,7 +4,7 @@ public enum UserState
 {
     None,
     ServicePaused,
-    ServiceStarted,
+    Running,
     GetList,
     UpdateList,
     AddItem,

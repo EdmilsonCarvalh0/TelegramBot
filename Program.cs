@@ -10,7 +10,7 @@ public class Program
 {
     static async Task Main(string[] args)
     {
-        MessageHandler client = new MessageHandler();
+        ItemController client = new ItemController();
 
         using var cts = new CancellationTokenSource();
 

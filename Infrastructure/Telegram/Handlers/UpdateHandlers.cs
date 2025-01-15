@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Diagnostics;
 using Telegram.Bot;
+using Telegram.Bot.Types;
 using TelegramBot.Application;
 using TelegramBot.Core;
 using TelegramBot.Domain;
@@ -26,114 +27,91 @@ public class UpdateHandlers
         );
     }
 
-    public async Task HandleMessageAsync()
+    public async Task<UserState> HandleMessageAsync()
     {
-        InitialMessageResult result = await HandleInitialMessage();
-        
-        if (result == InitialMessageResult.InvalidInput && 
-            UserStates[Context.UserId].State == UserState.ServicePaused) return;
-
         switch (UserStates[Context.UserId].AdditionalInfo)
         {
             case "waiting_item_to_add":
-            await HandleWaitingToAddOfItem();
-            break;
+                return await HandleWaitingToAddOfItem();
                 
             case "waiting_for_attribute_to_updated":
-                await HandleWaitingForAttributeToUpdated();
-                break;
+                return await HandleWaitingForAttributeToUpdated();
 
             case "waiting_for_name_attribute_to_updated":
-                await HandleWaitingForNameAttributeToUpdated();
-                break;
+                return await HandleWaitingForNameAttributeToUpdated();
                 
             case "waiting_item_to_remove":
-                await HandleWaitingItemToRemove();
-                break;
+                return await HandleWaitingItemToRemove();
 
             case "waiting_items_to_create_new_list":
-                await HandleWaitingItemsCreatingNewList();
-                break;
+                return await HandleWaitingItemsCreatingNewList();
         }
 
         Console.WriteLine($"{Context.Message!.From?.Username} saying: {Context.Message.Text}");
-
+        return UserState.None;
     }
 
-    public async Task HandleCallbackQueryAsync()
+    public async Task<UserState> HandleCallbackQueryAsync()
     {
-        if (Context.CallbackQuery == null) return;
+        if (Context.CallbackQuery == null) return UserState.None;
 
         switch (Context.CallbackQuery.Data)
         {
             //Verify option 'ver lista' and send list to user
             case "Ver lista":
-                await HandleSendOfList();
-                break;
+                return await HandleSendOfList();
                 
             //Verify option 'atualizar lista' and asks the user wich kind atualization
             case "Atualizar lista":
-                await HandleToUpdateList();
-                break;
+                return await HandleToUpdateList();
 
                 //Verify option 'adicionar item' and asks the user
             case "Adicionar um item":
-                await HandleToAddItem();
-                break;
+                return await HandleToAddItem();
 
             //Verify option 'alterar um item' and asks the user
             case "Alterar um item":
-                await HandleItemChange();
-                break;
+                return await HandleItemChange();
 
             case "Nome":
-                await HandleAttributeChange();
-                break;
+                return await HandleAttributeChange();
                 
             case "Marca":
-                await HandleAttributeChange();
-                break;
+                return await HandleAttributeChange();
                 
             case "Preço":
-                await HandleAttributeChange();
-                break;
+                return await HandleAttributeChange();
 
                 //Verify option 'remover um item' and asks the user
             case "Remover um item":
-                await HandleItemRemove();
-                break;
+                return await HandleItemRemove();
             
             case "Criar nova lista":
             //Verify option 'criar nova lista' 
-                await HandleCreatingNewList();
-                break;
+                return await HandleCreatingNewList();
         }
+
+        return UserState.None;
     }
 
-    private async Task SendMenuOfBot()
+    private async Task<UserState> SendMenuOfBot()
     {
-        var initialButtons = messageHandler.StartService();
+        var menuButtons = messageHandler.StartService();
         await Context.BotClient.SendMessage(
             chatId: Context.Message!.Chat.Id,
             text: $"Olá, bem vindo ao Bot de Compras Mensais!\nEscolha uma opção:",
-            replyMarkup: initialButtons,
+            replyMarkup: menuButtons,
             cancellationToken: Context.CancellationToken
         );
+
+        return UserState.Running;
+
     }
 
-    private async Task<InitialMessageResult> HandleInitialMessage()
+    public async Task<UserState> HandleInitialMessage(UserState state)
     {
-        if (UserStates[Context.UserId].AdditionalInfo == "")
+        if (state == UserState.None)
         {
-            UserStates!.TryAdd(
-                Context.UserId,
-                new UserStateData {
-                    State = UserState.ServicePaused,
-                    LastUpdated = DateTime.UtcNow,
-                    AdditionalInfo = ""
-                }
-            );
-
             if (Context.Message?.Text != "Menu")
             {
                 await Context.BotClient.SendMessage(
@@ -141,28 +119,19 @@ public class UpdateHandlers
                     "Para ir para o menu inicial digite 'Menu'.",
                     cancellationToken: Context.CancellationToken
                 );
-                return InitialMessageResult.InvalidInput;
+                return UserState.None;
             }
 
             if (Context.Message?.Text == "Menu")
             {
-                UserStates.TryAdd(
-                    Context.UserId,
-                    new UserStateData {
-                        State = UserState.ServiceStarted,
-                        LastUpdated = DateTime.UtcNow,
-                        AdditionalInfo = ""
-                    }
-                );
-                await SendMenuOfBot();
-                return InitialMessageResult.MenuPlayed;
+                return await SendMenuOfBot();
             }
         }
 
-        return InitialMessageResult.Unknown;
+        return UserState.None;
     }
 
-    private  async Task HandleWaitingToAddOfItem()
+    private async Task<UserState> HandleWaitingToAddOfItem()
     {
         var item = Context.Message!.Text;
 
@@ -175,9 +144,10 @@ public class UpdateHandlers
         );
 
         UserStates.TryRemove(Context.UserId, out _);
+        return UserState.None;
     }
 
-    private  async Task HandleWaitingForAttributeToUpdated()
+    private async Task<UserState> HandleWaitingForAttributeToUpdated()
     {
         var attribute = Context.Message!.Text;
 
@@ -189,9 +159,10 @@ public class UpdateHandlers
         );
 
         UserStates.TryRemove(Context.UserId, out _);
+        return UserState.None;
     }
 
-    private async Task HandleWaitingForNameAttributeToUpdated()
+    private async Task<UserState> HandleWaitingForNameAttributeToUpdated()
     {
         var attributeName = Context.Message!.Text;
 
@@ -204,9 +175,10 @@ public class UpdateHandlers
         );
 
         UserStates.TryRemove(Context.UserId, out _);
+        return UserState.UpdateItem;
     }
 
-    private async Task HandleWaitingItemToRemove()
+    private async Task<UserState> HandleWaitingItemToRemove()
     {
         var item = Context.Message!.Text;
 
@@ -217,9 +189,11 @@ public class UpdateHandlers
             text: methodResponse,
             cancellationToken: Context.CancellationToken
         );
+
+        return UserState.None;
     }
 
-    private async Task HandleWaitingItemsCreatingNewList()
+    private async Task<UserState> HandleWaitingItemsCreatingNewList()
     {
         var item = Context.Message!.Text;
                 
@@ -232,9 +206,10 @@ public class UpdateHandlers
         );
 
         UserStates.TryRemove(Context.UserId, out _);
+        return UserState.None;
     }
 
-    public async Task HandleSendOfList()
+    public async Task<UserState> HandleSendOfList()
     {
         await Context.BotClient.AnswerCallbackQuery(
             callbackQueryId: Context.CallbackQuery!.Id,
@@ -248,9 +223,11 @@ public class UpdateHandlers
             text: methodResponse,
             cancellationToken: Context.CancellationToken
         );
+
+        return UserState.None;
     }
 
-    public async Task HandleToUpdateList()
+    public async Task<UserState> HandleToUpdateList()
     {
         UserStates[Context.UserId] = new UserStateData {
             State = UserState.UpdateList,
@@ -271,9 +248,11 @@ public class UpdateHandlers
             replyMarkup: listUpdatesOptionsKeyboard,
             cancellationToken: Context.CancellationToken
         );
+
+        return UserState.UpdateList;
     }
 
-    public async Task HandleToAddItem()
+    public async Task<UserState> HandleToAddItem()
     {
         UserStates[Context.UserId].AdditionalInfo = "waiting_item_to_add";
 
@@ -292,9 +271,11 @@ public class UpdateHandlers
             text: "Vamos lá! Para inserir o item, siga a seguinte extrutura:\nProduto - Marca - Preco\nProduto - Marca - Preco\n\nAgora, por favor, informe os itens que deseja adicionar:",
             cancellationToken: Context.CancellationToken
         );
+
+        return UserState.AddItem;
     }
 
-    public async Task HandleItemChange()
+    public async Task<UserState> HandleItemChange()
     {
         UserStates[Context.UserId].AdditionalInfo = "waiting_for_name_attribute_to_updated";
 
@@ -309,9 +290,11 @@ public class UpdateHandlers
             text: "Por favor, informe agora o nome do item que deseja fazer alteração:",
             cancellationToken: Context.CancellationToken
         );
+        
+        return UserState.UpdateItem;
     }
 
-    public async Task HandleCreatingNewList()
+    public async Task<UserState> HandleCreatingNewList()
     {
         UserStates[Context.UserId].AdditionalInfo = "waiting_items_to_create_new_list";
 
@@ -325,9 +308,11 @@ public class UpdateHandlers
             text: "Envie agora os itens da nova lista.\nUse o padrão adequado para registro correto dos itens. Nesse caso, separe os itens por vírgula sem espaços.\nEx: Pão,Manteiga,Queijo",
             cancellationToken: Context.CancellationToken
         );
+
+        return UserState.CreatingNewList;
     }
 
-    public async Task HandleAttributeChange()
+    public async Task<UserState> HandleAttributeChange()
     {
         UserStates[Context.UserId].AdditionalInfo = "waiting_for_attribute_to_update";
 
@@ -337,9 +322,11 @@ public class UpdateHandlers
             text: $"Informe {genderVerified} {Context.CallbackQuery.Data}:",
             cancellationToken: Context.CancellationToken
         );
+
+        return UserState.UpdateItem;
     }
 
-    public async Task HandleItemRemove()
+    public async Task<UserState> HandleItemRemove()
     {
         UserStates[Context.UserId].AdditionalInfo = "waiting_item_to_remove";
 
@@ -354,5 +341,7 @@ public class UpdateHandlers
             text: "Por favor, informe agora o nome do item que deseja remover:",
             cancellationToken: Context.CancellationToken
         );
+
+        return UserState.DeleteItem;
     }
 }
