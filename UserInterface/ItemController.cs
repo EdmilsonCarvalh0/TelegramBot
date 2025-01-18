@@ -3,9 +3,9 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
-using TelegramBot.Data;
+using TelegramBot.Service;
 
-namespace TelegramBot.Core;
+namespace TelegramBot.UserInterface;
 
 //TODO: Create Class about List/Data for encapsulate functionalities
 //      criar classe sobre list/dados para encapsular funcionalidades
@@ -13,7 +13,7 @@ public class ItemController : IItemController
 {
     private readonly static string Token = "7560368958:AAGSWm6chmVviBNYSNF8P4Yh3aJdcka0vQw";
     public TelegramBotClient Bot;
-    private static readonly IItemRepository _shoppingData = new JsonItemRepository();
+    private static readonly IItemRepository _itemRepository = new JsonItemRepository();
 
     public ItemController()
     {
@@ -57,7 +57,7 @@ public class ItemController : IItemController
     public InlineKeyboardMarkup GetAttributeOptions()
     {
         return new InlineKeyboardMarkup(new[]
-            {  
+            {
                 new[]
                 {
                     InlineKeyboardButton.WithCallbackData("Nome"),
@@ -68,34 +68,46 @@ public class ItemController : IItemController
         );
     }
 
+    public string CheckItemExistence(string nameAttribute)
+    {
+        var response = _itemRepository.GetItemInRepository(nameAttribute);
+
+        if (response.Contains('\n'))
+        {
+            return $"Encontrei os seguintes itens:\n{response}\nQual deles você quer alterar?";
+        }
+
+        return response;
+    }
+
     public string AddItemInShoppingData(string userItems)
     {
-        _shoppingData.AddItemInList(userItems);
+        _itemRepository.AddItemInList(userItems);
         return $"{userItems} adicionado(a).";
     }
 
     public string SendItemToUpdateList(string item)
     {
-        _shoppingData.UpdateList(item);
-        return "Lista atualizada.";
+        _itemRepository.UpdateList(item);
+        return "Pronto, alterei pra você.";
     }
 
     public string SendItemToRemoveFromList(string item)
     {
-        _shoppingData.RemoveItemFromList(item);
+        _itemRepository.RemoveItemFromList(item);
         return "Item removido.";
     }
     
     public string ShowList()
     {
-        var list = _shoppingData.GetList();
+        var list = _itemRepository.GetList();
         return list;
     }
 
     public string GetItemsToCreatelist(string items)
     {
         //TODO: manipulate TimeStamp to formalize data
-        _shoppingData.CreateNewList(items);
+        _itemRepository.CreateNewList(items);
         return "Nova lista criada.";
     }
 

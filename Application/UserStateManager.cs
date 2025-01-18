@@ -1,7 +1,3 @@
-/*
-    Gerenciar estados do usuário durante o fluxo
-*/
-
 using TelegramBot.Domain;
 
 namespace TelegramBot.Application;

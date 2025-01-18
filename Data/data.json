@@ -32,12 +32,6 @@
     },
     {
       "id": 0,
-      "nome": "Guaraná",
-      "marca": "Qtal",
-      "preco": 3.7
-    },
-    {
-      "id": 0,
       "nome": "Queijo Ralado",
       "marca": "Vigor",
       "preco": 3.9
@@ -47,6 +41,18 @@
       "nome": "Bolacha",
       "marca": "Salt",
       "preco": 5.4
+    },
+    {
+      "id": 0,
+      "nome": "Biscoito",
+      "marca": "Bono",
+      "preco": 2.8
+    },
+    {
+      "id": 0,
+      "nome": "Miojo",
+      "marca": "Maratá",
+      "preco": 1.5
     }
   ]
 }

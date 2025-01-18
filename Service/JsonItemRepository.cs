@@ -1,8 +1,10 @@
+using System.Collections.Generic;
 using System.Data.Common;
 using Microsoft.AspNetCore.Http.Features;
 using Newtonsoft.Json;
+using TelegramBot.Data;
 
-namespace TelegramBot.Data;
+namespace TelegramBot.Service;
 
 public class JsonItemRepository : IItemRepository
 {
@@ -22,6 +24,33 @@ public class JsonItemRepository : IItemRepository
     public void SaveData()
     {
         File.WriteAllText(JsonFilePath, JsonConvert.SerializeObject(ListData, Formatting.Indented));
+    }
+
+    public string GetItemInRepository(string itemInput)
+    {       
+        var result = ListData.Items.FindAll(
+            delegate (Item it)
+            {
+                return it.Nome.Equals(itemInput, StringComparison.CurrentCultureIgnoreCase);
+            }
+        );
+
+        if (result.Count == 0) return "Item não encontrado.";
+
+        string names = string.Empty;
+
+        if (result.Count > 1)
+        {
+            foreach (var item in ListData.Items)
+            {
+                var precoFormatado = item.Preco.ToString("C");
+                names += $"{item.Nome} - {item.Marca} - {precoFormatado}\n";
+            }
+
+            return names;
+        }
+
+        return names;
     }
 
     public string GetList()
@@ -108,6 +137,7 @@ public class JsonItemRepository : IItemRepository
             attributesOfTheItemToBeChecked.AddRange(line.Trim().Split(" - "));
             ListData.Items.Add(CheckLineOfItem(attributesOfTheItemToBeChecked));
         }
+        SaveData();
     }
 
     private static Item CheckLineOfItem(List<string> linesOfItems)
