@@ -72,12 +72,12 @@ public class ItemController : IItemController
     {
         var response = _itemRepository.GetItemInRepository(nameAttribute);
 
-        if (response.Contains('\n'))
-        {
-            return $"Encontrei os seguintes itens:\n{response}\nQual deles você quer alterar?";
-        }
+        //if (response.Contains('\n'))
+        //{
+        //    return $"Encontrei os seguintes itens:\n{response}\nQual deles você quer alterar?";
+        //}
 
-        return response;
+        return response.Contains('\n') ? $"Encontrei os seguintes itens:\n\n{response}\nQual deles você quer alterar?" : response;
     }
 
     public string AddItemInShoppingData(string userItems)

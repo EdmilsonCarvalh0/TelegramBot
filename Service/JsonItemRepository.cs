@@ -41,7 +41,7 @@ public class JsonItemRepository : IItemRepository
 
         if (result.Count > 1)
         {
-            foreach (var item in ListData.Items)
+            foreach (var item in result)
             {
                 var precoFormatado = item.Preco.ToString("C");
                 names += $"{item.Nome} - {item.Marca} - {precoFormatado}\n";

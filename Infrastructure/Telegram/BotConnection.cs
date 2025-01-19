@@ -12,7 +12,7 @@ namespace TelegramBot.Infrastructure
 {
     public class BotConnection
     {
-        public static readonly UserStateManager _userStateManager = new();
+        private static readonly UserStateManager _userStateManager = new();
 
         public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
@@ -37,17 +37,12 @@ namespace TelegramBot.Infrastructure
 
             if (update.Type == UpdateType.Message && update.Message != null)
             {
-                switch (userState)
+                if (userState == UserState.None)
                 {
-                    case UserState.None:
-                        responseState = await handlers.HandleInitialMessage(userState);
-                        _userStateManager.SetState(context.UserId, responseState);
-                        Console.WriteLine($"Estado atual {_userStateManager.GetState(context.UserId)}");
-                        return;
-                    
-                    case UserState.ServicePaused:
-                        break;
-                    
+                    responseState = await handlers.HandleInitialMessage(userState);
+                    _userStateManager.SetState(context.UserId, responseState);
+                    Console.WriteLine($"Estado atual {_userStateManager.GetState(context.UserId)}");
+                    return;   
                 }
 
                 responseState = await handlers.HandleMessageAsync();

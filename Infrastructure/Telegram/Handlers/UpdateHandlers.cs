@@ -102,7 +102,7 @@ namespace TelegramBot.Infrastructure.Handlers
         {
             var menuButtons = messageHandler.StartService();
             await Context.BotClient.SendMessage(
-                chatId: Context.Message!.Chat.Id,
+                chatId: Context.UserId,
                 text: $"Olá, bem vindo ao Bot de Compras Mensais!\nEscolha uma opção:",
                 replyMarkup: menuButtons,
                 cancellationToken: Context.CancellationToken
@@ -141,11 +141,7 @@ namespace TelegramBot.Infrastructure.Handlers
 
             string methodResponse = messageHandler.AddItemInShoppingData(item!);
                 
-            await Context.BotClient.SendMessage(
-                chatId: Context.UserId,
-                text: methodResponse,
-                cancellationToken: Context.CancellationToken
-            );
+            await Context.BotClient.SendMessage(Context.UserId, methodResponse, cancellationToken: Context.CancellationToken);
 
             UserStates.TryRemove(Context.UserId, out _);
             return UserState.None;
@@ -156,11 +152,7 @@ namespace TelegramBot.Infrastructure.Handlers
             var attribute = Context.Message!.Text;
 
             string methodResponse = messageHandler.SendItemToUpdateList(attribute!);
-            await Context.BotClient.SendMessage(
-                chatId: Context.UserId,
-                text: methodResponse,
-                cancellationToken: Context.CancellationToken
-            );
+            await Context.BotClient.SendMessage(Context.UserId, methodResponse, cancellationToken: Context.CancellationToken);
 
             UserStates.TryRemove(Context.UserId, out _);
             return UserState.None;
@@ -188,12 +180,9 @@ namespace TelegramBot.Infrastructure.Handlers
             {
                 //TODO: implement items filter with same name / SECOND USE CASE
                 //      implementar filtro de itens com o mesmo nome / SEGUNDO CASO DE USO
+                if (response.Contains('\n')) return await HandleDuplicateItemReport(response);
 
-                await Context.BotClient.SendMessage(
-                    chatId: Context.UserId,
-                    text: response,
-                    cancellationToken: Context.CancellationToken
-                );
+                await Context.BotClient.SendMessage(Context.UserId, response, cancellationToken: Context.CancellationToken);
             }
 
             string genderVerified = Context.Message.Text![Context.Message.Text.Length - 1] == 'a' ? "da" : "do";
@@ -210,17 +199,22 @@ namespace TelegramBot.Infrastructure.Handlers
             return UserState.UpdateItem;
         }
 
+        private async Task<UserState> HandleDuplicateItemReport(string response)
+        {
+            UserStates[Context.UserId].AdditionalInfo = "waiting_for_name_attribute_to_update";
+
+            await Context.BotClient.SendMessage(Context.UserId, response, cancellationToken: Context.CancellationToken);
+
+            return UserState.UpdateItem;
+        }
+
         private async Task<UserState> HandleWaitingItemToRemove()
         {
             var item = Context.Message!.Text;
 
             string methodResponse = messageHandler.SendItemToRemoveFromList(item!);
 
-            await Context.BotClient.SendMessage(
-                chatId: Context.Message.Chat.Id,
-                text: methodResponse,
-                cancellationToken: Context.CancellationToken
-            );
+            await Context.BotClient.SendMessage(Context.UserId, methodResponse, cancellationToken: Context.CancellationToken);
 
             return UserState.None;
         }
@@ -231,11 +225,7 @@ namespace TelegramBot.Infrastructure.Handlers
                 
             string methodResponse = messageHandler.GetItemsToCreatelist(item!);
                  
-            await Context.BotClient.SendMessage(
-                chatId: Context.Message.Chat.Id,
-                text: methodResponse,
-                cancellationToken: Context.CancellationToken
-            );
+            await Context.BotClient.SendMessage(Context.UserId, text: methodResponse, cancellationToken: Context.CancellationToken);
 
             UserStates.TryRemove(Context.UserId, out _);
             return UserState.None;
@@ -250,11 +240,7 @@ namespace TelegramBot.Infrastructure.Handlers
             );
 
             var methodResponse = messageHandler.ShowList();
-            await Context.BotClient.SendMessage(
-                chatId: Context.UserId,
-                text: methodResponse,
-                cancellationToken: Context.CancellationToken
-            );
+            await Context.BotClient.SendMessage(Context.UserId, methodResponse, cancellationToken: Context.CancellationToken);
 
             return UserState.None;
         }

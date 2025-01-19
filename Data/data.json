@@ -53,6 +53,18 @@
       "nome": "Miojo",
       "marca": "Maratá",
       "preco": 1.5
+    },
+    {
+      "id": 0,
+      "nome": "Guaraná",
+      "marca": "Qtal",
+      "preco": 4.6
+    },
+    {
+      "id": 0,
+      "nome": "Guaraná",
+      "marca": "Antártica",
+      "preco": 7.8
     }
   ]
 }
