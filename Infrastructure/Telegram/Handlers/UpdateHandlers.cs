@@ -5,6 +5,7 @@ using Telegram.Bot.Types;
 using TelegramBot.Application;
 using TelegramBot.UserInterface;
 using TelegramBot.Domain;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TelegramBot.Infrastructure.Handlers
 {
@@ -14,21 +15,25 @@ namespace TelegramBot.Infrastructure.Handlers
             Avaliar uso dos dados de update posteriormente
             (com qual intuito reter esses dados?)
         */
-        private static readonly ConcurrentDictionary<long, UserStateData> UserStates = new();
-        private readonly BotRequestContext Context;
+        private readonly ConcurrentDictionary<long, UserStateData> UserStates = new();
+        public BotRequestContext Context { get; set; }
         private static readonly IItemController messageHandler = new ItemController();
 
-        public UpdateHandlers(BotRequestContext context)
+        public UpdateHandlers()
         {
-            Context = context;
             UserStates.TryAdd(
-                context.UserId,
+                Context.UserId,
                 new UserStateData {
                     State = UserState.None,
                     LastUpdated = DateTime.UtcNow,
                     AdditionalInfo = ""
                 }
             );
+        }
+
+        public void LoadContext(BotRequestContext context)
+        {
+            Context = context;
         }
 
         public async Task<UserState> HandleMessageAsync()
@@ -98,18 +103,33 @@ namespace TelegramBot.Infrastructure.Handlers
             return UserState.None;
         }
 
-        private async Task<UserState> SendMenuOfBot()
+        private async Task<UserState> SendResponseToUser(ResponseContent responseContent)
         {
-            var menuButtons = messageHandler.StartService();
+            if (responseContent.KeyboardMarkup != null)
+            {
+                await Context.BotClient.SendMessage(
+                    chatId: Context.UserId,
+                    text: responseContent.Text,
+                    replyMarkup: responseContent.KeyboardMarkup,
+                    cancellationToken: Context.CancellationToken
+                );
+
+                return responseContent.UserState;
+            }
+
             await Context.BotClient.SendMessage(
                 chatId: Context.UserId,
-                text: $"Olá, bem vindo ao Bot de Compras Mensais!\nEscolha uma opção:",
-                replyMarkup: menuButtons,
+                text: responseContent.Text,
                 cancellationToken: Context.CancellationToken
             );
 
-            return UserState.Running;
+            return responseContent.UserState;
+        }
 
+        private async Task<UserState> SendMenuOfBot()
+        {
+            var responseContent = messageHandler.StartService();
+            return await SendResponseToUser(responseContent);
         }
 
         public async Task<UserState> HandleInitialMessage(UserState state)
@@ -118,12 +138,9 @@ namespace TelegramBot.Infrastructure.Handlers
             {
                 if (Context.Message?.Text != "Menu")
                 {
-                    await Context.BotClient.SendMessage(
-                        Context.UserId,
-                        "Para ir para o menu inicial digite 'Menu'.",
-                        cancellationToken: Context.CancellationToken
-                    );
-                    return UserState.None;
+                    var responseContent = messageHandler.GetInitialMessage();
+                    var userState = await SendResponseToUser(responseContent);
+                    return userState;
                 }
 
                 if (Context.Message?.Text == "Menu")
@@ -137,75 +154,54 @@ namespace TelegramBot.Infrastructure.Handlers
 
         private async Task<UserState> HandleWaitingToAddOfItem()
         {
-            var item = Context.Message!.Text;
-
-            string methodResponse = messageHandler.AddItemInShoppingData(item!);
-                
-            await Context.BotClient.SendMessage(Context.UserId, methodResponse, cancellationToken: Context.CancellationToken);
-
             UserStates.TryRemove(Context.UserId, out _);
-            return UserState.None;
+            var item = Context.Message!.Text;
+            var responseContent = messageHandler.AddItemInShoppingData(item!);
+            return await SendResponseToUser(responseContent);
         }
 
         private async Task<UserState> HandleWaitingForAttributeToUpdated()
         {
-            var attribute = Context.Message!.Text;
-
-            string methodResponse = messageHandler.SendItemToUpdateList(attribute!);
-            await Context.BotClient.SendMessage(Context.UserId, methodResponse, cancellationToken: Context.CancellationToken);
-
             UserStates.TryRemove(Context.UserId, out _);
-            return UserState.None;
+            var attribute = Context.Message!.Text;
+            var responseContent = messageHandler.SendItemToUpdateList(attribute!);
+            return await SendResponseToUser(responseContent);
         }
 
         private async Task<UserState> HandleWaitingForNameAttributeToUpdated()
         {
             var nameAttribute = Context.Message!.Text;
+            var responseContent = messageHandler.CheckItemExistence(nameAttribute!);
 
-            string response = messageHandler.CheckItemExistence(nameAttribute!);
-            if (response.Equals("item não encontrado.", StringComparison.CurrentCultureIgnoreCase))
+            if (responseContent.UserState == UserState.UpdateList)
             {
                 UserStates[Context.UserId].AdditionalInfo = "waiting_for_name_attribute_to_update";
-
-                await Context.BotClient.SendMessage(
-                    chatId: Context.UserId,
-                    text: $"Infelizmente não encontrei o item na lista.\n\n{messageHandler.ShowList()}\n\nVerifique se o nome está correto e informe novamente.",
-                    cancellationToken: Context.CancellationToken
-                );
-
-                return UserState.UpdateItem;
+                return await SendResponseToUser(responseContent);
             }
+
+            //if (responseContent.AdditionalResponseContext == "Item no exist")
+            //{
+            //    UserStates[Context.UserId].AdditionalInfo = "waiting_for_name_attribute_to_update";
+            //    return await SendResponseToUser(responseContent);
+            //}
             
-            if(response != string.Empty)
-            {
-                //TODO: implement items filter with same name / SECOND USE CASE
-                //      implementar filtro de itens com o mesmo nome / SEGUNDO CASO DE USO
-                if (response.Contains('\n')) return await HandleDuplicateItemReport(response);
+            //if(responseContent.Text != string.Empty)
+            //{
+            //    if (responseContent.Text.Contains('\n'))
+            //    {
+            //        UserStates[Context.UserId].AdditionalInfo = "waiting_for_name_attribute_to_update";
+            //        return await SendResponseToUser(responseContent);
+            //    };
 
-                await Context.BotClient.SendMessage(Context.UserId, response, cancellationToken: Context.CancellationToken);
-            }
+            //    await Context.BotClient.SendMessage(Context.UserId, responseContent.Text, cancellationToken: Context.CancellationToken);
+            //}
 
-            string genderVerified = Context.Message.Text![Context.Message.Text.Length - 1] == 'a' ? "da" : "do";
+            var response = messageHandler.GetAttributeOptions();
 
-            var methodResponse = messageHandler.GetAttributeOptions();
-            await Context.BotClient.SendMessage(
-                chatId: Context.UserId,
-                text: $"O que deseja alterar {genderVerified} {nameAttribute}?",
-                replyMarkup: methodResponse,
-                cancellationToken: Context.CancellationToken
-            );
-
+            string genderVerified = nameAttribute![nameAttribute.Length - 1] == 'a' ? "da" : "do";
+            response.Text += genderVerified + nameAttribute + "?";
             UserStates.TryRemove(Context.UserId, out _);
-            return UserState.UpdateItem;
-        }
-
-        private async Task<UserState> HandleDuplicateItemReport(string response)
-        {
-            UserStates[Context.UserId].AdditionalInfo = "waiting_for_name_attribute_to_update";
-
-            await Context.BotClient.SendMessage(Context.UserId, response, cancellationToken: Context.CancellationToken);
-
-            return UserState.UpdateItem;
+            return await SendResponseToUser(response);
         }
 
         private async Task<UserState> HandleWaitingItemToRemove()
@@ -259,11 +255,11 @@ namespace TelegramBot.Infrastructure.Handlers
                 cancellationToken: Context.CancellationToken
             );
 
-            var listUpdatesOptionsKeyboard = messageHandler.GetOptionsOfListUpdate();
+            var responseContemt = messageHandler.GetOptionsOfListUpdate();
             await Context.BotClient.SendMessage(
                 chatId: Context.UserId,
                 text: "Selecione o tipo de atualização que deseja fazer:",
-                replyMarkup: listUpdatesOptionsKeyboard,
+                replyMarkup: responseContemt.KeyboardMarkup,
                 cancellationToken: Context.CancellationToken
             );
 

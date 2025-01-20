@@ -11,7 +11,7 @@ namespace TelegramBot
     {
         static async Task Main(string[] args)
         {
-            ItemController client = new ItemController();
+            BotConnection client = new BotConnection();
 
             using var cts = new CancellationTokenSource();
 

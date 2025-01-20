@@ -21,9 +21,4 @@ public class BotRequestContext
         Message = message;
         CancellationToken = cancellationToken;
     }
-
-    /*
-        Avaliar arquitetura para saber onde inserir a classe
-        (talvez na de aplicação)
-    */
 }

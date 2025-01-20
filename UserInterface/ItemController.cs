@@ -1,8 +1,6 @@
-using System.Data.Common;
 using Telegram.Bot;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using TelegramBot.Domain;
 using TelegramBot.Service;
 
 namespace TelegramBot.UserInterface;
@@ -11,18 +9,35 @@ namespace TelegramBot.UserInterface;
 //      criar classe sobre list/dados para encapsular funcionalidades
 public class ItemController : IItemController
 {
-    private readonly static string Token = "7560368958:AAGSWm6chmVviBNYSNF8P4Yh3aJdcka0vQw";
-    public TelegramBotClient Bot;
     private static readonly IItemRepository _itemRepository = new JsonItemRepository();
+    private ResponseContent _responseContent = new();
+    private Dictionary<string, string> ResponseMessage { get; set; }
 
     public ItemController()
     {
-        Bot = new TelegramBotClient(Token);
+        ResponseMessage = new Dictionary<string, string>()
+        { 
+            { "Initial Message", "Para ir para o menu inicial digite 'Menu'." },
+            { "Menu", $"Olá, bem vindo ao Bot de Compras Mensais!\nEscolha uma opção:" },
+            { "Item Added", $"Pronto, já adicionei!" },
+            { "Update Item", "O que deseja alterar " },
+            { "Non-existent Item", $"Infelizmente não encontrei o item na lista.\\n\\n{ShowList()}\\n\\nVerifique se o nome está correto e informe novamente.\"" },
+            { "Update Item OK", "Pronto, alterei pra você." }
+        };
     }
 
-    public InlineKeyboardMarkup StartService()
+    public ResponseContent GetInitialMessage()
     {
-        return new InlineKeyboardMarkup(new[]
+        _responseContent.Text = ResponseMessage["Initial Message"];
+        _responseContent.UserState = UserState.None;
+        return _responseContent;
+    }
+
+    public ResponseContent StartService()
+    {
+        _responseContent.Text = ResponseMessage["Menu"];
+        _responseContent.UserState = UserState.Running;
+        _responseContent.KeyboardMarkup = new InlineKeyboardMarkup(new[]
             {
                 new[]
                 {
@@ -32,11 +47,13 @@ public class ItemController : IItemController
                 }
             }
         );
+
+        return _responseContent;
     }
 
-    public InlineKeyboardMarkup GetOptionsOfListUpdate()
+    public ResponseContent GetOptionsOfListUpdate()
     {
-        return new InlineKeyboardMarkup(new[]
+        _responseContent.KeyboardMarkup =  new InlineKeyboardMarkup(new[]
             {
                 new []
                 {
@@ -52,11 +69,15 @@ public class ItemController : IItemController
                 }
             }
         );
+
+        return _responseContent;
     }
 
-    public InlineKeyboardMarkup GetAttributeOptions()
+    public ResponseContent GetAttributeOptions()
     {
-        return new InlineKeyboardMarkup(new[]
+        _responseContent.Text = ResponseMessage["Update Item"];
+        _responseContent.UserState = UserState.UpdateItem;
+        _responseContent.KeyboardMarkup = new InlineKeyboardMarkup(new[]
             {
                 new[]
                 {
@@ -66,30 +87,46 @@ public class ItemController : IItemController
                 }
             }
         );
+
+        return _responseContent;
     }
 
-    public string CheckItemExistence(string nameAttribute)
+    public ResponseContent CheckItemExistence(string nameAttribute)
     {
         var response = _itemRepository.GetItemInRepository(nameAttribute);
 
-        //if (response.Contains('\n'))
-        //{
-        //    return $"Encontrei os seguintes itens:\n{response}\nQual deles você quer alterar?";
-        //}
+        if(response.Equals("item não encontrado.", StringComparison.CurrentCultureIgnoreCase))
+        {
+            _responseContent.Text = ResponseMessage["Non-existent Item"];
+            _responseContent.UserState = UserState.UpdateList;
+            //_responseContent.AdditionalResponseContext = "Item no exist";
+            return _responseContent;
+        }
 
-        return response.Contains('\n') ? $"Encontrei os seguintes itens:\n\n{response}\nQual deles você quer alterar?" : response;
+        if(response.Contains('\n'))
+        {
+            _responseContent.Text = $"Encontrei os seguintes itens:\n\n{response}\nQual deles você quer alterar?";
+            _responseContent.UserState = UserState.UpdateList;
+            return _responseContent;
+        }
+
+        _responseContent.UserState = UserState.UpdateItem;
+        return _responseContent;
     }
 
-    public string AddItemInShoppingData(string userItems)
+    public ResponseContent AddItemInShoppingData(string userItems)
     {
         _itemRepository.AddItemInList(userItems);
-        return $"{userItems} adicionado(a).";
+        _responseContent.Text = ResponseMessage["Item Added"];
+        return _responseContent;
     }
 
-    public string SendItemToUpdateList(string item)
+    public ResponseContent SendItemToUpdateList(string item)
     {
         _itemRepository.UpdateList(item);
-        return "Pronto, alterei pra você.";
+        _responseContent.Text = ResponseMessage["Update Item OK"];
+        _responseContent.UserState = UserState.None;
+        return _responseContent;
     }
 
     public string SendItemToRemoveFromList(string item)
@@ -100,8 +137,7 @@ public class ItemController : IItemController
     
     public string ShowList()
     {
-        var list = _itemRepository.GetList();
-        return list;
+        return $"Essa é a sua lista atual:\n\n{_itemRepository.GetList()}";
     }
 
     public string GetItemsToCreatelist(string items)
