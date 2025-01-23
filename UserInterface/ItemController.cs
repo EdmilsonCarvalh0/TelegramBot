@@ -22,7 +22,10 @@ public class ItemController : IItemController
             { "Item Added", $"Pronto, já adicionei!" },
             { "Update Item", "O que deseja alterar " },
             { "Non-existent Item", $"Infelizmente não encontrei o item na lista.\\n\\n{ShowList()}\\n\\nVerifique se o nome está correto e informe novamente.\"" },
-            { "Update Item OK", "Pronto, alterei pra você." }
+            { "Update Item OK", "Pronto, alterei pra você." },
+            { "Deleted Item OK", "Item removido." },
+            { "Show List", $"Essa é a sua lista atual:\n\n{_itemRepository.GetList()}" },
+            { "Created New List", "Nova lista criada." }
         };
     }
 
@@ -129,22 +132,28 @@ public class ItemController : IItemController
         return _responseContent;
     }
 
-    public string SendItemToRemoveFromList(string item)
+    public ResponseContent SendItemToRemoveFromList(string item)
     {
         _itemRepository.RemoveItemFromList(item);
-        return "Item removido.";
+        _responseContent.Text = ResponseMessage["Deleted Item OK"];
+        _responseContent.UserState = UserState.None;
+        return _responseContent;
     }
     
-    public string ShowList()
+    public ResponseContent ShowList()
     {
-        return $"Essa é a sua lista atual:\n\n{_itemRepository.GetList()}";
+        _responseContent.Text = ResponseMessage["Show List"];
+        _responseContent.UserState = UserState.None;
+        return _responseContent;
     }
 
-    public string GetItemsToCreatelist(string items)
+    public ResponseContent GetItemsToCreatelist(string items)
     {
         //TODO: manipulate TimeStamp to formalize data
         _itemRepository.CreateNewList(items);
-        return "Nova lista criada.";
+        _responseContent.Text = ResponseMessage["Created New List"];
+        _responseContent.UserState = UserState.None;
+        return _responseContent;
     }
 
     //TODO: implement verify function automatic of item

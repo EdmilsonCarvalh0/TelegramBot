@@ -11,7 +11,7 @@ public interface IItemController
     ResponseContent CheckItemExistence(string nameAttribute);
     ResponseContent AddItemInShoppingData(string item);
     ResponseContent SendItemToUpdateList(string item);
-    string SendItemToRemoveFromList(string item);
-    string ShowList();
-    string GetItemsToCreatelist(string item);
+    ResponseContent SendItemToRemoveFromList(string item);
+    ResponseContent ShowList();
+    ResponseContent GetItemsToCreatelist(string item);
 }

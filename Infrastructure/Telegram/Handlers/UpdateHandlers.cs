@@ -139,8 +139,7 @@ namespace TelegramBot.Infrastructure.Handlers
                 if (Context.Message?.Text != "Menu")
                 {
                     var responseContent = messageHandler.GetInitialMessage();
-                    var userState = await SendResponseToUser(responseContent);
-                    return userState;
+                    return await SendResponseToUser(responseContent);
                 }
 
                 if (Context.Message?.Text == "Menu")
@@ -207,24 +206,16 @@ namespace TelegramBot.Infrastructure.Handlers
         private async Task<UserState> HandleWaitingItemToRemove()
         {
             var item = Context.Message!.Text;
-
-            string methodResponse = messageHandler.SendItemToRemoveFromList(item!);
-
-            await Context.BotClient.SendMessage(Context.UserId, methodResponse, cancellationToken: Context.CancellationToken);
-
-            return UserState.None;
+            var responseContent = messageHandler.SendItemToRemoveFromList(item!);
+            return await SendResponseToUser(responseContent);
         }
 
         private async Task<UserState> HandleWaitingItemsCreatingNewList()
         {
-            var item = Context.Message!.Text;
-                
-            string methodResponse = messageHandler.GetItemsToCreatelist(item!);
-                 
-            await Context.BotClient.SendMessage(Context.UserId, text: methodResponse, cancellationToken: Context.CancellationToken);
-
             UserStates.TryRemove(Context.UserId, out _);
-            return UserState.None;
+            var item = Context.Message!.Text;
+            var responseContent = messageHandler.GetItemsToCreatelist(item!);                 
+            return await SendResponseToUser(responseContent);
         }
 
         public async Task<UserState> HandleSendOfList()
@@ -235,10 +226,8 @@ namespace TelegramBot.Infrastructure.Handlers
                 cancellationToken: Context.CancellationToken
             );
 
-            var methodResponse = messageHandler.ShowList();
-            await Context.BotClient.SendMessage(Context.UserId, methodResponse, cancellationToken: Context.CancellationToken);
-
-            return UserState.None;
+            var responseContent = messageHandler.ShowList();
+            return await SendResponseToUser(responseContent);
         }
 
         public async Task<UserState> HandleToUpdateList()
