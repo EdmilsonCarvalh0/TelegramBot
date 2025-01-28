@@ -9,22 +9,28 @@ namespace TelegramBot.UserInterface;
 //      criar classe sobre list/dados para encapsular funcionalidades
 public class ItemController : IItemController
 {
-    private static readonly IItemRepository _itemRepository = new JsonItemRepository();
+    private IItemRepository _itemRepository;
     private ResponseContent _responseContent = new();
-    private Dictionary<string, string> ResponseMessage { get; set; }
+    private Dictionary<string, string> ResponseMessage { get; set; } = new();
 
     public ItemController()
     {
+        _itemRepository = new JsonItemRepository();
+        LoadResponseMessages();
+    }
+
+    private void LoadResponseMessages()
+    {
         ResponseMessage = new Dictionary<string, string>()
-        { 
+        {
             { "Initial Message", "Para ir para o menu inicial digite 'Menu'." },
             { "Menu", $"Olá, bem vindo ao Bot de Compras Mensais!\nEscolha uma opção:" },
+            { "Show List", $"Essa é a sua lista atual:\n\n{_itemRepository.GetList()}" },
             { "Item Added", $"Pronto, já adicionei!" },
             { "Update Item", "O que deseja alterar " },
-            { "Non-existent Item", $"Infelizmente não encontrei o item na lista.\\n\\n{ShowList()}\\n\\nVerifique se o nome está correto e informe novamente.\"" },
+            { "Non-existent Item", $"Infelizmente não encontrei o item na lista.\\n\\n{_itemRepository.GetList()}\\n\\nVerifique se o nome está correto e informe novamente.\"" },
             { "Update Item OK", "Pronto, alterei pra você." },
             { "Deleted Item OK", "Item removido." },
-            { "Show List", $"Essa é a sua lista atual:\n\n{_itemRepository.GetList()}" },
             { "Created New List", "Nova lista criada." }
         };
     }

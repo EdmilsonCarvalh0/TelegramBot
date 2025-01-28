@@ -15,21 +15,22 @@ namespace TelegramBot.Infrastructure.Handlers
             Avaliar uso dos dados de update posteriormente
             (com qual intuito reter esses dados?)
         */
-        private readonly ConcurrentDictionary<long, UserStateData> UserStates = new();
+        // private readonly ConcurrentDictionary<long, UserStateData> UserStates = new();
         public UserStateManager UserStateManager { get; set; }
-        public BotRequestContext Context { get; set; }
+        public BotRequestContext Context { get; set; } = default!;
         private static readonly IItemController messageHandler = new ItemController();
 
         public UpdateHandlers()
         {
-            UserStates.TryAdd(
-                Context!.UserId,
-                new UserStateData {
-                    State = UserState.None,
-                    LastUpdated = DateTime.UtcNow,
-                    AdditionalInfo = ""
-                }
-            );
+            // Avaliar o uso do UserStates
+            // UserStates.TryAdd(
+            //     Context!.UserId,
+            //     new UserStateData {
+            //         State = UserState.None,
+            //         LastUpdated = DateTime.UtcNow,
+            //         AdditionalInfo = ""
+            //     }
+            // );
 
             UserStateManager = new UserStateManager();
         }
@@ -37,9 +38,14 @@ namespace TelegramBot.Infrastructure.Handlers
         public void LoadContext(BotRequestContext context)
         {
             Context = context;
+
+            if (!UserStateManager.ContainsUserId(Context.UserId))
+            {
+                UserStateManager.SetUserId(Context.UserId);
+            }
         }
 
-        public async Task<UserState> HandleMessageAsync()
+        public async Task HandleMessageAsync()
         {
 
             /*
@@ -51,70 +57,82 @@ namespace TelegramBot.Infrastructure.Handlers
             switch (userStateData.AdditionalInfo)
             {
                 case "waiting_item_to_add":
-                    return await HandleWaitingToAddOfItem();
+                    await HandleWaitingToAddOfItem();
+                    break;
                 
                 case "waiting_for_attribute_to_update":
-                    return await HandleWaitingForAttributeToUpdated();
+                    await HandleWaitingForAttributeToUpdated();
+                    break;
 
                 case "waiting_for_name_attribute_to_update":
-                    return await HandleWaitingForNameAttributeToUpdated();
+                    await HandleWaitingForNameAttributeToUpdated();
+                    break;
                 
                 case "waiting_item_to_remove":
-                    return await HandleWaitingItemToRemove();
+                    await HandleWaitingItemToRemove();
+                    break;
 
                 case "waiting_items_to_create_new_list":
-                    return await HandleWaitingItemsCreatingNewList();
+                    await HandleWaitingItemsCreatingNewList();
+                    break;
             }
 
             Console.WriteLine($"{Context.Message!.From?.Username} saying: {Context.Message.Text}");
-            return UserState.None;
         }
 
-        public async Task<UserState> HandleCallbackQueryAsync()
+        public async Task HandleCallbackQueryAsync()
         {
-            if (Context.CallbackQuery == null) return UserState.None;
+            if (Context.CallbackQuery == null) return;
 
             switch (Context.CallbackQuery.Data)
             {
                 //Verify option 'ver lista' and send list to user
                 case "Ver lista":
-                    return await HandleSendOfList();
+                    await HandleSendOfList();
+                    break;
                 
                 //Verify option 'atualizar lista' and asks the user wich kind atualization
                 case "Atualizar lista":
-                    return await HandleToUpdateList();
+                    await HandleToUpdateList();
+                    break;
 
                     //Verify option 'adicionar item' and asks the user
                 case "Adicionar um item":
-                    return await HandleToAddItem();
+                    await HandleToAddItem();
+                    break;
 
                 //Verify option 'alterar um item' and asks the user
                 case "Alterar um item":
-                    return await HandleItemChange();
+                    await HandleItemChange();
+                    break;
 
                 case "Nome":
-                    return await HandleAttributeChange();
+                    await HandleAttributeChange();
+                    break;
                 
                 case "Marca":
-                    return await HandleAttributeChange();
+                    await HandleAttributeChange();
+                    break;
                 
                 case "Preço":
-                    return await HandleAttributeChange();
+                    await HandleAttributeChange();
+                    break;
 
                     //Verify option 'remover um item' and asks the user
                 case "Remover um item":
-                    return await HandleItemRemove();
+                    await HandleItemRemove();
+                    break;
             
                 case "Criar nova lista":
                 //Verify option 'criar nova lista' 
-                    return await HandleCreatingNewList();
+                    await HandleCreatingNewList();
+                    break;
             }
-
-            return UserState.None;
         }
 
-        private async Task<UserState> SendResponseToUser(ResponseContent responseContent)
+        private async Task SendResponseToUser(ResponseContent responseContent)
         {
+            
             if (responseContent.KeyboardMarkup != null)
             {
                 await Context.BotClient.SendMessage(
@@ -124,7 +142,8 @@ namespace TelegramBot.Infrastructure.Handlers
                     cancellationToken: Context.CancellationToken
                 );
 
-                return responseContent.UserState;
+                UserStateManager.SetState(Context.UserId, responseContent.UserState);
+                return;
             }
 
             await Context.BotClient.SendMessage(
@@ -133,59 +152,54 @@ namespace TelegramBot.Infrastructure.Handlers
                 cancellationToken: Context.CancellationToken
             );
 
-            return responseContent.UserState;
+            UserStateManager.SetState(Context.UserId, responseContent.UserState);
+            return;
         }
 
-        private async Task<UserState> SendMenuOfBot()
+        public async Task HandleInitialMessage()
         {
-            var responseContent = messageHandler.StartService();
-            return await SendResponseToUser(responseContent);
-        }
-
-        public async Task<UserState> HandleInitialMessage(UserState state)
-        {
-            if (state == UserState.None)
+            if (Context.Message?.Text != "Menu")
             {
-                if (Context.Message?.Text != "Menu")
-                {
-                    var responseContent = messageHandler.GetInitialMessage();
-                    return await SendResponseToUser(responseContent);
-                }
-
-                if (Context.Message?.Text == "Menu")
-                {
-                    return await SendMenuOfBot();
-                }
+                var responseContent = messageHandler.GetInitialMessage();
+                await SendResponseToUser(responseContent);
             }
 
-            return UserState.None;
+            if (Context.Message?.Text == "Menu")
+            {
+                var responseContent = messageHandler.StartService();
+                await SendResponseToUser(responseContent);
+            }
         }
 
-        private async Task<UserState> HandleWaitingToAddOfItem()
+        private async Task HandleWaitingToAddOfItem()
         {
-            UserStates.TryRemove(Context.UserId, out _);
+            // UserStates.TryRemove(Context.UserId, out _);
+            UserStateManager.ResetAdditionalInfo(Context.UserId);
             var item = Context.Message!.Text;
             var responseContent = messageHandler.AddItemInShoppingData(item!);
-            return await SendResponseToUser(responseContent);
+            await SendResponseToUser(responseContent);
         }
 
-        private async Task<UserState> HandleWaitingForAttributeToUpdated()
+        private async Task HandleWaitingForAttributeToUpdated()
         {
-            UserStates.TryRemove(Context.UserId, out _);
+            // UserStates.TryRemove(Context.UserId, out _);
+            UserStateManager.ResetAdditionalInfo(Context.UserId);
             var attribute = Context.Message!.Text;
             var responseContent = messageHandler.SendItemToUpdateList(attribute!);
-            return await SendResponseToUser(responseContent);
+            await SendResponseToUser(responseContent);
         }
 
-        private async Task<UserState> HandleWaitingForNameAttributeToUpdated()
+        private async Task HandleWaitingForNameAttributeToUpdated()
         {
             var nameAttribute = Context.Message!.Text;
             var responseContent = messageHandler.CheckItemExistence(nameAttribute!);
 
             if (responseContent.UserState == UserState.UpdateList)
             {
-                UserStates[Context.UserId].AdditionalInfo = "waiting_for_name_attribute_to_update";
-                return await SendResponseToUser(responseContent);
+                // UserStates[Context.UserId].AdditionalInfo = "waiting_for_name_attribute_to_update";
+                UserStateManager.SetAdditionalInfo(Context.UserId, "waiting_for_name_attribute_to_update");
+                await SendResponseToUser(responseContent);
+                return;
             }
 
             //if (responseContent.AdditionalResponseContext == "Item no exist")
@@ -207,28 +221,30 @@ namespace TelegramBot.Infrastructure.Handlers
 
             var response = messageHandler.GetAttributeOptions();
 
-            string genderVerified = nameAttribute![nameAttribute.Length - 1] == 'a' ? "da" : "do";
+            string genderVerified = nameAttribute![nameAttribute.Length - 1] == 'a' ? "da " : "do ";
             response.Text += genderVerified + nameAttribute + "?";
-            UserStates.TryRemove(Context.UserId, out _);
-            return await SendResponseToUser(response);
+            // UserStates.TryRemove(Context.UserId, out _);
+            UserStateManager.ResetAdditionalInfo(Context.UserId);
+            await SendResponseToUser(response);
         }
 
-        private async Task<UserState> HandleWaitingItemToRemove()
+        private async Task HandleWaitingItemToRemove()
         {
             var item = Context.Message!.Text;
             var responseContent = messageHandler.SendItemToRemoveFromList(item!);
-            return await SendResponseToUser(responseContent);
+            await SendResponseToUser(responseContent);
         }
 
-        private async Task<UserState> HandleWaitingItemsCreatingNewList()
+        private async Task HandleWaitingItemsCreatingNewList()
         {
-            UserStates.TryRemove(Context.UserId, out _);
+            // UserStates.TryRemove(Context.UserId, out _);
+            UserStateManager.ResetAdditionalInfo(Context.UserId);
             var item = Context.Message!.Text;
             var responseContent = messageHandler.GetItemsToCreatelist(item!);                 
-            return await SendResponseToUser(responseContent);
+            await SendResponseToUser(responseContent);
         }
 
-        public async Task<UserState> HandleSendOfList()
+        public async Task HandleSendOfList()
         {
             await Context.BotClient.AnswerCallbackQuery(
                 callbackQueryId: Context.CallbackQuery!.Id,
@@ -237,16 +253,16 @@ namespace TelegramBot.Infrastructure.Handlers
             );
 
             var responseContent = messageHandler.ShowList();
-            return await SendResponseToUser(responseContent);
+            await SendResponseToUser(responseContent);
         }
 
-        public async Task<UserState> HandleToUpdateList()
+        public async Task HandleToUpdateList()
         {
-            UserStates[Context.UserId] = new UserStateData {
-                State = UserState.UpdateList,
-                LastUpdated = DateTime.UtcNow,
-                AdditionalInfo = ""
-            };
+            // UserStates[Context.UserId] = new UserStateData {
+            //     State = UserState.UpdateList,
+            //     LastUpdated = DateTime.UtcNow,
+            //     AdditionalInfo = ""
+            // };
 
             await Context.BotClient.AnswerCallbackQuery(
                 callbackQueryId: Context.CallbackQuery!.Id,
@@ -254,20 +270,20 @@ namespace TelegramBot.Infrastructure.Handlers
                 cancellationToken: Context.CancellationToken
             );
 
-            var responseContemt = messageHandler.GetOptionsOfListUpdate();
+            var responseContent = messageHandler.GetOptionsOfListUpdate();
             await Context.BotClient.SendMessage(
                 chatId: Context.UserId,
                 text: "Selecione o tipo de atualização que deseja fazer:",
-                replyMarkup: responseContemt.KeyboardMarkup,
+                replyMarkup: responseContent.KeyboardMarkup,
                 cancellationToken: Context.CancellationToken
             );
 
-            return UserState.UpdateList;
+            UserStateManager.SetState(Context.UserId, UserState.UpdateList);
         }
 
-        public async Task<UserState> HandleToAddItem()
+        public async Task HandleToAddItem()
         {
-            UserStates[Context.UserId].AdditionalInfo = "waiting_item_to_add";
+            // UserStates[Context.UserId].AdditionalInfo = "waiting_item_to_add";
 
             await Context.BotClient.AnswerCallbackQuery(
                 callbackQueryId: Context.CallbackQuery!.Id,
@@ -285,12 +301,13 @@ namespace TelegramBot.Infrastructure.Handlers
                 cancellationToken: Context.CancellationToken
             );
 
-            return UserState.AddItem;
+            UserStateManager.SetAdditionalInfo(Context.UserId, "waiting_item_to_add");
+            UserStateManager.SetState(Context.UserId, UserState.AddItem);
         }
 
-        public async Task<UserState> HandleItemChange()
+        public async Task HandleItemChange()
         {
-            UserStates[Context.UserId].AdditionalInfo = "waiting_for_name_attribute_to_update";
+            // UserStates[Context.UserId].AdditionalInfo = "waiting_for_name_attribute_to_update";
 
             await Context.BotClient.AnswerCallbackQuery(
                 callbackQueryId: Context.CallbackQuery!.Id,
@@ -304,12 +321,13 @@ namespace TelegramBot.Infrastructure.Handlers
                 cancellationToken: Context.CancellationToken
             );
         
-            return UserState.UpdateItem;
+            UserStateManager.SetAdditionalInfo(Context.UserId, "waiting_for_name_attribute_to_update");
+            UserStateManager.SetState(Context.UserId, UserState.UpdateItem);
         }
 
-        public async Task<UserState> HandleCreatingNewList()
+        public async Task HandleCreatingNewList()
         {
-            UserStates[Context.UserId].AdditionalInfo = "waiting_items_to_create_new_list";
+            // UserStates[Context.UserId].AdditionalInfo = "waiting_items_to_create_new_list";
 
             await Context.BotClient.AnswerCallbackQuery(
                 callbackQueryId: Context.CallbackQuery!.Id,
@@ -322,12 +340,13 @@ namespace TelegramBot.Infrastructure.Handlers
                 cancellationToken: Context.CancellationToken
             );
 
-            return UserState.CreatingNewList;
+            UserStateManager.SetAdditionalInfo(Context.UserId, "waiting_items_to_create_new_list");
+            UserStateManager.SetState(Context.UserId, UserState.CreatingNewList);
         }
 
-        public async Task<UserState> HandleAttributeChange()
+        public async Task HandleAttributeChange()
         {
-            UserStates[Context.UserId].AdditionalInfo = "waiting_for_attribute_to_update";
+            // UserStates[Context.UserId].AdditionalInfo = "waiting_for_attribute_to_update";
 
             string genderVerified = Context.CallbackQuery!.Data![Context.CallbackQuery.Data.Length -1] == 'a' ? "a" : "o";
             await Context.BotClient.SendMessage(
@@ -336,12 +355,13 @@ namespace TelegramBot.Infrastructure.Handlers
                 cancellationToken: Context.CancellationToken
             );
 
-            return UserState.UpdateItem;
+            UserStateManager.SetAdditionalInfo(Context.UserId, "waiting_for_attribute_to_update");
+            UserStateManager.SetState(Context.UserId, UserState.UpdateItem);
         }
 
-        public async Task<UserState> HandleItemRemove()
+        public async Task HandleItemRemove()
         {
-            UserStates[Context.UserId].AdditionalInfo = "waiting_item_to_remove";
+            // UserStates[Context.UserId].AdditionalInfo = "waiting_item_to_remove";
 
             await Context.BotClient.AnswerCallbackQuery(
                 callbackQueryId: Context.CallbackQuery!.Id,
@@ -355,7 +375,8 @@ namespace TelegramBot.Infrastructure.Handlers
                 cancellationToken: Context.CancellationToken
             );
 
-            return UserState.DeleteItem;
+            UserStateManager.SetAdditionalInfo(Context.UserId, "waiting_item_to_remove");
+            UserStateManager.SetState(Context.UserId, UserState.DeleteItem);
         }
     }
 }

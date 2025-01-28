@@ -11,7 +11,7 @@ namespace TelegramBot.UserInterface
     public class ResponseContent
     {
         public string Text { get; set; } = string.Empty;
-        public InlineKeyboardMarkup KeyboardMarkup { get; set; } = null;
+        public InlineKeyboardMarkup KeyboardMarkup { get; set; } = null!;
         public UserState UserState { get; set; }
         public string AdditionalResponseContext { get; set; } = string.Empty;
     }
