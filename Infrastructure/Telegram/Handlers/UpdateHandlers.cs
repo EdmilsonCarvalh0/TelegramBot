@@ -16,19 +16,22 @@ namespace TelegramBot.Infrastructure.Handlers
             (com qual intuito reter esses dados?)
         */
         private readonly ConcurrentDictionary<long, UserStateData> UserStates = new();
+        public UserStateManager UserStateManager { get; set; }
         public BotRequestContext Context { get; set; }
         private static readonly IItemController messageHandler = new ItemController();
 
         public UpdateHandlers()
         {
             UserStates.TryAdd(
-                Context.UserId,
+                Context!.UserId,
                 new UserStateData {
                     State = UserState.None,
                     LastUpdated = DateTime.UtcNow,
                     AdditionalInfo = ""
                 }
             );
+
+            UserStateManager = new UserStateManager();
         }
 
         public void LoadContext(BotRequestContext context)
@@ -38,7 +41,14 @@ namespace TelegramBot.Infrastructure.Handlers
 
         public async Task<UserState> HandleMessageAsync()
         {
-            switch (UserStates[Context.UserId].AdditionalInfo)
+
+            /*
+                TODO: refatorar o restante das manipulações de UserStateManager e
+                implementar os métodos corretos de manipulação de AdditionalInfo
+            */
+            var userStateData = UserStateManager.GetUserStateData(Context.UserId);
+
+            switch (userStateData.AdditionalInfo)
             {
                 case "waiting_item_to_add":
                     return await HandleWaitingToAddOfItem();

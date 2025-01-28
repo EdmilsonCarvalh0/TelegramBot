@@ -15,9 +15,9 @@ namespace TelegramBot.Infrastructure
 
         //TODO: Corrigir erro de referência nula no handlers
         private readonly static string Token = "7560368958:AAGSWm6chmVviBNYSNF8P4Yh3aJdcka0vQw";
-        private static UpdateHandlers _handlers;
+        private readonly static UpdateHandlers _handlers = new();
         public TelegramBotClient Bot;
-        private static readonly UserStateManager _userStateManager = new();
+        // private static readonly UserStateManager _userStateManager = new();
 
         public BotConnection()
         {
@@ -37,35 +37,35 @@ namespace TelegramBot.Infrastructure
             );
 
             _handlers.LoadContext(context);
-            await DelegateUpdates(_handlers, update);
+            await DelegateUpdates(update);
         }
 
-        private static async Task DelegateUpdates(UpdateHandlers handlers,  Update update)
+        private static async Task DelegateUpdates(Update update)
         {
-            var userState = _userStateManager.GetState(_handlers.Context.UserId);
+            var userState = _handlers.UserStateManager.GetUserStateData(_handlers.Context.UserId);
 
             UserState responseState;
 
 
             if (update.Type == UpdateType.Message && update.Message != null)
             {
-                if (userState == UserState.None)
+                if (userState.State == UserState.None)
                 {
-                    responseState = await handlers.HandleInitialMessage(userState);
-                    _userStateManager.SetState(_handlers.Context.UserId, responseState);
-                    Console.WriteLine($"Estado atual {_userStateManager.GetState(_handlers.Context.UserId)}");
+                    responseState = await _handlers.HandleInitialMessage(userState.State);
+                    _handlers.UserStateManager.SetState(_handlers.Context.UserId, responseState);
+                    Console.WriteLine($"Estado atual {_handlers.UserStateManager.GetUserStateData(_handlers.Context.UserId)}");
                     return;
                 }
 
-                responseState = await handlers.HandleMessageAsync();
-                _userStateManager.SetState(_handlers.Context.UserId, responseState);
-                Console.WriteLine($"Estado atual {_userStateManager.GetState(_handlers.Context.UserId)}");
+                responseState = await _handlers.HandleMessageAsync();
+                _handlers.UserStateManager.SetState(_handlers.Context.UserId, responseState);
+                Console.WriteLine($"Estado atual {_handlers.UserStateManager.GetUserStateData(_handlers.Context.UserId)}");
             }
             else if (update.Type == UpdateType.CallbackQuery && update.CallbackQuery != null)
             {
-                responseState = await handlers.HandleCallbackQueryAsync();
-                _userStateManager.SetState(_handlers.Context.UserId, responseState);
-                Console.WriteLine($"Estado atual {_userStateManager.GetState(_handlers.Context.UserId)}");
+                responseState = await _handlers.HandleCallbackQueryAsync();
+                _handlers.UserStateManager.SetState(_handlers.Context.UserId, responseState);
+                Console.WriteLine($"Estado atual {_handlers.UserStateManager.GetUserStateData(_handlers.Context.UserId)}");
             }
         }
 

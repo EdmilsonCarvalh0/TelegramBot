@@ -4,21 +4,32 @@ namespace TelegramBot.Application;
 
 public class UserStateManager
 {
-    private readonly Dictionary<long, UserState> _userStates = new();
+    private readonly Dictionary<long, UserStateData> _userStates = new();
 
     public UserStateManager()
     {
-        _userStates.Add(default, UserState.None);
+        _userStates.Add(default, new UserStateData {
+            State = UserState.None,
+            LastUpdated = DateTime.UtcNow
+        });
     }
 
-    public UserState GetState(long userId)
+    public UserStateData GetUserStateData(long userId)
     {
-        return _userStates.TryGetValue(userId, out var state) ? state : UserState.None;
+        return _userStates.TryGetValue(userId, out var state) ? state : new UserStateData {
+                                                                        State = UserState.None,
+                                                                        LastUpdated = DateTime.UtcNow
+        };
     }
 
     public void SetState(long userId, UserState state)
     {
-        _userStates[userId] = state;
+        _userStates[userId].State = state;
+    }
+
+    public void SetaAdditionalInfo(long userId, string additionalInfo)
+    {
+        _userStates[userId].AdditionalInfo = additionalInfo;
     }
 
     public void ResetState(long userId)
