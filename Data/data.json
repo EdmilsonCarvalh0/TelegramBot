@@ -65,6 +65,18 @@
       "nome": "Guaraná",
       "marca": "Antártica",
       "preco": 7.8
+    },
+    {
+      "id": 0,
+      "nome": "Café Solúvel",
+      "marca": "Santa Clara",
+      "preco": 4.39
+    },
+    {
+      "id": 0,
+      "nome": "Café",
+      "marca": "Kimimo",
+      "preco": 9.90
     }
   ]
 }

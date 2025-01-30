@@ -60,6 +60,7 @@ public class JsonItemRepository : IItemRepository
             list += $"{item.Nome} - {item.Marca} - {precoFormatado}\n";
         }
 
+        Console.WriteLine(list);
         return list;
     }
 

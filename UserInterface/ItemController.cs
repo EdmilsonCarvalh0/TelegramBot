@@ -25,10 +25,11 @@ public class ItemController : IItemController
         {
             { "Initial Message", "Para ir para o menu inicial digite 'Menu'." },
             { "Menu", $"Olá, bem vindo ao Bot de Compras Mensais!\nEscolha uma opção:" },
-            { "Show List", $"Essa é a sua lista atual:\n\n{_itemRepository.GetList()}" },
+            { "Show List", $"Essa é a sua lista atual:\n\n" },
             { "Item Added", $"Pronto, já adicionei!" },
             { "Update Item", "O que deseja alterar " },
-            { "Non-existent Item", $"Infelizmente não encontrei o item na lista.\\n\\n{_itemRepository.GetList()}\\n\\nVerifique se o nome está correto e informe novamente.\"" },
+            { "Non-existent Item", $"Infelizmente não encontrei o item na lista.\n\n" },
+            { "Non-exsten Item 2", "\n\nVerifique se o nome está correto e informe novamente." },
             { "Update Item OK", "Pronto, alterei pra você." },
             { "Deleted Item OK", "Item removido." },
             { "Created New List", "Nova lista criada." }
@@ -36,7 +37,9 @@ public class ItemController : IItemController
     }
 
     public ResponseContent GetInitialMessage()
-    {
+    {   
+        _responseContent.ResetResponseContent();
+
         _responseContent.Text = ResponseMessage["Initial Message"];
         _responseContent.UserState = UserState.None;
         return _responseContent;
@@ -44,6 +47,8 @@ public class ItemController : IItemController
 
     public ResponseContent StartService()
     {
+        _responseContent.ResetResponseContent();
+
         _responseContent.Text = ResponseMessage["Menu"];
         _responseContent.UserState = UserState.Running;
         _responseContent.KeyboardMarkup = new InlineKeyboardMarkup(new[]
@@ -62,6 +67,8 @@ public class ItemController : IItemController
 
     public ResponseContent GetOptionsOfListUpdate()
     {
+        _responseContent.ResetResponseContent();
+
         _responseContent.KeyboardMarkup =  new InlineKeyboardMarkup(new[]
             {
                 new []
@@ -84,6 +91,8 @@ public class ItemController : IItemController
 
     public ResponseContent GetAttributeOptions()
     {
+        _responseContent.ResetResponseContent();
+
         _responseContent.Text = ResponseMessage["Update Item"];
         _responseContent.UserState = UserState.UpdateItem;
         _responseContent.KeyboardMarkup = new InlineKeyboardMarkup(new[]
@@ -102,11 +111,16 @@ public class ItemController : IItemController
 
     public ResponseContent CheckItemExistence(string nameAttribute)
     {
+        _responseContent.ResetResponseContent();
+
         var response = _itemRepository.GetItemInRepository(nameAttribute);
 
         if(response.Equals("item não encontrado.", StringComparison.CurrentCultureIgnoreCase))
         {
-            _responseContent.Text = ResponseMessage["Non-existent Item"];
+            _responseContent.Text = ResponseMessage["Non-existent Item"] 
+                                    + _itemRepository.GetList()
+                                    + ResponseMessage["Non-existent Item 2"];
+                                    
             _responseContent.UserState = UserState.UpdateList;
             //_responseContent.AdditionalResponseContext = "Item no exist";
             return _responseContent;
@@ -125,6 +139,8 @@ public class ItemController : IItemController
 
     public ResponseContent AddItemInShoppingData(string userItems)
     {
+        _responseContent.ResetResponseContent();
+
         _itemRepository.AddItemInList(userItems);
         _responseContent.Text = ResponseMessage["Item Added"];
         return _responseContent;
@@ -132,6 +148,8 @@ public class ItemController : IItemController
 
     public ResponseContent SendItemToUpdateList(string item)
     {
+        _responseContent.ResetResponseContent();
+
         _itemRepository.UpdateList(item);
         _responseContent.Text = ResponseMessage["Update Item OK"];
         _responseContent.UserState = UserState.None;
@@ -140,6 +158,8 @@ public class ItemController : IItemController
 
     public ResponseContent SendItemToRemoveFromList(string item)
     {
+        _responseContent.ResetResponseContent();
+
         _itemRepository.RemoveItemFromList(item);
         _responseContent.Text = ResponseMessage["Deleted Item OK"];
         _responseContent.UserState = UserState.None;
@@ -148,13 +168,17 @@ public class ItemController : IItemController
     
     public ResponseContent ShowList()
     {
-        _responseContent.Text = ResponseMessage["Show List"];
+        _responseContent.ResetResponseContent();
+
+        _responseContent.Text = ResponseMessage["Show List"] + _itemRepository.GetList();
         _responseContent.UserState = UserState.None;
         return _responseContent;
     }
 
     public ResponseContent GetItemsToCreatelist(string items)
     {
+        _responseContent.ResetResponseContent();
+
         //TODO: manipulate TimeStamp to formalize data
         _itemRepository.CreateNewList(items);
         _responseContent.Text = ResponseMessage["Created New List"];
