@@ -50,12 +50,6 @@
     },
     {
       "id": 0,
-      "nome": "Miojo",
-      "marca": "Maratá",
-      "preco": 1.5
-    },
-    {
-      "id": 0,
       "nome": "Guaraná",
       "marca": "Qtal",
       "preco": 4.6
@@ -77,6 +71,12 @@
       "nome": "Café",
       "marca": "Kimimo",
       "preco": 9.90
+    },
+    {
+      "id": 0,
+      "nome": "Macarrão",
+      "marca": "Favorita",
+      "preco": 3.6
     }
   ]
 }

@@ -4,9 +4,11 @@ using TelegramBot.UserInterface;
 
 public interface IItemController
 {
+    ResponseContent GetResponseCallback(string subject);
+    ResponseContent GetResponseMessage(string subject);
     ResponseContent GetInitialMessage();
     ResponseContent StartService();
-    ResponseContent GetOptionsOfListUpdate();
+    ResponseContent GetOptionsOfListUpdate(string callbackMessage);
     ResponseContent GetAttributeOptions();
     ResponseContent CheckItemExistence(string nameAttribute);
     ResponseContent AddItemInShoppingData(string item);
