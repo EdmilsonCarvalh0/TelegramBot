@@ -8,8 +8,8 @@ public interface IItemController
     ResponseContent GetResponseMessage(string subject);
     ResponseContent GetInitialMessage();
     ResponseContent StartService(string request);
-    ResponseContent GetOptionsOfListUpdate(string callbackMessage);
-    ResponseContent GetAttributeOptions();
+    ResponseContent GetOptionsOfListUpdate(string request);
+    ResponseContent GetAttributeOptions(string request);
     ResponseContent CheckItemExistence(string nameAttribute);
     ResponseContent AddItemInShoppingData(string item);
     ResponseContent SendItemToUpdateList(string item);

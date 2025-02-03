@@ -154,7 +154,6 @@ namespace TelegramBot.Infrastructure.Handlers
             if (Context.Message?.Text == "Menu")
             {
                 var responseContent = messageHandler.StartService(Context.Message.Text);
-                Console.WriteLine($"Text: {responseContent.Text}\nKeyboard: {responseContent.KeyboardMarkup!.InlineKeyboard}\nUserState: {responseContent.UserState}");
                 await SendResponseToUser(responseContent);
             }
         }
@@ -187,24 +186,7 @@ namespace TelegramBot.Infrastructure.Handlers
                 return;
             }
 
-            //if (responseContent.AdditionalResponseContext == "Item no exist")
-            //{
-            //    UserStates[Context.UserId].AdditionalInfo = "waiting_for_name_attribute_to_update";
-            //    return await SendResponseToUser(responseContent);
-            //}
-            
-            //if(responseContent.Text != string.Empty)
-            //{
-            //    if (responseContent.Text.Contains('\n'))
-            //    {
-            //        UserStates[Context.UserId].AdditionalInfo = "waiting_for_name_attribute_to_update";
-            //        return await SendResponseToUser(responseContent);
-            //    };
-
-            //    await Context.BotClient.SendMessage(Context.UserId, responseContent.Text, cancellationToken: Context.CancellationToken);
-            //}
-
-            var response = messageHandler.GetAttributeOptions();
+            var response = messageHandler.GetAttributeOptions("Update Item");
 
             string genderVerified = CheckAttributeGender(nameAttribute!);
             response.Text += genderVerified + nameAttribute + "?";

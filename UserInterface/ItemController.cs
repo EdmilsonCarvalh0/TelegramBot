@@ -100,49 +100,53 @@ public class ItemController : IItemController
         return _botResponse.GetResponse(request);
     }
 
-    public ResponseContent GetOptionsOfListUpdate(string callbackMessage)
+    public ResponseContent GetOptionsOfListUpdate(string request)
     {
-        _responseContent.ResetResponseContent();
+        // _responseContent.ResetResponseContent();
 
-        _responseContent.Text = ResponseCallback[callbackMessage];
-        _responseContent.KeyboardMarkup =  new InlineKeyboardMarkup(new[]
-            {
-                new []
-                {
-                    InlineKeyboardButton.WithCallbackData("Adicionar um item"),
-                },
-                new[]
-                {
-                    InlineKeyboardButton.WithCallbackData("Alterar um item")
-                },
-                new[]
-                {
-                    InlineKeyboardButton.WithCallbackData("Remover um item")
-                }
-            }
-        );
+        // _responseContent.Text = ResponseCallback[callbackMessage];
+        // _responseContent.KeyboardMarkup =  new InlineKeyboardMarkup(new[]
+        //     {
+        //         new []
+        //         {
+        //             InlineKeyboardButton.WithCallbackData("Adicionar um item"),
+        //         },
+        //         new[]
+        //         {
+        //             InlineKeyboardButton.WithCallbackData("Alterar um item")
+        //         },
+        //         new[]
+        //         {
+        //             InlineKeyboardButton.WithCallbackData("Remover um item")
+        //         }
+        //     }
+        // );
 
-        return _responseContent;
+        // return _responseContent;
+
+        return _botResponse.GetResponse(request);
     }
 
-    public ResponseContent GetAttributeOptions()
+    public ResponseContent GetAttributeOptions(string request)
     {
-        _responseContent.ResetResponseContent();
+        // _responseContent.ResetResponseContent();
 
-        _responseContent.Text = ResponseMessage["Update Item"];
-        _responseContent.UserState = UserState.UpdateItem;
-        _responseContent.KeyboardMarkup = new InlineKeyboardMarkup(new[]
-            {
-                new[]
-                {
-                    InlineKeyboardButton.WithCallbackData("Nome"),
-                    InlineKeyboardButton.WithCallbackData("Marca"),
-                    InlineKeyboardButton.WithCallbackData("Preço")
-                }
-            }
-        );
+        // _responseContent.Text = ResponseMessage["Update Item"];
+        // _responseContent.UserState = UserState.UpdateItem;
+        // _responseContent.KeyboardMarkup = new InlineKeyboardMarkup(new[]
+        //     {
+        //         new[]
+        //         {
+        //             InlineKeyboardButton.WithCallbackData("Nome"),
+        //             InlineKeyboardButton.WithCallbackData("Marca"),
+        //             InlineKeyboardButton.WithCallbackData("Preço")
+        //         }
+        //     }
+        // );
 
-        return _responseContent;
+        // return _responseContent;
+
+        return _botResponse.GetResponse(request);
     }
 
     public ResponseContent CheckItemExistence(string nameAttribute)

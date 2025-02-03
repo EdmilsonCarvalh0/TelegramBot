@@ -9,12 +9,21 @@
             "text": "Olá, bem vindo ao Bot de Compras Mensais!\nEscolha uma opção:",
             "keyboardMarkup": [
                 [
-                    {"text": "Ver lista", "callback_data": "ver_lista"},
-                    {"text": "Atualizar lista", "callback_data": "atualizar_lista"},
-                    {"text": "Criar nova lista", "callback_data": "criar_lista"}
+                    {"text": "Ver lista", "callbackData": "Ver lista"},
+                    {"text": "Atualizar lista", "callbackData": "Atualizar lista"},
+                    {"text": "Criar nova lista", "callbackData": "Criar nova lista"}
                 ]
             ],
             "userState": "Running"
+        },
+        "Atualizar lista": {
+            "text": "Selecione o tipo de atualização que deseja fazer:",
+            "keyboardMarkup": [
+                [{"text": "Adicionar um item", "callbackData": "Adicionar um item"}],
+                [{"text": "Alterar um item", "callbackData": "Alterar um item"}],
+                [{"text": "Remover um item", "callbackData": "Remover um item"}]
+            ],
+            "userState": "UpdateList"
         },
         "Item Added": {
             "text": "Pronto, já adicionei!",
@@ -23,11 +32,11 @@
         },
         "Update Item": {
             "text": "O que deseja alterar ",
-            "keyboardMarkup": [
-                [{"text": "Adicionar um item", "callback_data": "Adicionar um item"}],
-                [{"text": "Alterar um item", "callback_data": "Alterar um item"}],
-                [{"text": "Remover um item", "callback_data": "Remover um item"}]
-            ],
+            "keyboardMarkup": [[
+                {"text": "Nome", "callbackData": "Nome"},
+                {"text": "Marca", "callbackData": "Marca"},
+                {"text": "Preço", "callbackData": "Preço"}
+            ]],
             "userState": "UpdateItem"
         },
         "Non-existent Item": {
