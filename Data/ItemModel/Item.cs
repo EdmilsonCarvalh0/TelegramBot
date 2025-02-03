@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace TelegramBot.Data;
 
-public class Item : DataModel
+public class Item : ItemDataModel
 {
     
 }

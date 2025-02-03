@@ -1,19 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBot.Domain;
+using TelegramBot.Infrastructure;
 
 namespace TelegramBot.UserInterface
 {
     public class ResponseContent
     {
+        //TODO: avaliar o uso de GET e SET
+        [JsonProperty("text")]
         public string Text { get; set; } = string.Empty;
+
+        [JsonProperty("keyboardMarkup")]
+        [Newtonsoft.Json.JsonConverter(typeof(InlineKeyboardMarkupConverter))]
         public InlineKeyboardMarkup? KeyboardMarkup { get; set; }
+
+        [JsonProperty("userState")]
+        // [Newtonsoft.Json.JsonConverter(typeof(JsonStringEnumConverter))]
         public UserState UserState { get; set; }
-        public string AdditionalResponseContext { get; set; } = string.Empty;
+
+
+
+
         private Dictionary<string, string> ResponseMessage { get; set; } = new();
         private Dictionary<string, string> ResponseCallback { get; set; } = new();
         private Dictionary<string, InlineKeyboardMarkup> ResponseInlineKeyboardMarkup { get; set; } = new();
@@ -28,7 +39,6 @@ namespace TelegramBot.UserInterface
             Text = string.Empty;
             KeyboardMarkup = null;
             UserState = UserState.None;
-            AdditionalResponseContext = string.Empty;
         }
 
         private void LoadResponses()

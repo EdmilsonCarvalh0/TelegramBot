@@ -5,17 +5,17 @@ namespace TelegramBot.Service;
 
 public class JsonItemRepository : IItemRepository
 {
-    public DataFormatter ListData = new();
-    public string JsonFilePath = "C:/Users/ANGELA SOUZA/OneDrive/Área de Trabalho/ED/Programação/C#/Projects/TelegramBot/Data/data.json";
+    public ItemDataFormatter ListData = new();
+    public string JsonFilePath = "C:/Users/ANGELA SOUZA/OneDrive/Área de Trabalho/ED/Programação/C#/Projects/TelegramBot/Data/ItemModel/itemsData.json";
 
     public JsonItemRepository()
     {
         ListData = LoadData();
     }
 
-    public DataFormatter LoadData()
+    public ItemDataFormatter LoadData()
     {
-        return JsonConvert.DeserializeObject<DataFormatter>(File.ReadAllText(JsonFilePath))!;
+        return JsonConvert.DeserializeObject<ItemDataFormatter>(File.ReadAllText(JsonFilePath))!;
     }
 
     public void SaveData()

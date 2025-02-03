@@ -71,9 +71,7 @@ namespace TelegramBot.Infrastructure.Handlers
 
         public async Task HandleCallbackQueryAsync()
         {
-            if (Context.CallbackQuery == null) return;
-
-            switch (Context.CallbackQuery.Data)
+            switch (Context.CallbackQuery!.Data)
             {
                 //Verify option 'ver lista' and send list to user
                 case "Ver lista":
@@ -155,7 +153,8 @@ namespace TelegramBot.Infrastructure.Handlers
 
             if (Context.Message?.Text == "Menu")
             {
-                var responseContent = messageHandler.StartService();
+                var responseContent = messageHandler.StartService(Context.Message.Text);
+                Console.WriteLine($"Text: {responseContent.Text}\nKeyboard: {responseContent.KeyboardMarkup!.InlineKeyboard}\nUserState: {responseContent.UserState}");
                 await SendResponseToUser(responseContent);
             }
         }

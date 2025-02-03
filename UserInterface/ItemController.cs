@@ -1,5 +1,6 @@
 using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
+using TelegramBot.Data;
 using TelegramBot.Domain;
 using TelegramBot.Service;
 
@@ -9,14 +10,16 @@ namespace TelegramBot.UserInterface;
 //      criar classe sobre list/dados para encapsular funcionalidades
 public class ItemController : IItemController
 {
-    private IItemRepository _itemRepository;
-    private ResponseContent _responseContent = new();
+    private readonly IItemRepository _itemRepository;
+    private BotResponse _botResponse;
+    private readonly ResponseContent _responseContent = new();
     private Dictionary<string, string> ResponseMessage { get; set; } = new();
     private Dictionary<string, string> ResponseCallback { get; set; } = new();
 
     public ItemController()
     {
         _itemRepository = new JsonItemRepository();
+        _botResponse = new BotResponse();
         LoadResponseMessages();
     }
 
@@ -75,24 +78,26 @@ public class ItemController : IItemController
         return _responseContent;
     }
 
-    public ResponseContent StartService()
+    public ResponseContent StartService(string request)
     {
-        _responseContent.ResetResponseContent();
+        // _responseContent.ResetResponseContent();
 
-        _responseContent.Text = ResponseMessage["Menu"];
-        _responseContent.UserState = UserState.Running;
-        _responseContent.KeyboardMarkup = new InlineKeyboardMarkup(new[]
-            {
-                new[]
-                {
-                    InlineKeyboardButton.WithCallbackData("Ver lista"),
-                    InlineKeyboardButton.WithCallbackData("Atualizar lista"),
-                    InlineKeyboardButton.WithCallbackData("Criar nova lista")
-                }
-            }
-        );
+        // _responseContent.Text = ResponseMessage["Menu"];
+        // _responseContent.UserState = UserState.Running;
+        // _responseContent.KeyboardMarkup = new InlineKeyboardMarkup(new[]
+        //     {
+        //         new[]
+        //         {
+        //             InlineKeyboardButton.WithCallbackData("Ver lista"),
+        //             InlineKeyboardButton.WithCallbackData("Atualizar lista"),
+        //             InlineKeyboardButton.WithCallbackData("Criar nova lista")
+        //         }
+        //     }
+        // );
 
-        return _responseContent;
+        // return _responseContent;
+
+        return _botResponse.GetResponse(request);
     }
 
     public ResponseContent GetOptionsOfListUpdate(string callbackMessage)

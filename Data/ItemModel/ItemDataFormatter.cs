@@ -4,7 +4,7 @@ using Newtonsoft.Json.Serialization;
 
 namespace TelegramBot.Data;
 
-public class DataFormatter
+public class ItemDataFormatter
 {
     [JsonProperty("items")]
     public List<Item> Items { get; set; } = new();

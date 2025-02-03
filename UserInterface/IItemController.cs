@@ -7,7 +7,7 @@ public interface IItemController
     ResponseContent GetResponseCallback(string subject);
     ResponseContent GetResponseMessage(string subject);
     ResponseContent GetInitialMessage();
-    ResponseContent StartService();
+    ResponseContent StartService(string request);
     ResponseContent GetOptionsOfListUpdate(string callbackMessage);
     ResponseContent GetAttributeOptions();
     ResponseContent CheckItemExistence(string nameAttribute);

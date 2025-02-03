@@ -1,0 +1,59 @@
+{
+    "responses": {
+        "Initial Message": {
+            "text": "Para ir para o menu inicial digite 'Menu'.",
+            "keyboardMarkup": null,
+            "userState": "None"
+        },
+        "Menu": {
+            "text": "Olá, bem vindo ao Bot de Compras Mensais!\nEscolha uma opção:",
+            "keyboardMarkup": [
+                [
+                    {"text": "Ver lista", "callback_data": "ver_lista"},
+                    {"text": "Atualizar lista", "callback_data": "atualizar_lista"},
+                    {"text": "Criar nova lista", "callback_data": "criar_lista"}
+                ]
+            ],
+            "userState": "Running"
+        },
+        "Item Added": {
+            "text": "Pronto, já adicionei!",
+            "keyboardMarkup": null,
+            "UserState": "None"
+        },
+        "Update Item": {
+            "text": "O que deseja alterar ",
+            "keyboardMarkup": [
+                [{"text": "Adicionar um item", "callback_data": "Adicionar um item"}],
+                [{"text": "Alterar um item", "callback_data": "Alterar um item"}],
+                [{"text": "Remover um item", "callback_data": "Remover um item"}]
+            ],
+            "userState": "UpdateItem"
+        },
+        "Non-existent Item": {
+            "text": "Infelizmente não encontrei o item na lista.\n\n",
+            "keyboardMarkup": null,
+            "userState": "UpdateItem"
+        },
+        "Non-existent Item 2": {
+            "text": "\n\nVerifique se o nome está correto e informe novamente.",
+            "keyboardMarkup": null,
+            "userState": "UpdateItem"
+        },
+        "Update Item OK": {
+            "text": "Pronto, alterei pra você.",
+            "keyboardMarkup": null,
+            "userState": "None"
+        },
+        "Deleted Item OK": {
+            "text": "Item removido.",
+            "keyboardMarkup": null,
+            "userState": "None"
+        },
+        "Created New List": {
+            "text": "Nova lista criada.}",
+            "keyboardMarkup": null,
+            "userState": "None"
+        }
+    }
+}
