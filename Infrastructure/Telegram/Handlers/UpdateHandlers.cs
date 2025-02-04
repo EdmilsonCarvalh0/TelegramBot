@@ -1,5 +1,3 @@
-using System.Collections.Concurrent;
-using Microsoft.AspNetCore.Diagnostics;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using TelegramBot.Application;
@@ -147,7 +145,7 @@ namespace TelegramBot.Infrastructure.Handlers
         {
             if (Context.Message?.Text != "Menu")
             {
-                var responseContent = messageHandler.GetInitialMessage();
+                var responseContent = messageHandler.GetInitialMessage("Initial Message");
                 await SendResponseToUser(responseContent);
             }
 
@@ -186,12 +184,10 @@ namespace TelegramBot.Infrastructure.Handlers
                 return;
             }
 
-            var response = messageHandler.GetAttributeOptions("Update Item");
-
             string genderVerified = CheckAttributeGender(nameAttribute!);
-            response.Text += genderVerified + nameAttribute + "?";
+            responseContent.Text += genderVerified + nameAttribute + "?";
             UserStateManager.ResetAdditionalInfo(Context.UserId);
-            await SendResponseToUser(response);
+            await SendResponseToUser(responseContent);
         }
 
         private async Task HandleWaitingItemToRemove()
@@ -277,7 +273,7 @@ namespace TelegramBot.Infrastructure.Handlers
             await SendResponseToUser(responseContent);
 
             UserStateManager.SetAdditionalInfo(Context.UserId, "waiting_items_to_create_new_list");
-            UserStateManager.SetState(Context.UserId, UserState.CreatingNewList);
+            UserStateManager.SetState(Context.UserId, UserState.CreateList);
         }
 
         public async Task HandleAttributeChange()

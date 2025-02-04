@@ -10,5 +10,5 @@ public enum UserState
     AddItem,
     UpdateItem,
     DeleteItem,
-    CreatingNewList
+    CreateList
 }

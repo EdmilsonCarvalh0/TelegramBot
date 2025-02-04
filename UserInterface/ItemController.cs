@@ -55,27 +55,29 @@ public class ItemController : IItemController
 
     public ResponseContent GetResponseCallback(string subject)
     {
-        _responseContent.ResetResponseContent();
+        // _responseContent.ResetResponseContent();
+        // _responseContent.Text = ResponseCallback[subject];
 
-        _responseContent.Text = ResponseCallback[subject];
-        return _responseContent;
+        return _botResponse.GetResponse(subject);
     }
 
     public ResponseContent GetResponseMessage(string subject)
     {
-        _responseContent.ResetResponseContent();
+        // _responseContent.ResetResponseContent();
+        // _responseContent.Text = ResponseMessage[subject];
 
-        _responseContent.Text = ResponseMessage[subject];
-        return _responseContent;
+        return _botResponse.GetResponse(subject);
     }
 
-    public ResponseContent GetInitialMessage()
+    public ResponseContent GetInitialMessage(string subject)
     {   
-        _responseContent.ResetResponseContent();
+        // _responseContent.ResetResponseContent();
 
-        _responseContent.Text = ResponseMessage["Initial Message"];
-        _responseContent.UserState = UserState.None;
-        return _responseContent;
+        // _responseContent.Text = ResponseMessage[subject];
+        // _responseContent.UserState = UserState.None;
+        // return _responseContent;
+
+        return _botResponse.GetResponse(subject);
     }
 
     public ResponseContent StartService(string request)
@@ -151,79 +153,80 @@ public class ItemController : IItemController
 
     public ResponseContent CheckItemExistence(string nameAttribute)
     {
-        _responseContent.ResetResponseContent();
+        // _responseContent.ResetResponseContent();
 
-        var response = _itemRepository.GetItemInRepository(nameAttribute);
+        var result = _itemRepository.GetItemInRepository(nameAttribute);
 
-        if(response.Equals("item não encontrado.", StringComparison.CurrentCultureIgnoreCase))
+        if(result.Equals("item não encontrado.", StringComparison.CurrentCultureIgnoreCase))
         {
-            _responseContent.Text = ResponseMessage["Non-existent Item"] 
-                                    + _itemRepository.GetList()
-                                    + ResponseMessage["Non-existent Item 2"];
-
-            _responseContent.UserState = UserState.UpdateList;
+            // _responseContent.UserState = UserState.UpdateList;
             //_responseContent.AdditionalResponseContext = "Item no exist";
-            return _responseContent;
+
+            ResponseContent response = _botResponse.GetResponse("Non-existent Item");
+            response.Text += _itemRepository.GetList();
+            return response;
         }
 
-        if(response.Contains('\n'))
+        if(result.Contains('\n'))
         {
-            _responseContent.Text = $"Encontrei os seguintes itens:\n\n{response}\nQual deles você quer alterar?";
-            _responseContent.UserState = UserState.UpdateList;
-            return _responseContent;
+            // _responseContent.Text = $"Encontrei os seguintes itens, qual deles você quer alterar?";
+            // _responseContent.UserState = UserState.UpdateList;
+            return _botResponse.GetResponse("More Than One Item");
         }
 
-        _responseContent.UserState = UserState.UpdateItem;
-        return _responseContent;
+        return _botResponse.GetResponse("Update Item");
     }
 
     public ResponseContent AddItemInShoppingData(string userItems)
     {
-        _responseContent.ResetResponseContent();
+        // _responseContent.ResetResponseContent();
+        // _responseContent.Text = ResponseMessage["Item Added"];
 
         _itemRepository.AddItemInList(userItems);
-        _responseContent.Text = ResponseMessage["Item Added"];
-        return _responseContent;
+        return _botResponse.GetResponse("Item Added");
     }
 
     public ResponseContent SendItemToUpdateList(string item)
     {
-        _responseContent.ResetResponseContent();
+        // _responseContent.ResetResponseContent();
+        // _responseContent.UserState = UserState.None;
+        // _responseContent.Text = ResponseMessage["Update Item OK"];
 
         _itemRepository.UpdateList(item);
-        _responseContent.Text = ResponseMessage["Update Item OK"];
-        _responseContent.UserState = UserState.None;
-        return _responseContent;
+        return _botResponse.GetResponse("Update Item OK");
     }
 
     public ResponseContent SendItemToRemoveFromList(string item)
     {
-        _responseContent.ResetResponseContent();
+        // _responseContent.ResetResponseContent();
+        // _responseContent.Text = ResponseMessage["Deleted Item OK"];
+        // _responseContent.UserState = UserState.None;
 
         _itemRepository.RemoveItemFromList(item);
-        _responseContent.Text = ResponseMessage["Deleted Item OK"];
-        _responseContent.UserState = UserState.None;
-        return _responseContent;
+        return _botResponse.GetResponse("Deleted Item OK");
     }
     
     public ResponseContent ShowList()
     {
-        _responseContent.ResetResponseContent();
+        // _responseContent.ResetResponseContent();
 
-        _responseContent.Text = ResponseCallback["Show List"] + _itemRepository.GetList();
-        _responseContent.UserState = UserState.None;
-        return _responseContent;
+        // _responseContent.Text = ResponseCallback["Show List"] + _itemRepository.GetList();
+        // _responseContent.UserState = UserState.None;
+        
+        var response = _botResponse.GetResponse("Show List");
+        response.Text += _itemRepository.GetList();
+        return response;
     }
 
     public ResponseContent GetItemsToCreatelist(string items)
     {
-        _responseContent.ResetResponseContent();
+        // _responseContent.ResetResponseContent();
+        // _responseContent.Text = ResponseMessage["Created New List"];
+        // _responseContent.UserState = UserState.None;
 
         //TODO: manipulate TimeStamp to formalize data
         _itemRepository.CreateNewList(items);
-        _responseContent.Text = ResponseMessage["Created New List"];
-        _responseContent.UserState = UserState.None;
-        return _responseContent;
+        return _botResponse.GetResponse("Created New List");
     }
 
     //TODO: implement verify function automatic of item

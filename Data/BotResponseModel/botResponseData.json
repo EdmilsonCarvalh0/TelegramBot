@@ -40,14 +40,14 @@
             "userState": "UpdateItem"
         },
         "Non-existent Item": {
-            "text": "Infelizmente não encontrei o item na lista.\n\n",
+            "text": "Infelizmente não encontrei o item na lista.\nVerifique se o nome está correto e informe novamente.",
             "keyboardMarkup": null,
-            "userState": "UpdateItem"
+            "userState": "UpdateList"
         },
-        "Non-existent Item 2": {
-            "text": "\n\nVerifique se o nome está correto e informe novamente.",
+        "More Than One Item": {
+            "text": "Encontrei os seguintes itens, qual deles você quer alterar?",
             "keyboardMarkup": null,
-            "userState": "UpdateItem"
+            "userState": "UpdateList"
         },
         "Update Item OK": {
             "text": "Pronto, alterei pra você.",
@@ -60,9 +60,39 @@
             "userState": "None"
         },
         "Created New List": {
-            "text": "Nova lista criada.}",
+            "text": "Nova lista criada.",
             "keyboardMarkup": null,
             "userState": "None"
+        },
+        "Show List": {
+            "text": "Essa é a sua lista atual:\n\n",
+            "keyboardMarkup": null,
+            "userState": "None"
+        },
+        "Adicionar um item":  {
+            "text": "Ótimo! Para fazer a inserção você pode enviar um ou mais itens se desejar.\nLembrando que apenas o nome é obrigatório, mas é ideal que você informe a Marca e o Preço também para uma melhor experiência!\n\nVamos lá! Para inserir o item, siga a seguinte extrutura:\nProduto - Marca - Preco\nProduto - Marca - Preco\n\nAgora, por favor, informe os itens que deseja adicionar:",
+            "keyboardMarkup": null,
+            "userState": "AddItem"
+        },
+        "Alterar um item":  {
+            "text": "Por favor, informe agora o nome do item que deseja fazer alteração:",
+            "keyboardMarkup": null,
+            "userState": "UpdateList"
+        },
+        "Atributte Change":  {
+            "text": "Informe ",
+            "keyboardMarkup": null,
+            "userState": "UpdateItem"   
+        },
+        "Remover um item": {
+            "text": "Por favor, informe agora o nome do item que deseja remover:",
+            "keyboardMarkup": null,
+            "userState": "DeleteItem"
+        },
+        "Criar nova lista": {
+            "text": "Envie agora os itens da nova lista.\nUse o padrão adequado para registro correto dos itens. Nesse caso, separe os itens por vírgula sem espaços.\nEx: Pão,Manteiga,Queijo",
+            "keyboardMarkup": null,
+            "userState": "CreateList"
         }
     }
 }

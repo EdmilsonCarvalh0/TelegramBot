@@ -77,6 +77,12 @@
       "nome": "Macarrão",
       "marca": "Favorita",
       "preco": 3.6
+    },
+    {
+      "id": 0,
+      "nome": "Arroz",
+      "marca": "Pop",
+      "preco": 5.49
     }
   ]
 }

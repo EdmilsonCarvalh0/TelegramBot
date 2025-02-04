@@ -6,7 +6,7 @@ public interface IItemController
 {
     ResponseContent GetResponseCallback(string subject);
     ResponseContent GetResponseMessage(string subject);
-    ResponseContent GetInitialMessage();
+    ResponseContent GetInitialMessage(string subject);
     ResponseContent StartService(string request);
     ResponseContent GetOptionsOfListUpdate(string request);
     ResponseContent GetAttributeOptions(string request);
