@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http.Features;
 using Newtonsoft.Json;
 using TelegramBot.Data;
 
@@ -107,7 +108,7 @@ public class JsonItemRepository : IItemRepository
         itemsForRemove.AddRange(userItem.Trim()
                                         .Split(", ", StringSplitOptions.None)
                                         .ToList());
-        temporaryList.RemoveAll(item => itemsForRemove.Contains(item.Nome));
+        temporaryList.RemoveAll(item => itemsForRemove.Contains(itemsForRemove.First(item => item.Equals(userItem, StringComparison.CurrentCultureIgnoreCase))));
 
         ListData.Items = temporaryList;
         SaveData();

@@ -32,12 +32,6 @@
     },
     {
       "id": 0,
-      "nome": "Queijo Ralado",
-      "marca": "Vigor",
-      "preco": 3.9
-    },
-    {
-      "id": 0,
       "nome": "Bolacha",
       "marca": "Salt",
       "preco": 5.4
@@ -83,6 +77,12 @@
       "nome": "Arroz",
       "marca": "Pop",
       "preco": 5.49
+    },
+    {
+      "id": 0,
+      "nome": "Batata Palha",
+      "marca": "Yoki",
+      "preco": 6.70
     }
   ]
 }

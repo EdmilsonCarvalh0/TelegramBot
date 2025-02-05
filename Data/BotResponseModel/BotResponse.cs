@@ -20,6 +20,10 @@ public class BotResponse : BotResponseDataModel
 
     public ResponseContent GetResponse(string request)
     {
-        return DataFormatter.Responses[request];
+        return new ResponseContent {
+            Text = DataFormatter.Responses[request].Text,
+            KeyboardMarkup = DataFormatter.Responses[request].KeyboardMarkup,
+            UserState = DataFormatter.Responses[request].UserState
+        };
     }
 }
