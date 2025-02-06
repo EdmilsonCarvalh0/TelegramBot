@@ -1,13 +1,18 @@
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Newtonsoft.Json;
 using TelegramBot.Data;
+using TelegramBot.Domain;
+using TelegramBot.Infrastructure;
 
 namespace TelegramBot.Service;
 
 public class JsonItemRepository : IItemRepository
 {
     public ItemDataFormatter ListData = new();
-    public string JsonFilePath = "C:/Users/ANGELA SOUZA/OneDrive/Área de Trabalho/ED/Programação/C#/Projects/TelegramBot/Data/ItemModel/itemsData.json";
+    private string JsonFilePath = "C:/Users/ANGELA SOUZA/OneDrive/Área de Trabalho/ED/Programação/C#/Projects/TelegramBot/Data/ItemModel/itemsData.json";
+    private ItemSearchResult _itemSearchResult { get; set; } = new();
+
 
     public JsonItemRepository()
     {
@@ -24,31 +29,35 @@ public class JsonItemRepository : IItemRepository
         File.WriteAllText(JsonFilePath, JsonConvert.SerializeObject(ListData, Formatting.Indented));
     }
 
-    public string GetItemInRepository(string itemInput)
+    public ItemSearchResult GetItemInRepository(string itemInput)
     {       
-        var result = ListData.Items.FindAll(
+        List<Item> result = ListData.Items.FindAll(
             delegate (Item it)
             {
                 return it.Nome.Equals(itemInput, StringComparison.CurrentCultureIgnoreCase);
             }
         );
 
-        if (result.Count == 0) return "Item não encontrado.";
+        var searchResult = _itemSearchResult.GetItemSearchResult(result);
 
-        string names = string.Empty;
+        return searchResult;
 
-        if (result.Count > 1)
-        {
-            foreach (var item in result)
-            {
-                var precoFormatado = item.Preco.ToString("C");
-                names += $"{item.Nome} - {item.Marca} - {precoFormatado}\n";
-            }
+        // if (result.Count == 0) return "Item não encontrado.";
 
-            return names;
-        }
+        // string names = string.Empty;
 
-        return names;
+        // if (result.Count > 1)
+        // {
+        //     foreach (var item in result)
+        //     {
+        //         var precoFormatado = item.Preco.ToString("C");
+        //         names += $"{item.Nome} - {item.Marca} - {precoFormatado}\n";
+        //     }
+
+        //     return names;
+        // }
+
+        // return names;
     }
 
     public string GetList()
@@ -99,8 +108,17 @@ public class JsonItemRepository : IItemRepository
         SaveData();
     }
 
-    public void RemoveItemFromList(string userItem)
+    public string RemoveItemFromList(string userItem)
     {
+        var result = ListData.Items.FindAll(
+            delegate (Item it)
+            {
+                return it.Nome.Equals(userItem, StringComparison.CurrentCultureIgnoreCase);
+            }
+        );
+
+        if (result.Count == 0) return "";
+        
         List<Item> temporaryList = ListData.Items;
 
         var itemsForRemove = new List<string>();

@@ -2,6 +2,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBot.Data;
 using TelegramBot.Domain;
+using TelegramBot.Infrastructure;
 using TelegramBot.Service;
 
 namespace TelegramBot.UserInterface;
@@ -53,14 +54,14 @@ public class ItemController : IItemController
     {
         var result = _itemRepository.GetItemInRepository(nameAttribute);
 
-        if(result.Equals("item não encontrado.", StringComparison.CurrentCultureIgnoreCase))
+        if(result.Status == SearchStatus.NotFound)
         {
             var response = _botResponse.GetResponse("Non-existent Item");
             response.Text += _itemRepository.GetList();
             return response;
         }
 
-        if(result.Contains('\n'))
+        if(result.Status == SearchStatus.MoreThanOne)
         {
             var response = _botResponse.GetResponse("More Than One Item");
             response.Text += result;

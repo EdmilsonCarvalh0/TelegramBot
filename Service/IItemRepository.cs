@@ -1,8 +1,8 @@
-using TelegramBot.Service;
+using TelegramBot.Domain;
 
 public interface IItemRepository
 {
-    string GetItemInRepository(string itemInput);
+    ItemSearchResult GetItemInRepository(string itemInput);
     string GetList();
     void UpdateList(string items);
     void AddItemInList(string items);
