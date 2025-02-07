@@ -115,7 +115,7 @@ namespace TelegramBot.Infrastructure.Handlers
             }
         }
 
-        private async Task SendResponseToUser(ResponseContent responseContent)
+        private async Task SendResponseToUser(ResponseContentDTO responseContent)
         {
             
             if (responseContent.KeyboardMarkup != null)

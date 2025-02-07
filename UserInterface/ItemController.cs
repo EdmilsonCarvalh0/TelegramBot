@@ -1,8 +1,6 @@
-using Telegram.Bot;
-using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBot.Data;
 using TelegramBot.Application;
-using TelegramBot.Infrastructure;
+using TelegramBot.Domain;
 using TelegramBot.Service;
 
 namespace TelegramBot.UserInterface;
@@ -64,7 +62,7 @@ public class ItemController : IItemController
         if(result.Status == SearchStatus.MoreThanOne)
         {
             var response = _botResponse.GetResponse("More Than One Item");
-            response.Text += result;
+            response.Text += result.Result;
             return response;
         }
 

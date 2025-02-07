@@ -1,30 +1,38 @@
 using TelegramBot.Data;
-using TelegramBot.Infrastructure;
+using TelegramBot.Domain;
 
 namespace TelegramBot.Service;
 
 public class SearchResultHandler
 {
-    private Dictionary<int, SearchStatus> Scenario;
+    private Dictionary<int, SearchStatus> ScenarioStatus;
+    private Dictionary<SearchStatus, Action> Scenario;
     private List<Item> PrimaryResult { get; set; } = new();
     private string FinalResult { get; set; } = string.Empty;
     private SearchStatus FinalStatus { get; set; }
 
     public SearchResultHandler()
     {
-        Scenario = new Dictionary<int, SearchStatus>{
+        ScenarioStatus = new Dictionary<int, SearchStatus>{
             {0, SearchStatus.NotFound},
             {1, SearchStatus.Found},
             {2, SearchStatus.MoreThanOne}
+        };
+
+        Scenario = new Dictionary<SearchStatus, Action>
+        {
+            {SearchStatus.NotFound, ItemNotFound},
+            {SearchStatus.Found, ItemFound},
+            {SearchStatus.MoreThanOne, MoreThanOneItem}
         };
     }
 
     private SearchStatus GetSearchStatus(int quantityOfItens)
     {
-        return Scenario[quantityOfItens];
+        return ScenarioStatus[quantityOfItens];
     }
 
-    public SearchResultDTO GetItemSearchResult(List<Item> result)
+    public SearchResultDTO GetSearchResult(List<Item> result)
     {
         PrimaryResult = result;
         var searchStatus = GetSearchStatus(PrimaryResult.Count);
@@ -39,14 +47,7 @@ public class SearchResultHandler
 
     private void Verify(SearchStatus searchStatus)
     {
-        Dictionary<SearchStatus, Action> scenario = new()
-        {
-            {SearchStatus.NotFound, ItemNotFound},
-            {SearchStatus.Found, ItemFound},
-            {SearchStatus.MoreThanOne, MoreThanOneItem}
-        };
-
-        if(scenario.TryGetValue(searchStatus, out Action? action))
+        if(Scenario.TryGetValue(searchStatus, out Action? action))
         {
             action.Invoke();
         }
@@ -54,7 +55,7 @@ public class SearchResultHandler
 
     private void ItemNotFound()
     {
-        FinalResult = "Item não encontrado.";
+        FinalResult = string.Empty;
         FinalStatus = SearchStatus.NotFound;
     }
 

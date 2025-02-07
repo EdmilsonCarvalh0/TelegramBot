@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using TelegramBot.Data;
+using TelegramBot.Domain;
 
 namespace TelegramBot.Service;
 
@@ -7,7 +8,7 @@ public class JsonItemRepository : IItemRepository
 {
     public ItemDataFormatter ListData = new();
     private string JsonFilePath = "C:/Users/ANGELA SOUZA/OneDrive/Área de Trabalho/ED/Programação/C#/Projects/TelegramBot/Data/ItemModel/itemsData.json";
-    private SearchResultHandler _itemSearchResult { get; set; } = new();
+    private SearchResultHandler _searchResultHandler { get; set; } = new();
 
 
     public JsonItemRepository()
@@ -34,24 +35,7 @@ public class JsonItemRepository : IItemRepository
             }
         );
 
-        return _itemSearchResult.GetItemSearchResult(result);
-
-        // if (result.Count == 0) return "Item não encontrado.";
-
-        // string names = string.Empty;
-
-        // if (result.Count > 1)
-        // {
-        //     foreach (var item in result)
-        //     {
-        //         var precoFormatado = item.Preco.ToString("C");
-        //         names += $"{item.Nome} - {item.Marca} - {precoFormatado}\n";
-        //     }
-
-        //     return names;
-        // }
-
-        // return names;
+        return _searchResultHandler.GetSearchResult(result);
     }
 
     public string GetList()
@@ -102,16 +86,20 @@ public class JsonItemRepository : IItemRepository
         SaveData();
     }
 
-    public string RemoveItemFromList(string userItem)
+    public SearchResultDTO RemoveItemFromList(string userItem)
     {
-        var result = ListData.Items.FindAll(
+        //TODO: Verify implementation of SearchResultHandler and to refactor logic
+        List<Item> result = ListData.Items.FindAll(
             delegate (Item it)
             {
                 return it.Nome.Equals(userItem, StringComparison.CurrentCultureIgnoreCase);
             }
         );
 
-        if (result.Count == 0) return "";
+        var searchResult = _searchResultHandler.GetSearchResult(result);
+
+        if (searchResult.Status == SearchStatus.NotFound || searchResult.Status == SearchStatus.MoreThanOne) return searchResult;
+
         
         List<Item> temporaryList = ListData.Items;
 
@@ -120,10 +108,12 @@ public class JsonItemRepository : IItemRepository
         itemsForRemove.AddRange(userItem.Trim()
                                         .Split(", ", StringSplitOptions.None)
                                         .ToList());
-        temporaryList.RemoveAll(item => itemsForRemove.Contains(itemsForRemove.First(item => item.Equals(userItem, StringComparison.CurrentCultureIgnoreCase))));
-
+        temporaryList.RemoveAll(item => item.Nome.Equals(searchResult.Result, StringComparison.CurrentCultureIgnoreCase));
+        
         ListData.Items = temporaryList;
         SaveData();
+
+        return searchResult;
     }
 
     public void CreateNewList(string userItems)

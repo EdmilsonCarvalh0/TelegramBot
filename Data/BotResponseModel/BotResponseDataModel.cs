@@ -1,7 +1,5 @@
-
-
 using Newtonsoft.Json;
-using TelegramBot.UserInterface;
+using TelegramBot.Application;
 
 namespace TelegramBot.Data;
 
@@ -11,5 +9,5 @@ public abstract class BotResponseDataModel
     public string ResponseRequest { get; set; } = string.Empty;
 
     [JsonProperty]
-    public ResponseContent ResponseContent { get; } = new ();
+    public ResponseContentDTO ResponseContent { get; } = new ();
 }

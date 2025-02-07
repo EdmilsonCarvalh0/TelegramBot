@@ -1,4 +1,4 @@
-namespace TelegramBot.Infrastructure;
+namespace TelegramBot.Domain;
 
 public enum SearchStatus
 {

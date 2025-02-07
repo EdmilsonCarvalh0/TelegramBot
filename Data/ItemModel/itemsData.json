@@ -1,3 +1,22 @@
 {
-  "items": []
+  "items": [
+    {
+      "id": 0,
+      "nome": "Café",
+      "marca": "Kimimo",
+      "preco": 9.90
+    },
+    {
+      "id": 0,
+      "nome": "Café",
+      "marca": "Maratá",
+      "preco": 13.91
+    },
+    {
+      "id": 0,
+      "nome": "Miojo",
+      "marca": "Maratá",
+      "preco": 1.80
+    }
+  ]
 }

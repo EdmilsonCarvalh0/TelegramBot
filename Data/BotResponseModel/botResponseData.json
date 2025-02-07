@@ -40,7 +40,7 @@
             "userState": "UpdateItem"
         },
         "Non-existent Item": {
-            "text": "Infelizmente não encontrei o item na lista.\nVerifique se o nome está correto e informe novamente.",
+            "text": "Infelizmente não encontrei o item na lista.\nVerifique se o nome está correto e informe novamente.\n",
             "keyboardMarkup": null,
             "userState": "UpdateList"
         },

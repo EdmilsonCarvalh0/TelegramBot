@@ -1,7 +1,5 @@
-
-
 using Newtonsoft.Json;
-using TelegramBot.UserInterface;
+using TelegramBot.Application;
 
 public class BotResponseDataFormatter
 {

@@ -1,5 +1,4 @@
-using TelegramBot.Data;
-using TelegramBot.Infrastructure;
+using TelegramBot.Domain;
 
 namespace TelegramBot.Service;
 
