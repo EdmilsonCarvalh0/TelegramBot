@@ -6,9 +6,9 @@ using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBot.Domain;
 using TelegramBot.Infrastructure;
 
-namespace TelegramBot.UserInterface
+namespace TelegramBot.Application
 {
-    public class ResponseContent
+    public class ResponseContentDTO
     {
         //TODO: avaliar o uso de GET e SET
         [JsonProperty("text")]
@@ -21,7 +21,7 @@ namespace TelegramBot.UserInterface
         [JsonProperty("userState")]
         public UserState UserState { get; set; }
 
-        public ResponseContent()
+        public ResponseContentDTO()
         {
         }
 

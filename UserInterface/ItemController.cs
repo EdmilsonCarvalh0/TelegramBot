@@ -1,7 +1,7 @@
 using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBot.Data;
-using TelegramBot.Domain;
+using TelegramBot.Application;
 using TelegramBot.Infrastructure;
 using TelegramBot.Service;
 
@@ -20,37 +20,37 @@ public class ItemController : IItemController
         _botResponse = new BotResponse();
     }
 
-    public ResponseContent GetResponseCallback(string subject)
+    public ResponseContentDTO GetResponseCallback(string subject)
     {
         return _botResponse.GetResponse(subject);
     }
 
-    public ResponseContent GetResponseMessage(string subject)
+    public ResponseContentDTO GetResponseMessage(string subject)
     {
         return _botResponse.GetResponse(subject);
     }
 
-    public ResponseContent GetInitialMessage(string subject)
+    public ResponseContentDTO GetInitialMessage(string subject)
     {   
         return _botResponse.GetResponse(subject);
     }
 
-    public ResponseContent StartService(string request)
+    public ResponseContentDTO StartService(string request)
     {
         return _botResponse.GetResponse(request);
     }
 
-    public ResponseContent GetOptionsOfListUpdate(string request)
+    public ResponseContentDTO GetOptionsOfListUpdate(string request)
     {
         return _botResponse.GetResponse(request);
     }
 
-    public ResponseContent GetAttributeOptions(string request)
+    public ResponseContentDTO GetAttributeOptions(string request)
     {
         return _botResponse.GetResponse(request);
     }
 
-    public ResponseContent CheckItemExistence(string nameAttribute)
+    public ResponseContentDTO CheckItemExistence(string nameAttribute)
     {
         var result = _itemRepository.GetItemInRepository(nameAttribute);
 
@@ -71,32 +71,32 @@ public class ItemController : IItemController
         return _botResponse.GetResponse("Update Item");
     }
 
-    public ResponseContent AddItemInShoppingData(string userItems)
+    public ResponseContentDTO AddItemInShoppingData(string userItems)
     {
         _itemRepository.AddItemInList(userItems);
         return _botResponse.GetResponse("Item Added");
     }
 
-    public ResponseContent SendItemToUpdateList(string item)
+    public ResponseContentDTO SendItemToUpdateList(string item)
     {
         _itemRepository.UpdateList(item);
         return _botResponse.GetResponse("Update Item OK");
     }
 
-    public ResponseContent SendItemToRemoveFromList(string item)
+    public ResponseContentDTO SendItemToRemoveFromList(string item)
     {
         _itemRepository.RemoveItemFromList(item);
         return _botResponse.GetResponse("Deleted Item OK");
     }
     
-    public ResponseContent ShowList()
+    public ResponseContentDTO ShowList()
     {
         var response = _botResponse.GetResponse("Show List");
         response.Text += _itemRepository.GetList();
         return response;
     }
 
-    public ResponseContent GetItemsToCreatelist(string items)
+    public ResponseContentDTO GetItemsToCreatelist(string items)
     {
         //TODO: manipulate TimeStamp to formalize data
         _itemRepository.CreateNewList(items);

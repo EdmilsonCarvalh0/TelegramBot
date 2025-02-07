@@ -1,5 +1,5 @@
 using Newtonsoft.Json;
-using TelegramBot.UserInterface;
+using TelegramBot.Application;
 
 namespace TelegramBot.Data;
 
@@ -18,9 +18,9 @@ public class BotResponse : BotResponseDataModel
         return JsonConvert.DeserializeObject<BotResponseDataFormatter>(File.ReadAllText(ResponseJsonFilePath))!;
     }
 
-    public ResponseContent GetResponse(string request)
+    public ResponseContentDTO GetResponse(string request)
     {
-        return new ResponseContent {
+        return new ResponseContentDTO {
             Text = DataFormatter.Responses[request].Text,
             KeyboardMarkup = DataFormatter.Responses[request].KeyboardMarkup,
             UserState = DataFormatter.Responses[request].UserState

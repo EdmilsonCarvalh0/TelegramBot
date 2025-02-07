@@ -1,9 +1,5 @@
-using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Newtonsoft.Json;
 using TelegramBot.Data;
-using TelegramBot.Domain;
-using TelegramBot.Infrastructure;
 
 namespace TelegramBot.Service;
 
@@ -11,7 +7,7 @@ public class JsonItemRepository : IItemRepository
 {
     public ItemDataFormatter ListData = new();
     private string JsonFilePath = "C:/Users/ANGELA SOUZA/OneDrive/Área de Trabalho/ED/Programação/C#/Projects/TelegramBot/Data/ItemModel/itemsData.json";
-    private ItemSearchResult _itemSearchResult { get; set; } = new();
+    private SearchResultHandler _itemSearchResult { get; set; } = new();
 
 
     public JsonItemRepository()
@@ -29,7 +25,7 @@ public class JsonItemRepository : IItemRepository
         File.WriteAllText(JsonFilePath, JsonConvert.SerializeObject(ListData, Formatting.Indented));
     }
 
-    public ItemSearchResult GetItemInRepository(string itemInput)
+    public SearchResultDTO GetItemInRepository(string itemInput)
     {       
         List<Item> result = ListData.Items.FindAll(
             delegate (Item it)
@@ -38,9 +34,7 @@ public class JsonItemRepository : IItemRepository
             }
         );
 
-        var searchResult = _itemSearchResult.GetItemSearchResult(result);
-
-        return searchResult;
+        return _itemSearchResult.GetItemSearchResult(result);
 
         // if (result.Count == 0) return "Item não encontrado.";
 

@@ -1,19 +1,17 @@
-using Telegram.Bot.Types.ReplyMarkups;
-using TelegramBot.Data;
-using TelegramBot.UserInterface;
+using TelegramBot.Application;
 
 public interface IItemController
 {
-    ResponseContent GetResponseCallback(string subject);
-    ResponseContent GetResponseMessage(string subject);
-    ResponseContent GetInitialMessage(string subject);
-    ResponseContent StartService(string request);
-    ResponseContent GetOptionsOfListUpdate(string request);
-    ResponseContent GetAttributeOptions(string request);
-    ResponseContent CheckItemExistence(string nameAttribute);
-    ResponseContent AddItemInShoppingData(string item);
-    ResponseContent SendItemToUpdateList(string item);
-    ResponseContent SendItemToRemoveFromList(string item);
-    ResponseContent ShowList();
-    ResponseContent GetItemsToCreatelist(string item);
+    ResponseContentDTO GetResponseCallback(string subject);
+    ResponseContentDTO GetResponseMessage(string subject);
+    ResponseContentDTO GetInitialMessage(string subject);
+    ResponseContentDTO StartService(string request);
+    ResponseContentDTO GetOptionsOfListUpdate(string request);
+    ResponseContentDTO GetAttributeOptions(string request);
+    ResponseContentDTO CheckItemExistence(string nameAttribute);
+    ResponseContentDTO AddItemInShoppingData(string item);
+    ResponseContentDTO SendItemToUpdateList(string item);
+    ResponseContentDTO SendItemToRemoveFromList(string item);
+    ResponseContentDTO ShowList();
+    ResponseContentDTO GetItemsToCreatelist(string item);
 }

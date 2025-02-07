@@ -1,16 +1,16 @@
 using TelegramBot.Data;
 using TelegramBot.Infrastructure;
 
-namespace TelegramBot.Domain;
+namespace TelegramBot.Service;
 
-public class ItemSearchResult
+public class SearchResultHandler
 {
-    private string FinalResult { get; set; } = string.Empty;
-    public SearchStatus Status { get; set; }
     private Dictionary<int, SearchStatus> Scenario;
-    private List<Item> Result { get; set; } = new();
+    private List<Item> PrimaryResult { get; set; } = new();
+    private string FinalResult { get; set; } = string.Empty;
+    private SearchStatus FinalStatus { get; set; }
 
-    public ItemSearchResult()
+    public SearchResultHandler()
     {
         Scenario = new Dictionary<int, SearchStatus>{
             {0, SearchStatus.NotFound},
@@ -24,16 +24,16 @@ public class ItemSearchResult
         return Scenario[quantityOfItens];
     }
 
-    public ItemSearchResult GetItemSearchResult(List<Item> result)
+    public SearchResultDTO GetItemSearchResult(List<Item> result)
     {
-        Result = result;
-        var searchStatus = GetSearchStatus(Result.Count);
+        PrimaryResult = result;
+        var searchStatus = GetSearchStatus(PrimaryResult.Count);
         Verify(searchStatus);
 
-        return new ItemSearchResult()
+        return new SearchResultDTO()
         {
-            FinalResult = FinalResult,
-            Status = Status
+            Result = FinalResult,
+            Status = FinalStatus
         };
     }
 
@@ -55,23 +55,23 @@ public class ItemSearchResult
     private void ItemNotFound()
     {
         FinalResult = "Item não encontrado.";
-        Status = SearchStatus.NotFound;
+        FinalStatus = SearchStatus.NotFound;
     }
 
     private void ItemFound()
     {
         FinalResult = "Item encontrado";
-        Status = SearchStatus.Found;
+        FinalStatus = SearchStatus.Found;
     }
 
     private void MoreThanOneItem()
     {
-        foreach (var item in Result)
+        foreach (var item in PrimaryResult)
             {
                 var precoFormatado = item.Preco.ToString("C");
                 FinalResult += $"{item.Nome} - {item.Marca} - {precoFormatado}\n";
             }
         
-        Status = SearchStatus.MoreThanOne;
+        FinalStatus = SearchStatus.MoreThanOne;
     }
 }
