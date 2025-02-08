@@ -83,7 +83,22 @@ public class ItemController : IItemController
 
     public ResponseContentDTO SendItemToRemoveFromList(string item)
     {
-        _itemRepository.RemoveItemFromList(item);
+        var result = _itemRepository.RemoveItemFromList(item);
+
+        if (result.Status == SearchStatus.NotFound)
+        {
+            var response = _botResponse.GetResponse("Non-existent Item");
+            response.Text += _itemRepository.GetList();
+            return response;
+        }
+
+        if (result.Status == SearchStatus.MoreThanOne)
+        {
+            var response = _botResponse.GetResponse("More Than One Item");
+            response.Text += result.Result;
+            return response;
+        }
+
         return _botResponse.GetResponse("Deleted Item OK");
     }
     

@@ -99,18 +99,12 @@ public class JsonItemRepository : IItemRepository
         var searchResult = _searchResultHandler.GetSearchResult(result);
 
         if (searchResult.Status == SearchStatus.NotFound || searchResult.Status == SearchStatus.MoreThanOne) return searchResult;
-
         
-        List<Item> temporaryList = ListData.Items;
+        // List<Item> temporaryList = ListData.Items;
+        // temporaryList.Remove(result[0]);
+        // ListData.Items = temporaryList;
+        ListData.Items.Remove(result[0]);
 
-        var itemsForRemove = new List<string>();
-
-        itemsForRemove.AddRange(userItem.Trim()
-                                        .Split(", ", StringSplitOptions.None)
-                                        .ToList());
-        temporaryList.RemoveAll(item => item.Nome.Equals(searchResult.Result, StringComparison.CurrentCultureIgnoreCase));
-        
-        ListData.Items = temporaryList;
         SaveData();
 
         return searchResult;

@@ -11,12 +11,6 @@
       "nome": "Café",
       "marca": "Maratá",
       "preco": 13.91
-    },
-    {
-      "id": 0,
-      "nome": "Miojo",
-      "marca": "Maratá",
-      "preco": 1.80
     }
   ]
 }

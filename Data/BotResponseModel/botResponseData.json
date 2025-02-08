@@ -45,7 +45,7 @@
             "userState": "UpdateList"
         },
         "More Than One Item": {
-            "text": "Encontrei os seguintes itens, qual deles você quer alterar?\n\n",
+            "text": "Encontrei os seguintes itens, qual deles seria?\n\n",
             "keyboardMarkup": null,
             "userState": "UpdateList"
         },
