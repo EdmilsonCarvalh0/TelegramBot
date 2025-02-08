@@ -44,8 +44,7 @@ public class JsonItemRepository : IItemRepository
 
         foreach (var item in ListData.Items)
         {
-            var precoFormatado = item.Preco.ToString("C");
-            list += $"{item.Nome} - {item.Marca} - {precoFormatado}\n";
+            list += item.ToString();
         }
 
         Console.WriteLine(list);

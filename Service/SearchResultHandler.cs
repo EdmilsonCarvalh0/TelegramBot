@@ -69,8 +69,7 @@ public class SearchResultHandler
     {
         foreach (var item in PrimaryResult)
             {
-                var precoFormatado = item.Preco.ToString("C");
-                FinalResult += $"{item.Nome} - {item.Marca} - {precoFormatado}\n";
+                FinalResult += item.ToString();
             }
         
         FinalStatus = SearchStatus.MoreThanOne;
