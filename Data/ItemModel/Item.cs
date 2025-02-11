@@ -8,6 +8,6 @@ public class Item : ItemDataModel
 
     public override string ToString()
     {
-        return $"{Nome} - {Marca} - {Preco:C}\n";
+        return $"{Id}. {Nome} - {Marca} - {Preco:C}\n";
     }
 }

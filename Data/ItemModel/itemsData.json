@@ -7,10 +7,22 @@
       "preco": 9.90
     },
     {
-      "id": 0,
+      "id": 1,
       "nome": "Café",
       "marca": "Maratá",
       "preco": 13.91
+    },
+    {
+      "id": 2,
+      "nome": "Miojo",
+      "marca": "Maratá",
+      "preco": 1.70
+    },
+    {
+      "id": 3,
+      "nome": "Macarrão",
+      "marca": "Favoritta",
+      "preco": 3.50
     }
   ]
 }

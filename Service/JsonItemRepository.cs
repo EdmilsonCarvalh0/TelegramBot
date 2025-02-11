@@ -77,6 +77,7 @@ public class JsonItemRepository : IItemRepository
         itemsToAdd.AddRange(userItem.Trim().Split(" - "));
 
         ListData.Items.Add(new Item {
+            Id = ListData.Items.Count, 
             Nome = itemsToAdd[0],
             Marca = itemsToAdd[1],
             Preco = FormatPrice(itemsToAdd[2])
