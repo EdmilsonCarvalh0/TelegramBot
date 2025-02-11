@@ -77,7 +77,7 @@ public class JsonItemRepository : IItemRepository
         itemsToAdd.AddRange(userItem.Trim().Split(" - "));
 
         ListData.Items.Add(new Item {
-            Id = ListData.Items.Count, 
+            Id = ListData.Items.Count +1, 
             Nome = itemsToAdd[0],
             Marca = itemsToAdd[1],
             Preco = FormatPrice(itemsToAdd[2])
@@ -105,6 +105,7 @@ public class JsonItemRepository : IItemRepository
         // ListData.Items = temporaryList;
         ListData.Items.Remove(result[0]);
 
+        SequentializeIDs();
         SaveData();
 
         return searchResult;
@@ -135,22 +136,39 @@ public class JsonItemRepository : IItemRepository
         SaveData();
     }
 
-    private static Item CheckLineOfItem(List<string> linesOfItems)
+    private Item CheckLineOfItem(List<string> linesOfItems)
     {
         var indefinedItem = linesOfItems[1].Split(",").ToList();
         bool isPrice = indefinedItem[0].All(char.IsDigit) && indefinedItem[1].All(char.IsDigit);
         
         return isPrice ? 
             new Item {
+                Id = ListData.Items.Count +1,
                 Nome = linesOfItems[0],
                 Marca = default!,
                 Preco = FormatPrice(linesOfItems[1])
             } : 
             new Item 
             {
+                Id = ListData.Items.Count +1,
                 Nome = linesOfItems[0],
                 Marca = linesOfItems[1],
                 Preco = FormatPrice(linesOfItems[2])
             };
+    }
+
+    private void SequentializeIDs()
+    {
+        if(ListData.Items.Count <= 1) return;
+        
+        List<Item> temporaryList = ListData.Items;
+        temporaryList[0].Id = 1;
+
+        for (int i = 0; i < temporaryList.Count -1; i++)
+        {
+            temporaryList[i+1].Id = temporaryList[i+1].Id - temporaryList[i].Id > 1 ? temporaryList[i].Id+1 : temporaryList[i+1].Id;
+        }
+
+        ListData.Items = temporaryList;
     }
 }
