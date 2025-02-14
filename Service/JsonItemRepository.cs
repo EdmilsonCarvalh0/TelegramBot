@@ -9,7 +9,7 @@ public class JsonItemRepository : IItemRepository
     public ItemDataFormatter ListData = new();
     private string JsonFilePath = "C:/Users/edcar/Documents/ED/Programação/C#/C#/Projects/TelegramBot/Data/ItemModel/itemsData.json";
     private SearchResultHandler _searchResultHandler { get; set; } = new();
-
+    private List<Item> EditingArea { get; set; } = new();
 
     public JsonItemRepository()
     {
@@ -62,6 +62,23 @@ public class JsonItemRepository : IItemRepository
             De uma forma que ele altere corretamente o atributo passado.
             Talvez o segredo esteja na verificação automática de item do BotClient
         */
+    }
+
+    public void AddItemInEditArea(string itemToBeChanged)
+    {
+        EditingArea.Add(
+            ListData.Items.First(
+                item => item.Nome.Equals(itemToBeChanged, StringComparison.CurrentCultureIgnoreCase)));
+
+        //TODO: Implementar o uso da Area de Edição de item.
+        // EditingArea.Add(
+        //     ListData.Items.Find(
+        //         delegate (Item it)
+        //         {
+        //             return it.Nome.Equals(itemToBeChanged, StringComparison.CurrentCultureIgnoreCase);
+        //         }
+        //     )
+        // );
     }
 
     public void AddItemInList(string userItem)
