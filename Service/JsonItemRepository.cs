@@ -7,7 +7,7 @@ namespace TelegramBot.Service;
 public class JsonItemRepository : IItemRepository
 {
     public ItemDataFormatter ListData = new();
-    private string JsonFilePath = "C:/Users/ANGELA SOUZA/OneDrive/Área de Trabalho/ED/Programação/C#/Projects/TelegramBot/Data/ItemModel/itemsData.json";
+    private string JsonFilePath = "C:/Users/edcar/Documents/ED/Programação/C#/C#/Projects/TelegramBot/Data/ItemModel/itemsData.json";
     private SearchResultHandler _searchResultHandler { get; set; } = new();
 
 

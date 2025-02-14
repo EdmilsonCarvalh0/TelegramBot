@@ -6,7 +6,7 @@ namespace TelegramBot.Data;
 public class BotResponse : BotResponseDataModel
 {
     public BotResponseDataFormatter DataFormatter { get; } = new();
-    private string ResponseJsonFilePath = "C:/Users/ANGELA SOUZA/OneDrive/Área de Trabalho/ED/Programação/C#/Projects/TelegramBot/Data/BotResponseModel/botResponseData.json";
+    private string ResponseJsonFilePath = "C:/Users/edcar/Documents/ED/Programação/C#/C#/Projects/TelegramBot/Data/BotResponseModel/botResponseData.json";
 
     public BotResponse()
     {

@@ -278,7 +278,7 @@ namespace TelegramBot.Infrastructure.Handlers
 
         public async Task HandleAttributeChange()
         {
-            string genderVerified = CheckItemGender(Context.Message!.Text!);
+            string genderVerified = CheckItemGender(Context.CallbackQuery!.Data!);
             var responseContent = messageHandler.GetResponseMessage("Atributte Change");
             responseContent.Text += $"{genderVerified} {Context.CallbackQuery!.Data}:";
 
