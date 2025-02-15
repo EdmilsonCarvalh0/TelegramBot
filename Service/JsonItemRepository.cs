@@ -64,7 +64,7 @@ public class JsonItemRepository : IItemRepository
         */
     }
 
-    public void AddItemInEditArea(string itemToBeChanged)
+    public void AddItemInEditingArea(string itemToBeChanged)
     {
         EditingArea.Add(
             ListData.Items.First(

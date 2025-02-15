@@ -66,6 +66,8 @@ public class ItemController : IItemController
             return response;
         }
 
+        _itemRepository.AddItemInEditingArea(nameAttribute);
+
         return _botResponse.GetResponse("Update Item");
     }
 

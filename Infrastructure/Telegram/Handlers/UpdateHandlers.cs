@@ -278,6 +278,8 @@ namespace TelegramBot.Infrastructure.Handlers
 
         public async Task HandleAttributeChange()
         {
+            //TODO: Avaliar a forma de capturar o atributo a ser alterado e enviar para o JsonItemRepository
+            //      afim de reter em um objeto que tenha a EditingArea.
             string genderVerified = CheckItemGender(Context.CallbackQuery!.Data!);
             var responseContent = messageHandler.GetResponseMessage("Atributte Change");
             responseContent.Text += $"{genderVerified} {Context.CallbackQuery!.Data}:";
