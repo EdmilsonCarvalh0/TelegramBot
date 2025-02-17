@@ -10,4 +10,20 @@ public class Item : ItemDataModel
     {
         return $"{Id}. {Nome} - {Marca} - {Preco:C}\n";
     }
+
+    public void SetNome(string attribute)
+    {
+        Nome = attribute;
+    }
+
+    public void SetMarca(string attribute)
+    {
+        Marca = attribute;
+    }
+
+    public void SetPreco(string attribute)
+    {
+        Preco = Convert.ToDecimal(attribute);
+    }
+
 }
