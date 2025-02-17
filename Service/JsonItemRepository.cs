@@ -7,9 +7,9 @@ namespace TelegramBot.Service;
 public class JsonItemRepository : IItemRepository
 {
     public ItemDataFormatter ListData = new();
-    private string JsonFilePath = "C:/Users/edcar/Documents/ED/Programação/C#/C#/Projects/TelegramBot/Data/ItemModel/itemsData.json";
+    private string JsonFilePath = "C:/Users/ANGELA SOUZA/OneDrive/Área de Trabalho/ED/Programação/C#/Projects/TelegramBot/Data/ItemModel/itemsData.json";
     private SearchResultHandler _searchResultHandler { get; set; } = new();
-    private List<Item> EditingArea { get; set; } = new();
+    private readonly EditingArea _editingArea = new();
 
     public JsonItemRepository()
     {
@@ -62,13 +62,34 @@ public class JsonItemRepository : IItemRepository
             De uma forma que ele altere corretamente o atributo passado.
             Talvez o segredo esteja na verificação automática de item do BotClient
         */
+
+
+    }
+
+    public void UpdateItemInList(string newAttribute)
+    {
+        var itemUpdated = _editingArea.Update(newAttribute);
+        var indexItem = ListData.Items.FindIndex(item => item.Id == itemUpdated.Id);
+
+        ListData.Items[indexItem] = itemUpdated;
+
+        SaveData();
     }
 
     public void AddItemInEditingArea(string itemToBeChanged)
     {
-        EditingArea.Add(
-            ListData.Items.First(
-                item => item.Nome.Equals(itemToBeChanged, StringComparison.CurrentCultureIgnoreCase)));
+        var item = ListData.Items.FirstOrDefault(
+            item => item.Nome.Equals(itemToBeChanged, StringComparison.CurrentCultureIgnoreCase));
+
+        if(item != null)
+        {
+            _editingArea.ItemToBeChanged = new Item {
+                Id = item.Id,
+                Nome = item.Nome,
+                Marca = item.Marca,
+                Preco = item.Preco
+            };
+        }
 
         //TODO: Implementar o uso da Area de Edição de item.
         // EditingArea.Add(
@@ -79,6 +100,11 @@ public class JsonItemRepository : IItemRepository
         //         }
         //     )
         // );
+    }
+
+    public void AddAttributeToBeChangedInEditingArea(string attributeToBeChanged)
+    {
+        _editingArea.AttributeToBeChanged = attributeToBeChanged;
     }
 
     public void AddItemInList(string userItem)
