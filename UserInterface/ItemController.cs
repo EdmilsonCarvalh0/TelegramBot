@@ -77,10 +77,15 @@ public class ItemController : IItemController
         return _botResponse.GetResponse("Item Added");
     }
 
-    public ResponseContentDTO SendItemToUpdateList(string item)
+    public ResponseContentDTO SendAttributeToUpdateItem(string attribute)
     {
-        _itemRepository.UpdateList(item);
+        _itemRepository.UpdateItemInList(attribute);
         return _botResponse.GetResponse("Update Item OK");
+    }
+
+    public void SendAttributeToEditingArea(string attributeToBeChagend)
+    {
+        _itemRepository.AddAttributeToBeChangedInEditingArea(attributeToBeChagend);
     }
 
     public ResponseContentDTO SendItemToRemoveFromList(string item)

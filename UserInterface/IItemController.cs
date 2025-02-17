@@ -10,7 +10,8 @@ public interface IItemController
     ResponseContentDTO GetAttributeOptions(string request);
     ResponseContentDTO CheckItemExistence(string nameAttribute);
     ResponseContentDTO AddItemInShoppingData(string item);
-    ResponseContentDTO SendItemToUpdateList(string item);
+    ResponseContentDTO SendAttributeToUpdateItem(string item);
+    void SendAttributeToEditingArea(string attributeToBeChagend);
     ResponseContentDTO SendItemToRemoveFromList(string item);
     ResponseContentDTO ShowList();
     ResponseContentDTO GetItemsToCreatelist(string item);
