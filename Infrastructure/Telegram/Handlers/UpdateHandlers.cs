@@ -168,7 +168,7 @@ namespace TelegramBot.Infrastructure.Handlers
         {
             UserStateManager.ResetAdditionalInfo(Context.UserId);
             var attribute = Context.Message!.Text;
-            var responseContent = messageHandler.SendItemToUpdateList(attribute!);
+            var responseContent = messageHandler.SendAttributeToUpdateItem(attribute!);
             await SendResponseToUser(responseContent);
         }
 
@@ -280,9 +280,12 @@ namespace TelegramBot.Infrastructure.Handlers
         {
             //TODO: Avaliar a forma de capturar o atributo a ser alterado e enviar para o JsonItemRepository
             //      afim de reter em um objeto que tenha a EditingArea.
-            string genderVerified = CheckItemGender(Context.CallbackQuery!.Data!);
+            var nameAttribute = Context.CallbackQuery!.Data!;
+            messageHandler.SendAttributeToEditingArea(nameAttribute);
+
+            string genderVerified = CheckItemGender(nameAttribute);
             var responseContent = messageHandler.GetResponseMessage("Atributte Change");
-            responseContent.Text += $"{genderVerified} {Context.CallbackQuery!.Data}:";
+            responseContent.Text += $"{genderVerified} {nameAttribute}:";
 
             await SendResponseToUser(responseContent);
 

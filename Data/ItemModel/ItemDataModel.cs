@@ -14,5 +14,5 @@ public abstract class ItemDataModel
     public string Marca { get; set; } = "Não informada";
 
     [JsonProperty("preco")]
-    public decimal Preco { get; set; }
+    public decimal Preco { get; set; } = 0;
 }
