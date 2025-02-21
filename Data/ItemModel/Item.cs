@@ -23,7 +23,10 @@ public class Item : ItemDataModel
 
     public void SetPreco(string attribute)
     {
-        Preco = Convert.ToDecimal(attribute);
+        if (decimal.TryParse(attribute, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal result))
+        {
+            Preco = result;
+        }
     }
 
 }
