@@ -6,15 +6,17 @@ public class EditingArea
 {
     public Item ItemToBeChanged { get; set; } = new();
     public string AttributeToBeChanged { get; set; } = string.Empty;
-    private readonly Dictionary<string, Action<string>> Scenario;
-
-    public EditingArea()
+    private Dictionary<string, Action<string>> Scenario 
     {
-        Scenario = new Dictionary<string, Action<string>>{
-            {"Nome", ItemToBeChanged.SetNome},
-            {"Marca", ItemToBeChanged.SetMarca},
-            {"Preço", ItemToBeChanged.SetPreco}
-        };
+        get 
+        {
+            return new Dictionary<string, Action<string>>
+            {
+                {"Nome", ItemToBeChanged.SetNome},
+                {"Marca", ItemToBeChanged.SetMarca},
+                {"Preço", ItemToBeChanged.SetPreco}
+            };
+        }
     }
 
     public Item Update(string newAttribute)
