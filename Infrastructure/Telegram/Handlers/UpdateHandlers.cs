@@ -143,15 +143,15 @@ namespace TelegramBot.Infrastructure.Handlers
 
         public async Task HandleInitialMessage()
         {
-            if (Context.Message?.Text != "Menu")
+            if (!Context.Message!.Text!.Equals("Menu", StringComparison.CurrentCultureIgnoreCase))
             {
                 var responseContent = messageHandler.GetInitialMessage("Initial Message");
                 await SendResponseToUser(responseContent);
             }
 
-            if (Context.Message?.Text == "Menu")
+            if (Context.Message!.Text!.Equals("Menu", StringComparison.CurrentCultureIgnoreCase))
             {
-                var responseContent = messageHandler.StartService(Context.Message.Text);
+                var responseContent = messageHandler.StartService(char.ToUpper(Context.Message.Text[0]) + Context.Message.Text.Substring(1).ToLower());
                 await SendResponseToUser(responseContent);
             }
         }
