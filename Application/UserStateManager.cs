@@ -4,7 +4,7 @@ namespace TelegramBot.Application;
 
 public class UserStateManager
 {
-    private readonly Dictionary<long, UserStateData> _userStates = new();
+    private static readonly Dictionary<long, UserStateData> _userStates = new(); //Verificar Dependence Injection
 
     public UserStateManager()
     {
@@ -38,7 +38,7 @@ public class UserStateManager
         }
     }
 
-    public void SetState(long userId, UserState state)
+    public static void SetState(long userId, UserState state)
     {
         _userStates[userId].State = state;
     }
