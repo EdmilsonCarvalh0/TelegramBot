@@ -6,14 +6,16 @@ namespace TelegramBot.Service;
 
 public class JsonItemRepository : IItemRepository
 {
-    public ItemDataFormatter ListData = new();
-    private string JsonFilePath = "C:/Users/edcar/Documents/ED/Programação/C#/C#/Projects/TelegramBot/Data/ItemModel/itemsData.json";
-    private SearchResultHandler _searchResultHandler { get; set; } = new();
-    private readonly EditingArea _editingArea = new();
+    public ItemDataFormatter ListData;
+    private string JsonFilePath = "";
+    private readonly SearchResultHandler _searchResultHandler;
+    private readonly EditingArea _editingArea;
 
-    public JsonItemRepository()
+    public JsonItemRepository(SearchResultHandler searchResultHandler, EditingArea editingArea)
     {
         ListData = LoadData();
+        _searchResultHandler = searchResultHandler;
+        _editingArea = editingArea;
     }
 
     public ItemDataFormatter LoadData()
