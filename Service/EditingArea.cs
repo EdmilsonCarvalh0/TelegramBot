@@ -2,7 +2,7 @@ using TelegramBot.Data;
 
 namespace TelegramBot.Service;
 
-public class EditingArea
+public class EditingArea : IEditingArea
 {
     public Item ItemToBeChanged { get; set; } = new();
     public string AttributeToBeChanged { get; set; } = string.Empty;
@@ -27,5 +27,15 @@ public class EditingArea
         }
 
         return ItemToBeChanged;
+    }
+
+    public void SetAttributeToBeChanged(string attribute)
+    {
+        AttributeToBeChanged = attribute;
+    }
+
+    public void SetItemToBeChanged(Item item)
+    {
+        ItemToBeChanged = item;
     }
 }
