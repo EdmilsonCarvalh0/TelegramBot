@@ -1,74 +1,67 @@
-using System.Collections.Concurrent;
+using Microsoft.Extensions.Configuration;
 using Telegram.Bot;
+using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBot.Application;
-using TelegramBot.Data;
-using TelegramBot.Domain;
-using TelegramBot.Infrastructure.Handlers;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace TelegramBot.Infrastructure
 {
     public class BotConnection
     {
+        private readonly ITelegramBotClient _bot;
+        private readonly UpdateHandlers _handlers;
+        private readonly IHostApplicationLifetime _appLifetime;
+        private readonly IServiceScopeFactory _scopeFactory;
 
-        //TODO: Corrigir erro de referência nula no handlers
-        private readonly static string Token = "7560368958:AAGSWm6chmVviBNYSNF8P4Yh3aJdcka0vQw";
-        private readonly static UpdateHandlers _handlers = new();
-        public TelegramBotClient Bot;
-        // private static readonly UserStateManager _userStateManager = new();
-
-        public BotConnection()
+        public BotConnection(ITelegramBotClient bot, UpdateHandlers handlers, IHostApplicationLifetime appLifetime, IServiceScopeFactory scopeFactory)
         {
-            Bot = new TelegramBotClient(Token);
+            _bot = bot;
+            _handlers = handlers;
+            _appLifetime = appLifetime;
+            _scopeFactory = scopeFactory;
         }
 
-        public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+        public void Start()
         {
-            long userId = update.CallbackQuery?.From.Id ?? update.Message?.Chat.Id ?? 0;
-            
-            // _handlers.UserStateManager.SetUserId(userId);
-
-            var context = new BotRequestContext(
-                botClient,
-                userId,
-                update.CallbackQuery,
-                update.Message,
-                cancellationToken
+            _bot.StartReceiving(
+                HandleUpdateAsync,
+                HandleErrorAsync,
+                new ReceiverOptions
+                {
+                    AllowedUpdates = Array.Empty<UpdateType>()
+                },
+                cancellationToken: _appLifetime.ApplicationStopping
             );
+        }
+
+        private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+        {
+            using var scope = _scopeFactory.CreateScope();
+
+            var contextFactory = scope.ServiceProvider.GetRequiredService<BotRequestContextFactory>();
+            var bot = scope.ServiceProvider.GetRequiredService<ITelegramBotClient>();
+
+            long userId = update.CallbackQuery?.From.Id ?? update.Message?.Chat.Id ?? 0;
+            var context = contextFactory.Create(bot, userId, update, cancellationToken);
 
             _handlers.LoadContext(context);
-            await DelegateUpdates(update);
+            await _handlers.DelegateUpdates(update);
         }
 
-        private static async Task DelegateUpdates(Update update)
-        {
-            var userState = _handlers.UserStateManager.GetUserStateData(_handlers.Context.UserId);
-
-            if (update.Type == UpdateType.Message && update.Message != null)
-            {
-                if (userState.State == UserState.None)
-                {
-                    await _handlers.HandleInitialMessage();
-                    Console.WriteLine($"Estado atual {_handlers.UserStateManager.GetUserStateData(_handlers.Context.UserId).State}");
-                    return;
-                }
-
-                await _handlers.HandleMessageAsync();
-                Console.WriteLine($"Estado atual {_handlers.UserStateManager.GetUserStateData(_handlers.Context.UserId).State}");
-            }
-            else if (update.Type == UpdateType.CallbackQuery && update.CallbackQuery != null)
-            {
-                await _handlers.HandleCallbackQueryAsync();
-                Console.WriteLine($"Estado atual {_handlers.UserStateManager.GetUserStateData(_handlers.Context.UserId).State}");
-            }
-        }
-
-        public static Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+        private Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
             Console.WriteLine($"Erro recebido: {exception.Message}\nData: {exception.InnerException}");
             return Task.CompletedTask;
+        }
+
+        public async Task DisplayBotInfoAsync()
+        {
+            var me = await _bot.GetMe();
+            Console.WriteLine($"Bot iniciado: @{me.Username}");
         }
 
         public InlineKeyboardMarkup StartService()
