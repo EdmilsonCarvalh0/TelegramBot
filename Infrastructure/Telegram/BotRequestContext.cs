@@ -11,12 +11,12 @@ public class BotRequestContext
     public Message? Message { get; }
     public CancellationToken CancellationToken { get; }
 
-    public BotRequestContext(ITelegramBotClient botCLient, long userId,
+    public BotRequestContext(ITelegramBotClient botCLient, ChatIdIdentifier chatIdIdentifier,
                             CallbackQuery? callbackQuery, Message? message,
                             CancellationToken cancellationToken)
     {
         BotClient = botCLient;
-        UserId = userId;
+        UserId = chatIdIdentifier.BotId;
         CallbackQuery = callbackQuery;
         Message = message;
         CancellationToken = cancellationToken;
