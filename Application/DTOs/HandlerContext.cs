@@ -4,15 +4,14 @@ namespace TelegramBot.Application;
 
 public class HandlerContext
 {
-    public UserStateManager? StateManager;
-    public IItemRepository? ItemRepository;
+    public UserStateManager StateManager;
+    public IItemRepository ItemRepository;
     public BotRequestContext? Context;
 
     
-    public void SetUpdateContext(UserStateManager stateManager, IItemRepository itemRepository, BotRequestContext context)
+    public HandlerContext(UserStateManager stateManager, IItemRepository itemRepository)
     {
         StateManager = stateManager;
         ItemRepository = itemRepository;
-        Context = context;
     }
 }
