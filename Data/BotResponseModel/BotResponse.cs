@@ -6,10 +6,11 @@ namespace TelegramBot.Data;
 public class BotResponse : BotResponseDataModel
 {
     public BotResponseDataFormatter DataFormatter { get; } = new();
-    private string ResponseJsonFilePath = "C:/Users/edcar/Documents/ED/Programação/C#/C#/Projects/TelegramBot/Data/BotResponseModel/botResponseData.json";
+    private string ResponseJsonFilePath;
 
-    public BotResponse()
+    public BotResponse(string filePath)
     {
+        ResponseJsonFilePath = filePath;
         DataFormatter = LoadData();
     }
 
@@ -18,9 +19,9 @@ public class BotResponse : BotResponseDataModel
         return JsonConvert.DeserializeObject<BotResponseDataFormatter>(File.ReadAllText(ResponseJsonFilePath))!;
     }
 
-    public ResponseContentDTO GetResponse(string request)
+    public ResponseContent GetResponse(string request)
     {
-        return new ResponseContentDTO {
+        return new ResponseContent {
             Text = DataFormatter.Responses[request].Text,
             KeyboardMarkup = DataFormatter.Responses[request].KeyboardMarkup,
             UserState = DataFormatter.Responses[request].UserState

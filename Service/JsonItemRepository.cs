@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using TelegramBot.Data;
 using TelegramBot.Domain;
@@ -7,15 +8,19 @@ namespace TelegramBot.Service;
 public class JsonItemRepository : IItemRepository
 {
     public ItemDataFormatter ListData;
-    private string JsonFilePath = "";
+    //Implementar pelo Host usando o appsettings.json
+    private readonly string JsonFilePath;
     private readonly SearchResultHandler _searchResultHandler;
-    private readonly EditingArea _editingArea;
+    private readonly IEditingArea _editingArea;
+    private readonly IServiceProvider _serviceProvider;
 
-    public JsonItemRepository(SearchResultHandler searchResultHandler, EditingArea editingArea)
+    public JsonItemRepository(SearchResultHandler searchResultHandler, IServiceProvider serviceProvider, string filePath)
     {
+        JsonFilePath = filePath;
         ListData = LoadData();
+        _serviceProvider = serviceProvider;
+        _editingArea = GetEditingArea();
         _searchResultHandler = searchResultHandler;
-        _editingArea = editingArea;
     }
 
     public ItemDataFormatter LoadData()
@@ -28,7 +33,13 @@ public class JsonItemRepository : IItemRepository
         File.WriteAllText(JsonFilePath, JsonConvert.SerializeObject(ListData, Formatting.Indented));
     }
 
-    public SearchResultDTO GetItemInRepository(string itemInput)
+    private IEditingArea GetEditingArea()
+    {
+        using var scope = _serviceProvider.CreateScope();
+        return scope.ServiceProvider.GetRequiredService<IEditingArea>();
+    }
+
+    public SearchResult GetItemInRepository(string itemInput)
     {       
         List<Item> result = ListData.Items.FindAll(
             delegate (Item it)
@@ -85,28 +96,18 @@ public class JsonItemRepository : IItemRepository
 
         if(item != null)
         {
-            _editingArea.ItemToBeChanged = new Item {
+            _editingArea.SetItemToBeChanged(new Item {
                 Id = item.Id,
                 Nome = item.Nome,
                 Marca = item.Marca,
                 Preco = item.Preco
-            };
+            });
         }
-
-        //TODO: Implementar o uso da Area de Edição de item.
-        // EditingArea.Add(
-        //     ListData.Items.Find(
-        //         delegate (Item it)
-        //         {
-        //             return it.Nome.Equals(itemToBeChanged, StringComparison.CurrentCultureIgnoreCase);
-        //         }
-        //     )
-        // );
     }
 
     public void AddAttributeToBeChangedInEditingArea(string attributeToBeChanged)
     {
-        _editingArea.AttributeToBeChanged = attributeToBeChanged;
+        _editingArea.SetAttributeToBeChanged(attributeToBeChanged);
     }
 
     public void AddItemInList(string userItem)
@@ -131,7 +132,7 @@ public class JsonItemRepository : IItemRepository
         SaveData();
     }
 
-    public SearchResultDTO RemoveItemFromList(string userItem)
+    public SearchResult RemoveItemFromList(string userItem)
     {
         //TODO: Verify implementation of SearchResultHandler and to refactor logic
         List<Item> result = ListData.Items.FindAll(
