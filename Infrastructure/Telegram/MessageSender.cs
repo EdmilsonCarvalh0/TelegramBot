@@ -1,4 +1,5 @@
 using Telegram.Bot;
+using Telegram.Bot.Types.Enums;
 using TelegramBot.Application;
 
 namespace TelegramBot.Infrastructure;
@@ -7,34 +8,23 @@ namespace TelegramBot.Infrastructure;
 public class MessageSender
 {
     private readonly ITelegramBotClient _botClient;
+    private readonly ChatIdIdentifier _chatId;
 
-    public MessageSender(ITelegramBotClient botClient)
+    public MessageSender(ITelegramBotClient botClient, ChatIdIdentifier chatId)
     {
         _botClient = botClient;
+        _chatId = chatId;
     }
 
-    public async Task SendMessageAsync(ResponseContentDTO responseContent, BotRequestContext context)
+    public async Task SendMessageAsync(ResponseContent responseContent, CancellationToken cancellationToken)
     {
-        if (responseContent.KeyboardMarkup != null)
-        {
-            await _botClient.SendMessage(
-                chatId: context.UserId,
-                text: responseContent.Text,
-                replyMarkup: responseContent.KeyboardMarkup,
-                cancellationToken: context.CancellationToken
-            );
-
-            UserStateManager.SetState(context.UserId, responseContent.UserState);
-            return;
-        }
-
         await _botClient.SendMessage(
-            chatId: context.UserId,
+            chatId: _chatId.BotId,
             text: responseContent.Text,
-            cancellationToken: context.CancellationToken
+            replyMarkup: responseContent.KeyboardMarkup,
+            cancellationToken: cancellationToken
         );
 
-        UserStateManager.SetState(context.UserId, responseContent.UserState);
-        return;
+        UserStateManager.SetState(_chatId.BotId, responseContent.UserState); // novo state precisa ser definido aqui?
     }
 }
