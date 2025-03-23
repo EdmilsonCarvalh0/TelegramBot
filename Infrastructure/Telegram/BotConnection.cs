@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Configuration;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -41,27 +40,26 @@ namespace TelegramBot.Infrastructure
         private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             using var scope = _scopeFactory.CreateScope();
-
             var contextFactory = scope.ServiceProvider.GetRequiredService<BotRequestContextFactory>();
-            var bot = scope.ServiceProvider.GetRequiredService<ITelegramBotClient>();
 
             long userId = update.CallbackQuery?.From.Id ?? update.Message?.Chat.Id ?? 0;
-            var context = contextFactory.Create(bot, userId, update, cancellationToken);
+            var context = contextFactory.Create(_bot, userId, update, cancellationToken);
 
-            _handlers.LoadContext(context);
+            _handlers.Start(context);
+
             await _handlers.DelegateUpdates(update);
         }
 
         private Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
-            Console.WriteLine($"Erro recebido: {exception.Message}\nData: {exception.InnerException}");
+            Console.WriteLine($"Erro recebido: {exception.Message}\nData: {exception.StackTrace}");
             return Task.CompletedTask;
         }
 
         public async Task DisplayBotInfoAsync()
         {
             var me = await _bot.GetMe();
-            Console.WriteLine($"Bot iniciado: @{me.Username}");
+            Console.WriteLine($"\n--> Bot iniciado: @{me.Username} <--\n");
         }
 
         public InlineKeyboardMarkup StartService()
