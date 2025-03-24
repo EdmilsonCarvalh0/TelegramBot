@@ -1,4 +1,6 @@
 
+using TelegramBot.Domain;
+
 namespace TelegramBot.Application;
 
 public class CallbackHandler
@@ -61,17 +63,20 @@ public class CallbackHandler
 
     private void HandleSendOfList()
     {
-
+        _responseInfo.SubjectContextData = _handlerContext.ItemRepository.GetList();
+        _responseInfo.Subject = "Show List";
     }
 
     private void HandleToUpdateList()
     {
-
+        _responseInfo.Subject = "Atualizar lista";
     }
 
     private void HandleToAddItem()
     {
+        _responseInfo.Subject = "Adicionar um item";
 
+        _handlerContext.StateManager.SetAdditionalInfo(_handlerContext.Context!.UserId, "waiting_item_to_add");
     }
 
     private void HandleItemChange()
@@ -86,7 +91,9 @@ public class CallbackHandler
 
     private void HandleItemRemove()
     {
-        
+        _responseInfo.Subject = "Remover um item";
+
+        _handlerContext.StateManager.SetAdditionalInfo(_handlerContext.Context!.UserId, "waiting_item_to_remove");
     }
 
     private void HandleCreatingNewList()
