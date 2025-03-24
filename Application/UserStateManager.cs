@@ -57,4 +57,9 @@ public class UserStateManager
     {
         _userStates[userId].AdditionalInfo = "";
     }
+
+    public void ShowUserState(long userId)
+    {
+        Console.WriteLine($"Estado atual {GetUserStateData(userId).State}");
+    }
 }
