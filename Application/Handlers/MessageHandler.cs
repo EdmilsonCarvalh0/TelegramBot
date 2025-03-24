@@ -67,7 +67,10 @@ public class MessageHandler
 
     private void HandleWaitingToAddOfItem()
     {
-         
+        _handlerContext.ItemRepository.AddItemInList(_handlerContext.Context!.Message!.Text!);
+        _handlerContext.StateManager.ResetAdditionalInfo(_handlerContext.Context!.UserId);
+        
+        _responseInfo.Subject = "Item Added";
     }
 
     private void HandleWaitingForAttributeToUpdated()
@@ -82,7 +85,23 @@ public class MessageHandler
 
     private void HandleWaitingItemToRemove()
     {
+        var result = _handlerContext.ItemRepository.RemoveItemFromList(_handlerContext.Context!.Message!.Text!);
 
+        if (result.Status == SearchStatus.NotFound)
+        {
+            _responseInfo.Subject = "Non-existent item";
+            _responseInfo.SubjectContextData = _handlerContext.ItemRepository.GetList();
+            return;
+        }
+
+        if (result.Status == SearchStatus.MoreThanOne)
+        {
+            _responseInfo.Subject = "More Than One Item";
+            _responseInfo.SubjectContextData = result.Result;
+            return;
+        }
+
+        _responseInfo.Subject = "Deleted Item OK";
     }
 
     private void HandleWaitingItemsCreatingNewList()
