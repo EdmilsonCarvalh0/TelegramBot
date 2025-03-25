@@ -13,12 +13,13 @@ public class Item : ItemDataModel
 
     public void SetNome(string attribute)
     {
-        Nome = attribute;
+        Nome = char.ToUpper(attribute[0]) + attribute[1..].ToLower();
+        
     }
 
     public void SetMarca(string attribute)
     {
-        Marca = attribute;
+        Marca = char.ToUpper(attribute[0]) + attribute[1..].ToLower();
     }
 
     public void SetPreco(string attribute)
