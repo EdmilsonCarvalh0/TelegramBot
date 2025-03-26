@@ -75,29 +75,40 @@ public class CallbackHandler
     private void HandleToAddItem()
     {
         _responseInfo.Subject = "Adicionar um item";
-
         _handlerContext.StateManager.SetAdditionalInfo(_handlerContext.Context!.UserId, "waiting_item_to_add");
     }
 
     private void HandleItemChange()
     {
-
+        _responseInfo.Subject = _handlerContext.Context!.CallbackQuery!.Data;
+        _handlerContext.StateManager.SetAdditionalInfo(_handlerContext.Context!.UserId, "waiting_for_name_attribute_to_update");
     }
 
     private void HandleAttributeChange()
     {
+        var nameAttribute = _handlerContext.Context!.CallbackQuery!.Data!;
+        _handlerContext.ItemRepository.AddAttributeToBeChangedInEditingArea(nameAttribute!);
 
+        var genderVerified = CheckItemGender(nameAttribute);
+        _responseInfo.SubjectContextData = $"{genderVerified} {nameAttribute}";
+        _responseInfo.Subject = "Attribute Change";
+
+        _handlerContext.StateManager.SetAdditionalInfo(_handlerContext.Context!.UserId, "waiting_for_attribute_to_update");
     }
 
     private void HandleItemRemove()
     {
         _responseInfo.Subject = "Remover um item";
-
         _handlerContext.StateManager.SetAdditionalInfo(_handlerContext.Context!.UserId, "waiting_item_to_remove");
     }
 
     private void HandleCreatingNewList()
     {
 
+    }
+
+    private string CheckItemGender(string item)
+    {
+        return item[item.Length -1] == 'a' ? "a" : "o";
     }
 }
