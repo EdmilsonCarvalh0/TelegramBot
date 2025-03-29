@@ -1,4 +1,5 @@
 
+using TelegramBot.Data;
 using TelegramBot.Domain;
 
 namespace TelegramBot.Application;
@@ -50,6 +51,14 @@ public class MessageHandler
             case "waiting_items_to_create_new_list":
                 HandleWaitingItemsCreatingNewList();
                 break;
+
+            case "waiting_for_the_assistant_list_items":
+                HandleWithTheListOfItemsToBeBuiyng();
+                break;
+
+            case "waiting_for_the_item_added_to_the_cart":
+                HandleAssistantListItems();
+                break;
         }
 
         return _responseInfo;
@@ -96,7 +105,7 @@ public class MessageHandler
         if (searchResult.Status == SearchStatus.NotFound)
         {
             _responseInfo.Subject = "Non-existent Item";
-            _responseInfo.SubjectContextData = _handlerContext.ItemRepository.GetList();
+            _responseInfo.SubjectContextData = ProcessListInRepositoryToShow();
             return;
         }
 
@@ -123,7 +132,7 @@ public class MessageHandler
         if (result.Status == SearchStatus.NotFound)
         {
             _responseInfo.Subject = "Non-existent item";
-            _responseInfo.SubjectContextData = _handlerContext.ItemRepository.GetList();
+            _responseInfo.SubjectContextData = ProcessListInRepositoryToShow();
             return;
         }
 
@@ -184,6 +193,44 @@ public class MessageHandler
 
     }
 
+    private void HandleAssistantListItems()
+    {
+                var item = _handlerContext.Context!.Message!.Text!;
+        bool wasRemoved = _handlerContext.ShoppingAssistant.RemoveItemFromShoppingList(item);
+
+        if (!wasRemoved)
+        {
+            _responseInfo.Subject = "Item Not Listed";
+            _handlerContext.ShoppingAssistant.ReserveItemNotListed(item);
+            return;
+        }
+
+        if (_handlerContext.ShoppingAssistant.ChekIfListIsEmpty())
+        {
+            _responseInfo.Subject = "Off Shopping";
+            _handlerContext.StateManager.ResetAdditionalInfo(_handlerContext.Context!.UserId);
+            return;
+        }
+
+        string list = ProcessListInShoppingToShow();
+
+        _responseInfo.Subject = "On Shopping";
+        _responseInfo.SubjectContextData = list;
+    }
+
+    private void HandleWithTheListOfItemsToBeBuiyng()
+    {
+        var items = _handlerContext.Context!.Message!.Text!;
+        List<string> listItems = [.. items.Trim().Split(", ")];
+
+        _handlerContext.ShoppingAssistant.LoadList(listItems);
+        
+        _responseInfo.Subject = "Prepared List";
+        _responseInfo.SubjectContextData = ProcessListInShoppingToShow();
+
+        _handlerContext.StateManager.SetAdditionalInfo(_handlerContext.Context!.UserId, "waiting_for_the_item_added_to_the_cart");
+    }
+
     private string CheckAttributeGender(string item)
     {
         return item[item.Length - 1] == 'a' ? "da " : "do ";
@@ -192,5 +239,32 @@ public class MessageHandler
     private bool CheckIfItIsANumber(string inputNumber)
     {
         return inputNumber.Length == 1 && int.TryParse(inputNumber, out _);
+    }
+
+    private string ProcessListInRepositoryToShow()
+    {
+        var items = _handlerContext.ItemRepository.GetList();
+        string list = string.Empty;
+
+        foreach(var item in items)
+        {
+            list += item.ToString();
+        }
+
+        return list;
+    }
+
+    private string ProcessListInShoppingToShow()
+    {
+        var itemsToBuy = _handlerContext.ShoppingAssistant.GetListOfRemainingItems();
+        string list = string.Empty;
+
+        for(int i = 0; i < itemsToBuy.Count; i++)
+        {
+            string item = itemsToBuy[i];
+            list += $"       {i+1}. {char.ToUpper(itemsToBuy[i][0]) + itemsToBuy[i][1..].ToLower()}\n";
+        }
+
+        return list;
     }
 }

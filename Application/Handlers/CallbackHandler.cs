@@ -1,6 +1,3 @@
-
-using TelegramBot.Domain;
-
 namespace TelegramBot.Application;
 
 public class CallbackHandler
@@ -56,6 +53,26 @@ public class CallbackHandler
             case "Criar nova lista":
                 HandleCreatingNewList();
                 break;
+            
+            case "Modo Ficando Mais Pobre":
+                HandleStartOfShoppingMode();
+                break;
+            
+            case "Sim":
+                HandleShoppingModeConfirmation();
+                break;
+            
+            case "Não":
+                HandleShoppingModeConfirmation();
+                break;
+
+            case "Mais uma coisa":
+                HandleWithUnlistedItem();
+                break;
+            
+            case "Só errei o nome":
+                HandleWrongItemName();
+                break;
         }
 
         return _responseInfo!;
@@ -63,7 +80,16 @@ public class CallbackHandler
 
     private void HandleSendOfList()
     {
-        _responseInfo.SubjectContextData = _handlerContext.ItemRepository.GetList();
+        var items = _handlerContext.ItemRepository.GetList();
+        
+        string list = string.Empty;
+
+        foreach(var item in items)
+        {
+            list += item.ToString();
+        }
+
+        _responseInfo.SubjectContextData = list;
         _responseInfo.Subject = "Show List";
     }
 
@@ -105,6 +131,40 @@ public class CallbackHandler
     private void HandleCreatingNewList()
     {
 
+    }
+
+    private void HandleStartOfShoppingMode()
+    {
+        _responseInfo.Subject = "Modo Ficando Mais Pobre";
+    }
+
+    private void HandleShoppingModeConfirmation()
+    {
+        if(_handlerContext.Context!.CallbackQuery!.Data! == "Sim")
+        {
+            _responseInfo.Subject = "Assistant List Items";
+            _handlerContext.StateManager.SetAdditionalInfo(_handlerContext.Context!.UserId, "waiting_for_the_assistant_list_items");
+        }
+
+        if(_handlerContext.Context!.CallbackQuery!.Data! == "Não")
+        {
+            _responseInfo.Subject = "Shopping Mode Declined";
+        }
+    }
+
+    private void HandleWithUnlistedItem()
+    {
+        _responseInfo.Subject = "Inserting New Item";
+
+        var itemName = _handlerContext.ShoppingAssistant.GetItemReserved();
+        string genderVerified = CheckItemGender(itemName);
+
+        _responseInfo.SubjectContextData = $"{genderVerified} {itemName}";
+    }
+
+    private void HandleWrongItemName()
+    {
+        _responseInfo.Subject = "Discard Wrong Item";
     }
 
     private string CheckItemGender(string item)
