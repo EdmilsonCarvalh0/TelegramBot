@@ -42,26 +42,34 @@ public class JsonItemRepository : IItemRepository
     public SearchResult GetItemInRepository(string itemInput)
     {       
         List<Item> result = ListData.Items.FindAll(
-            delegate (Item it)
+            delegate (Item item)
             {
-                return it.Nome.Equals(itemInput, StringComparison.CurrentCultureIgnoreCase);
+                return item.Nome.Equals(itemInput, StringComparison.CurrentCultureIgnoreCase);
             }
         );
+        
+        var searchResult = _searchResultHandler.GetSearchResult(result);
+        
+        if (searchResult.Status == SearchStatus.MoreThanOne) _editingArea.InsertFoundItems(result);
 
-        return _searchResultHandler.GetSearchResult(result);
+        return searchResult;
     }
 
-    public string GetList()
+    public List<Item> GetList()
     {
-        string list = string.Empty;
+        List<Item> auxiliaryList = new();
 
         foreach (var item in ListData.Items)
         {
-            list += item.ToString();
+            auxiliaryList.Add(new Item {
+                Id = item.Id,
+                Nome = item.Nome,
+                Marca = item.Marca,
+                Preco = item.Preco
+            });
         }
 
-        Console.WriteLine(list);
-        return list;
+        return auxiliaryList;
     }
 
     public void UpdateList(string item)
@@ -130,6 +138,38 @@ public class JsonItemRepository : IItemRepository
         });
 
         SaveData();
+    }
+
+    public UserState VerifyNumberReferencingItem(int referenceNumber, string operation)
+    {
+        if(operation == "waiting_for_number_that_references_to_update")
+        {
+            Item item = _searchResultHandler.GetItemToUpdate(referenceNumber)!;
+
+            if (item == null) return UserState.None;
+
+            _editingArea.SetItemToBeChanged(new Item {
+                Id = item.Id,
+                Nome = item.Nome,
+                Marca = item.Marca,
+                Preco = item.Preco
+            });
+
+            return UserState.UpdateItem;
+        }
+
+        if(operation == "waiting_for_number_that_references_to_remove")
+        {
+            Item item = _searchResultHandler.GetItemToUpdate(referenceNumber)!;
+
+            if (item == null) return UserState.None;
+
+            ListData.Items.Remove(item);
+            SequentializeIDs();
+            SaveData();
+        }
+        
+        return UserState.DeleteItem;
     }
 
     public SearchResult RemoveItemFromList(string userItem)
