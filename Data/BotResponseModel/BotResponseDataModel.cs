@@ -9,5 +9,5 @@ public abstract class BotResponseDataModel
     public string ResponseRequest { get; set; } = string.Empty;
 
     [JsonProperty]
-    public ResponseContentDTO ResponseContent { get; } = new ();
+    public ResponseContent ResponseContent { get; } = new ();
 }

@@ -32,13 +32,13 @@ public class SearchResultHandler
         return ScenarioStatus[quantityOfItens];
     }
 
-    public SearchResultDTO GetSearchResult(List<Item> result)
+    public SearchResult GetSearchResult(List<Item> result)
     {
         PrimaryResult = result;
         var searchStatus = GetSearchStatus(PrimaryResult.Count);
         Verify(searchStatus);
 
-        return new SearchResultDTO()
+        return new SearchResult()
         {
             Result = FinalResult,
             Status = FinalStatus
@@ -61,6 +61,7 @@ public class SearchResultHandler
 
     private void ItemFound()
     {
+        FinalResult = "";
         FinalResult = "Item encontrado";
         FinalStatus = SearchStatus.Found;
     }
@@ -73,5 +74,10 @@ public class SearchResultHandler
             }
         
         FinalStatus = SearchStatus.MoreThanOne;
+    }
+
+    public Item? GetItemToUpdate(int referenceNumber)
+    {
+        return PrimaryResult.FirstOrDefault(item => item.Id == referenceNumber)!;
     }
 }
