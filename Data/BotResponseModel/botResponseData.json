@@ -12,7 +12,8 @@
                     {"text": "Ver lista", "callbackData": "Ver lista"},
                     {"text": "Atualizar lista", "callbackData": "Atualizar lista"},
                     {"text": "Criar nova lista", "callbackData": "Criar nova lista"}
-                ]
+                ],
+                [{"text": "Modo Ficando Mais Pobre", "callbackData": "Modo Ficando Mais Pobre"}]
             ],
             "userState": "Running"
         },
@@ -31,7 +32,7 @@
             "UserState": "None"
         },
         "Update Item": {
-            "text": "O que deseja alterar ",
+            "text": "O que deseja alterar {0}?",
             "keyboardMarkup": [[
                 {"text": "Nome", "callbackData": "Nome"},
                 {"text": "Marca", "callbackData": "Marca"},
@@ -40,12 +41,17 @@
             "userState": "UpdateItem"
         },
         "Non-existent Item": {
-            "text": "Infelizmente não encontrei o item na lista.\nVerifique se o nome está correto e informe novamente.\n",
+            "text": "Infelizmente não encontrei o item na lista.\nVerifique se o nome está correto e informe novamente.\n\n{0}",
             "keyboardMarkup": null,
             "userState": "UpdateList"
         },
         "More Than One Item": {
-            "text": "Encontrei os seguintes itens. Qual deles seria?\nInforme o número que referencia o item.\n\n",
+            "text": "Encontrei os seguintes itens. Qual deles seria?\nInforme o número que referencia o item.\n\n{0}",
+            "keyboardMarkup": null,
+            "userState": "UpdateList"
+        },
+        "Invalid Number": {
+            "text": "Preciso que informe um número válido:\n\n{0}",
             "keyboardMarkup": null,
             "userState": "UpdateList"
         },
@@ -65,7 +71,7 @@
             "userState": "None"
         },
         "Show List": {
-            "text": "Essa é a sua lista atual:\n\n",
+            "text": "Essa é a sua lista atual:\n\n{0}",
             "keyboardMarkup": null,
             "userState": "None"
         },
@@ -79,8 +85,8 @@
             "keyboardMarkup": null,
             "userState": "UpdateList"
         },
-        "Atributte Change":  {
-            "text": "Informe ",
+        "Attribute Change":  {
+            "text": "Informe {0}:",
             "keyboardMarkup": null,
             "userState": "UpdateItem"   
         },
@@ -93,6 +99,57 @@
             "text": "Envie agora os itens da nova lista.\nUse o padrão adequado para registro correto dos itens. Nesse caso, separe os itens por vírgula sem espaços.\nEx: Pão,Manteiga,Queijo",
             "keyboardMarkup": null,
             "userState": "CreateList"
-        }
+        },
+        "Modo Ficando Mais Pobre": {
+            "text": "Parece que hoje é dia de deixar o pedaço do salário no mercado né?\nMas é assim mesmo...\nHoje eu vou ajudar você a não esquecer o leite do minino.\n\nVocê quer mesmo começar o processo que alegra o dono do mercado?",
+            "keyboardMarkup": [[
+                {"text": "Sim", "callbackData": "Sim"},
+                {"text": "Não", "callbackData": "Não"}
+            ]],
+            "userState": "ConfirmShoppingMode"
+        },
+        "Shopping Mode Declined": {
+            "text": "Tá legal!\nQuem sabe outra hora...",
+            "keyboardMarkup": null,
+            "userState": "None"
+        },
+        "Assistant List Items": {
+            "text": "Então vamos começar a ficar mais pobre!\n\nMe passe a lista das coisas que você vai comprar hoje da seguinte maneira:\n\n -> Pão, detergente, cebola <-\n\nÉ o nome seguido da vírgula e um espaço (não precisa de ponto final).\nPelo amor de Deus, não mande diferente!\n\nArrocha:",
+            "keyboardMarkup": null,
+            "userState": "PreparingShoppingMode"
+        },
+        "Prepared List": {
+            "text": "Tudo certo. Vamos começar a ficar pobre!\n\n{0}\nA partir de agora estou no modo EM COMPRAS, ou seja, basta me mandar o nome do item que você pegou e eu vou atualizando pra você o que resta.",
+            "keyboardMarkup": null,
+            "userState": "OnShoppingMode"
+        },
+        "On Shopping": {
+            "text": "ITENS RESTANTES:\n\n{0}",
+            "keyboardMarkup": null,
+            "userState": "OnShoppingMode"
+        },
+        "Item Not Listed": {
+            "text": "Decidiu pegar mais uma coisa ou só errou o nome?",
+            "keyboardMarkup": [[
+                {"text": "Mais uma coisa", "callbackData": "Mais uma coisa"},
+                {"text": "Só errei o nome", "callbackData": "Só errei o nome"}
+            ]],
+            "userState": "OnShoppingMode"
+        },
+        "Inserting New Item": {
+            "text": "Pobre é uma coisa triste...\nVai, já inseri {0}, pode continuar mandando os itens.",
+            "keyboardMarkup": null,
+            "userState": "OnShoppingMode"
+        },
+      "Discard Wrong Item": {
+        "text": "Então pode mandar o nome certo dessa vez:",
+        "keyboardMarkup": null,
+        "userState": "OnShoppingMode"
+      },
+      "Off Shopping": {
+        "text": "Chegamos ao fim!\nCaso você queira inserir mais itens, basta ir ao menu e inserir na lista, ela já foi salva.\nEspero ter ajudado da melhor forma!",
+        "keyboardMarkup": null,
+        "userState": "None"
+      }
     }
 }
