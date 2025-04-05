@@ -5,37 +5,33 @@ namespace TelegramBot.Service;
 
 public class SearchResultHandler
 {
-    private Dictionary<int, SearchStatus> ScenarioStatus;
-    private Dictionary<SearchStatus, Action> Scenario;
-    private List<Item> PrimaryResult { get; set; } = new();
+    private List<Item> PrimaryResult { get; set; } = [];
     private string FinalResult { get; set; } = string.Empty;
     private SearchStatus FinalStatus { get; set; }
-
-    public SearchResultHandler()
+    private Dictionary<SearchStatus, Action> Scenario
     {
-        ScenarioStatus = new Dictionary<int, SearchStatus>{
-            {0, SearchStatus.NotFound},
-            {1, SearchStatus.Found},
-            {2, SearchStatus.MoreThanOne}
-        };
-
-        Scenario = new Dictionary<SearchStatus, Action>
+        get
         {
-            {SearchStatus.NotFound, ItemNotFound},
-            {SearchStatus.Found, ItemFound},
-            {SearchStatus.MoreThanOne, MoreThanOneItem}
-        };
+            return new Dictionary<SearchStatus, Action>
+            {
+                {SearchStatus.NotFound, ItemNotFound},
+                {SearchStatus.Found, ItemFound},
+                {SearchStatus.MoreThanOne, MoreThanOneItem}
+            };
+        }
     }
 
-    private SearchStatus GetSearchStatus(int quantityOfItens)
+    private SearchStatus CheckPrimaryResultStatus(int quantityOfItens)
     {
-        return ScenarioStatus[quantityOfItens];
+        if (quantityOfItens == 0) return SearchStatus.NotFound;
+        if (quantityOfItens == 1) return SearchStatus.Found;
+        return SearchStatus.MoreThanOne;
     }
 
     public SearchResult GetSearchResult(List<Item> result)
     {
         PrimaryResult = result;
-        var searchStatus = GetSearchStatus(PrimaryResult.Count);
+        var searchStatus = CheckPrimaryResultStatus(PrimaryResult.Count);
         Verify(searchStatus);
 
         return new SearchResult()
@@ -61,17 +57,18 @@ public class SearchResultHandler
 
     private void ItemFound()
     {
-        FinalResult = "";
         FinalResult = "Item encontrado";
         FinalStatus = SearchStatus.Found;
     }
 
     private void MoreThanOneItem()
     {
+        FinalResult = string.Empty;
+
         foreach (var item in PrimaryResult)
-            {
-                FinalResult += item.ToString();
-            }
+        {
+            FinalResult += item.ToString();
+        }
         
         FinalStatus = SearchStatus.MoreThanOne;
     }
