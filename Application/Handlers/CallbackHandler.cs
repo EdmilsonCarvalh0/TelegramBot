@@ -1,6 +1,11 @@
+using Application.Handlers.Interface;
+using Telegram.Bot;
+using Telegram.Bot.Polling;
+using Telegram.Bot.Types;
+
 namespace TelegramBot.Application;
 
-public class CallbackHandler
+public class CallbackHandler : IUpdateHandlers
 {
     private readonly HandlerContext _handlerContext;
     private readonly ResponseInfoToSendToTheUser _responseInfo = new();
@@ -80,7 +85,7 @@ public class CallbackHandler
 
     private void HandleSendOfList()
     {
-        var items = _handlerContext.ItemRepository.GetList();
+        var items = _handlerContext.ItemRepository.GetListOfItems();
         
         string list = string.Empty;
 
@@ -169,6 +174,16 @@ public class CallbackHandler
 
     private string CheckItemGender(string item)
     {
-        return item[item.Length -1] == 'a' ? "a" : "o";
+        return item[item.Length -1] == 'a' ? "a nova" : "o novo";
+    }
+
+    public Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, HandleErrorSource source, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
     }
 }

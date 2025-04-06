@@ -1,10 +1,13 @@
 
-using TelegramBot.Data;
+using Telegram.Bot.Polling;
 using TelegramBot.Domain;
+using Telegram.Bot;
+using Telegram.Bot.Types;
+using Application.Handlers.Interface;
 
 namespace TelegramBot.Application;
 
-public class MessageHandler
+public class MessageHandler : IUpdateHandlers
 {
     private readonly HandlerContext _handlerContext;
     private readonly ResponseInfoToSendToTheUser _responseInfo = new();
@@ -112,7 +115,6 @@ public class MessageHandler
         if (searchResult.Status == SearchStatus.MoreThanOne)
         {
             _responseInfo.Subject = "More Than One Item";
-            _responseInfo.SubjectContextData = "";
             _responseInfo.SubjectContextData = searchResult.Result;
             _handlerContext.StateManager.SetAdditionalInfo(_handlerContext.Context!.UserId, "waiting_for_number_that_references_to_update");
             return;
@@ -139,7 +141,6 @@ public class MessageHandler
         if (result.Status == SearchStatus.MoreThanOne)
         {
             _responseInfo.Subject = "More Than One Item";
-            _responseInfo.SubjectContextData = "";
             _responseInfo.SubjectContextData = result.Result;
             _handlerContext.StateManager.SetAdditionalInfo(_handlerContext.Context!.UserId, "waiting_for_number_that_references_to_remove");
             return;
@@ -156,18 +157,14 @@ public class MessageHandler
         var inputNumber = _handlerContext.Context!.Message!.Text!;
 
         bool isNumber = CheckIfItIsANumber(inputNumber);
-        int referenceNumber = 0;
 
-        if(isNumber)
-        {
-            referenceNumber = Convert.ToInt32(inputNumber);
-        } 
-        
         if(!isNumber)
         {
             _responseInfo.Subject = "Invalid Number";
             return;
         }
+
+        int referenceNumber = Convert.ToInt32(inputNumber);
 
         UserState response = _handlerContext.ItemRepository.VerifyNumberReferencingItem(referenceNumber, stateData.AdditionalInfo);
 
@@ -238,12 +235,12 @@ public class MessageHandler
 
     private bool CheckIfItIsANumber(string inputNumber)
     {
-        return inputNumber.Length == 1 && int.TryParse(inputNumber, out _);
+        return int.TryParse(inputNumber, out _);
     }
 
     private string ProcessListInRepositoryToShow()
     {
-        var items = _handlerContext.ItemRepository.GetList();
+        var items = _handlerContext.ItemRepository.GetListOfItems();
         string list = string.Empty;
 
         foreach(var item in items)
@@ -261,10 +258,19 @@ public class MessageHandler
 
         for(int i = 0; i < itemsToBuy.Count; i++)
         {
-            string item = itemsToBuy[i];
-            list += $"       {i+1}. {char.ToUpper(itemsToBuy[i][0]) + itemsToBuy[i][1..].ToLower()}\n";
+            list += $"    {i+1}. {char.ToUpper(itemsToBuy[i][0]) + itemsToBuy[i][1..].ToLower()}\n";
         }
 
         return list;
+    }
+
+    public Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, HandleErrorSource source, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
     }
 }
