@@ -1,17 +1,19 @@
+using Application.Handlers.Interface;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 using TelegramBot.Infrastructure;
 
 namespace TelegramBot.Application
 {
     public class UpdateHandlers
     {
+        private readonly IUpdateHandlerFactory _updateHandlerFactory;
         private readonly HandlerContext _handlerContext;
         private readonly IResponseManager _responseManager;
         
 
-        public UpdateHandlers(IResponseManager responseManager, HandlerContext handlerContext)
+        public UpdateHandlers(IUpdateHandlerFactory updateHandlerFactory, IResponseManager responseManager, HandlerContext handlerContext)
         {
+            _updateHandlerFactory = updateHandlerFactory;
             _handlerContext = handlerContext;
             _responseManager = responseManager;
         }
@@ -28,18 +30,9 @@ namespace TelegramBot.Application
 
         public Task DelegateUpdates(Update update)
         {
-            ResponseInfoToSendToTheUser responseInfo = new ResponseInfoToSendToTheUser();
+            IUpdateHandlers handler = _updateHandlerFactory.CreateHandler(update, _handlerContext);
 
-            if (update.Type == UpdateType.Message && update.Message != null)
-            {
-                MessageHandler messageHandler = new MessageHandler(_handlerContext);
-                responseInfo = messageHandler.Handle();
-            }
-            else if (update.Type == UpdateType.CallbackQuery && update.CallbackQuery != null)
-            {
-                CallbackHandler callbackHandler = new CallbackHandler(_handlerContext);
-                responseInfo = callbackHandler.Handle();
-            }
+            ResponseInfoToSendToTheUser responseInfo = handler.Handle();
 
             _responseManager.ProcessResponse(responseInfo, _handlerContext.Context!.CancellationToken);
 
