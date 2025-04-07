@@ -1,36 +1,37 @@
+using Domain.Item;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using TelegramBot.Data;
+using TelegramBot.Application;
 using TelegramBot.Domain;
+using TelegramBot.Domain.Item;
 
 namespace TelegramBot.Service;
 
 public class JsonItemRepository : IItemRepository
 {
-    public ItemDataFormatter ListData;
-    //Implementar pelo Host usando o appsettings.json
-    private readonly string JsonFilePath;
+    private readonly ItemDataFormatter _listData;
+    private readonly string _jsonFilePath;
     private readonly SearchResultHandler _searchResultHandler;
     private readonly IEditingArea _editingArea;
     private readonly IServiceProvider _serviceProvider;
 
     public JsonItemRepository(SearchResultHandler searchResultHandler, IServiceProvider serviceProvider, string filePath)
     {
-        JsonFilePath = filePath;
-        ListData = LoadData();
+        _jsonFilePath = filePath;
+        _listData = LoadData();
         _serviceProvider = serviceProvider;
         _editingArea = GetEditingArea();
         _searchResultHandler = searchResultHandler;
     }
 
-    public ItemDataFormatter LoadData()
+    private ItemDataFormatter LoadData()
     {
-        return JsonConvert.DeserializeObject<ItemDataFormatter>(File.ReadAllText(JsonFilePath))!;
+        return JsonConvert.DeserializeObject<ItemDataFormatter>(File.ReadAllText(_jsonFilePath))!;
     }
 
-    public void SaveData()
+    private void SaveData()
     {
-        File.WriteAllText(JsonFilePath, JsonConvert.SerializeObject(ListData, Formatting.Indented));
+        File.WriteAllText(_jsonFilePath, JsonConvert.SerializeObject(_listData, Formatting.Indented));
     }
 
     private IEditingArea GetEditingArea()
@@ -41,12 +42,8 @@ public class JsonItemRepository : IItemRepository
 
     public SearchResult GetItemInRepository(string itemInput)
     {       
-        List<Item> result = ListData.Items.FindAll(
-            delegate (Item item)
-            {
-                return item.Nome.Equals(itemInput, StringComparison.CurrentCultureIgnoreCase);
-            }
-        );
+        var result = _listData.Items.FindAll(
+            item => item.Nome.Value.Equals(itemInput, StringComparison.CurrentCultureIgnoreCase));
         
         var searchResult = _searchResultHandler.GetSearchResult(result);
         
@@ -55,62 +52,40 @@ public class JsonItemRepository : IItemRepository
         return searchResult;
     }
 
-    public List<Item> GetList()
+    public List<Item> GetListOfItems()
     {
-        List<Item> auxiliaryList = new();
-
-        foreach (var item in ListData.Items)
-        {
-            auxiliaryList.Add(new Item {
-                Id = item.Id,
-                Nome = item.Nome,
-                Marca = item.Marca,
-                Preco = item.Preco
-            });
-        }
-
-        return auxiliaryList;
-    }
-
-    public void UpdateList(string item)
-    {
-        //TODO: implement list update and correctly replace elements
-        //      implementar atualização de lista e substituir corretamente os elementos
-        /*
-            In a way that it correctly changed the passed attribute.
-            Perhaps the secret lies in the BotClient's automatic item verification
-            
-            De uma forma que ele altere corretamente o atributo passado.
-            Talvez o segredo esteja na verificação automática de item do BotClient
-        */
-
-
+        return _listData.Items.Select(item => 
+            ItemFactory.Create(
+                item.Id.Value, 
+                item.Nome.Value, 
+                item.Marca.Value, 
+                item.Preco.Value)
+            ).ToList();
     }
 
     public void UpdateItemInList(string newAttribute)
     {
         var itemUpdated = _editingArea.Update(newAttribute);
-        var indexItem = ListData.Items.FindIndex(item => item.Id == itemUpdated.Id);
+        var indexItem = _listData.Items.FindIndex(item => item.Id.Value == itemUpdated.Id.Value);
 
-        ListData.Items[indexItem] = itemUpdated;
+        _listData.Items[indexItem] = itemUpdated;
 
         SaveData();
     }
 
     public void AddItemInEditingArea(string itemToBeChanged)
     {
-        var item = ListData.Items.FirstOrDefault(
-            item => item.Nome.Equals(itemToBeChanged, StringComparison.CurrentCultureIgnoreCase));
+        var item = _listData.GetItemInList(itemToBeChanged);
 
-        if(item != null)
-        {
-            _editingArea.SetItemToBeChanged(new Item {
-                Id = item.Id,
-                Nome = item.Nome,
-                Marca = item.Marca,
-                Preco = item.Preco
-            });
-        }
+        if (item == null) return;
+        var it = ItemFactory.Create(
+            item.Id.Value,
+            item.Nome.Value,
+            item.Marca.Value,
+            item.Preco.Value
+        );
+
+        _editingArea.SetItemToBeChanged(it);
     }
 
     public void AddAttributeToBeChangedInEditingArea(string attributeToBeChanged)
@@ -120,78 +95,71 @@ public class JsonItemRepository : IItemRepository
 
     public void AddItemInList(string userItem)
     {
-        List<string> itemsToAdd = new();
-
-        if (userItem.Contains('\n'))
+        InputProcessor processor= new(userItem);
+        var inputItems = processor.ProcessInput();
+        
+        foreach (var input in inputItems)
         {
-            AddIfThereIsMoreOneItem(userItem);
-            return;
+            var item = ItemFactory.Create(
+                _listData.Items.Count,
+                input.Name,
+                input.Brand,
+                input.Price
+            );
+            _listData.Items.Add(item);
         }
-
-        itemsToAdd.AddRange(userItem.Trim().Split(" - "));
-
-        ListData.Items.Add(new Item {
-            Id = ListData.Items.Count +1, 
-            Nome = itemsToAdd[0],
-            Marca = itemsToAdd[1],
-            Preco = FormatPrice(itemsToAdd[2])
-        });
-
         SaveData();
     }
 
     public UserState VerifyNumberReferencingItem(int referenceNumber, string operation)
     {
-        if(operation == "waiting_for_number_that_references_to_update")
+        switch (operation)
         {
-            Item item = _searchResultHandler.GetItemToUpdate(referenceNumber)!;
+            case "waiting_for_number_that_references_to_update":
+            {
+                var item = _searchResultHandler.GetItemToUpdate(referenceNumber)!;
 
-            if (item == null) return UserState.None;
+                if (item == null) return UserState.None;
 
-            _editingArea.SetItemToBeChanged(new Item {
-                Id = item.Id,
-                Nome = item.Nome,
-                Marca = item.Marca,
-                Preco = item.Preco
-            });
+                _editingArea.SetItemToBeChanged(ItemFactory.Create(
+                    item.Id.Value,
+                    item.Nome.Value,
+                    item.Marca.Value,
+                    item.Preco.Value
+                ));
 
-            return UserState.UpdateItem;
+                return UserState.UpdateItem;
+            }
+            case "waiting_for_number_that_references_to_remove":
+            {
+                var item = _searchResultHandler.GetItemToUpdate(referenceNumber)!;
+
+                if (item == null) return UserState.None;
+
+                _listData.Items.Remove(item);
+
+                _listData.SequentializeIDs();
+                SaveData();
+                break;
+            }
         }
 
-        if(operation == "waiting_for_number_that_references_to_remove")
-        {
-            Item item = _searchResultHandler.GetItemToUpdate(referenceNumber)!;
-
-            if (item == null) return UserState.None;
-
-            ListData.Items.Remove(item);
-            SequentializeIDs();
-            SaveData();
-        }
-        
         return UserState.DeleteItem;
     }
 
     public SearchResult RemoveItemFromList(string userItem)
     {
         //TODO: Verify implementation of SearchResultHandler and to refactor logic
-        List<Item> result = ListData.Items.FindAll(
-            delegate (Item it)
-            {
-                return it.Nome.Equals(userItem, StringComparison.CurrentCultureIgnoreCase);
-            }
-        );
+        var result = _listData.Items.FindAll(
+            it => it.Nome.Value.Equals(userItem, StringComparison.CurrentCultureIgnoreCase));
 
         var searchResult = _searchResultHandler.GetSearchResult(result);
 
-        if (searchResult.Status == SearchStatus.NotFound || searchResult.Status == SearchStatus.MoreThanOne) return searchResult;
+        if (searchResult.Status is SearchStatus.NotFound or SearchStatus.MoreThanOne) return searchResult;
         
-        // List<Item> temporaryList = ListData.Items;
-        // temporaryList.Remove(result[0]);
-        // ListData.Items = temporaryList;
-        ListData.Items.Remove(result[0]);
+        _listData.Items.Remove(result[0]);
 
-        SequentializeIDs();
+        _listData.SequentializeIDs();
         SaveData();
 
         return searchResult;
@@ -200,61 +168,5 @@ public class JsonItemRepository : IItemRepository
     public void CreateNewList(string userItems)
     {
 
-    }
-
-    private static decimal FormatPrice(string preco)
-    {
-        return Convert.ToDecimal(preco);
-    }
-
-    private void AddIfThereIsMoreOneItem(string userItem)
-    {
-        List<string> linesWithItems = [.. userItem.Trim().Split('\n')];
-
-        List<string> attributesOfTheItemToBeChecked = new();
-        
-        foreach (var line in linesWithItems)
-        {
-            attributesOfTheItemToBeChecked.Clear();
-            attributesOfTheItemToBeChecked.AddRange(line.Trim().Split(" - "));
-            ListData.Items.Add(CheckLineOfItem(attributesOfTheItemToBeChecked));
-        }
-        SaveData();
-    }
-
-    private Item CheckLineOfItem(List<string> linesOfItems)
-    {
-        var indefinedItem = linesOfItems[1].Split(",").ToList();
-        bool isPrice = indefinedItem[0].All(char.IsDigit) && indefinedItem[1].All(char.IsDigit);
-        
-        return isPrice ? 
-            new Item {
-                Id = ListData.Items.Count +1,
-                Nome = linesOfItems[0],
-                Marca = default!,
-                Preco = FormatPrice(linesOfItems[1])
-            } : 
-            new Item 
-            {
-                Id = ListData.Items.Count +1,
-                Nome = linesOfItems[0],
-                Marca = linesOfItems[1],
-                Preco = FormatPrice(linesOfItems[2])
-            };
-    }
-
-    private void SequentializeIDs()
-    {
-        if(ListData.Items.Count <= 1) return;
-        
-        List<Item> temporaryList = ListData.Items;
-        temporaryList[0].Id = 1;
-
-        for (int i = 0; i < temporaryList.Count -1; i++)
-        {
-            temporaryList[i+1].Id = temporaryList[i+1].Id - temporaryList[i].Id > 1 ? temporaryList[i].Id+1 : temporaryList[i+1].Id;
-        }
-
-        ListData.Items = temporaryList;
     }
 }

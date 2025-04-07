@@ -1,12 +1,11 @@
-using TelegramBot.Data;
+using Domain.Item;
 using TelegramBot.Domain;
 using TelegramBot.Service;
 
 public interface IItemRepository
 {
     SearchResult GetItemInRepository(string itemInput);
-    List<Item> GetList();
-    void UpdateList(string items);
+    List<Item> GetListOfItems();
     void UpdateItemInList(string newAttribute);
     void AddItemInEditingArea(string itemToBeChanged);
     void AddAttributeToBeChangedInEditingArea(string attributeToBeChanged);

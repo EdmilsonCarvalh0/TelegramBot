@@ -1,11 +1,12 @@
 using Domain.Item;
 using TelegramBot.Data;
+using TelegramBot.Domain.Item;
 
 namespace TelegramBot.Application;
 
 public class ItemFactory
 {
-    public Item Create(int id, string name, string brand, decimal price)
+    public static Item Create(int id, string name, string brand, decimal price)
     {
         return new Item(
             new ItemId(id),
