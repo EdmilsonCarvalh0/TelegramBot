@@ -1,5 +1,6 @@
 using TelegramBot.Data;
 using TelegramBot.Domain;
+using Domain.Item;
 
 namespace TelegramBot.Service;
 
@@ -75,6 +76,6 @@ public class SearchResultHandler
 
     public Item? GetItemToUpdate(int referenceNumber)
     {
-        return PrimaryResult.FirstOrDefault(item => item.Id == referenceNumber)!;
+        return PrimaryResult.FirstOrDefault(item => item.Id.Value == referenceNumber)!;
     }
 }
