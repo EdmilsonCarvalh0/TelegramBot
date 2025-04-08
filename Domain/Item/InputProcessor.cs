@@ -9,6 +9,10 @@ public class InputProcessor
     
     public InputProcessor(string value)
     {
+        if (string.IsNullOrEmpty((value)) || (value.Length <= 2))
+        {
+            throw new ArgumentException("Informe o item corretamente.");
+        }
         _input = value;
     }
     
