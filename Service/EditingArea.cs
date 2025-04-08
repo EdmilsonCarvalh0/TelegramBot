@@ -1,11 +1,12 @@
-using TelegramBot.Data;
+using Domain.Item;
 
 namespace TelegramBot.Service;
 
 public class EditingArea : IEditingArea
 {
-    public Item ItemToBeChanged { get; set; } = new();
-    public string AttributeToBeChanged { get; set; } = string.Empty;
+    private Item ItemToBeChanged { get; set; } = Item.Placeholder;
+    private string AttributeToBeChanged { get; set; } = string.Empty;
+    private List<Item> ItemsFound { get; set; } = [];
     private Dictionary<string, Action<string>> Scenario 
     {
         get 
@@ -37,5 +38,10 @@ public class EditingArea : IEditingArea
     public void SetItemToBeChanged(Item item)
     {
         ItemToBeChanged = item;
+    }
+
+    public void InsertFoundItems(List<Item> itemsFound)
+    {
+        ItemsFound = itemsFound;
     }
 }
