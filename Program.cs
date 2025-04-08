@@ -1,9 +1,13 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Application.Handlers;
+using Application.Handlers.Interface;
+using Domain.Item;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using TelegramBot.Application;
+using TelegramBot.Application.Handlers;
 using TelegramBot.Data;
 using TelegramBot.Infrastructure;
 using TelegramBot.Service;
@@ -69,6 +73,7 @@ namespace TelegramBot
                         services.AddSingleton<CallbackQuery>();
                         services.AddSingleton<Message>();
                         services.AddSingleton<HandlerContext>();
+                        services.AddSingleton<IUpdateHandlerFactory, UpdateHandlerFactory>();
                         services.AddScoped<IEditingArea, EditingArea>();
                         services.AddScoped<BotRequestContextFactory>();
                     }
