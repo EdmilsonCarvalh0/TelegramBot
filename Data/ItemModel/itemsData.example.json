@@ -1,0 +1,18 @@
+{
+  "items": [
+    {
+      "id": {
+        "Value": 0
+      },
+      "nome": {
+        "Value": ""
+      },
+      "marca": {
+        "Value": ""
+      },
+      "preco": {
+        "Value": 0.0
+      }
+    }
+  ]
+}
