@@ -1,7 +1,9 @@
 using Newtonsoft.Json;
-using TelegramBot.Application;
+using TelegramBot.Application.Bot;
 
-public class BotResponseDataFormatter
+namespace TelegramBot.Infrastructure.JsonStorage;
+
+public class BotResponseCollection
 {
     [JsonProperty("responses")]
     public Dictionary<string, ResponseContent> Responses { get; } = new();
