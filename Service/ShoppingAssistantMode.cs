@@ -19,7 +19,7 @@ public class ShoppingAssistantMode
 
         if (result == null)  return false;
 
-        ItemsToBuy.Remove(item);
+        ItemsToBuy.Remove(result);
         return true;
     }
 
