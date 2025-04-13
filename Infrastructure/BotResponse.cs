@@ -1,11 +1,13 @@
 using Newtonsoft.Json;
 using TelegramBot.Application;
+using TelegramBot.Application.Bot;
+using TelegramBot.Infrastructure.JsonStorage;
 
-namespace TelegramBot.Data;
+namespace TelegramBot.Infrastructure;
 
-public class BotResponse : BotResponseDataModel
+public class BotResponse
 {
-    public BotResponseDataFormatter DataFormatter { get; } = new();
+    public BotResponseCollection DataFormatter { get; } = new();
     private string ResponseJsonFilePath;
 
     public BotResponse(string filePath)
@@ -14,9 +16,9 @@ public class BotResponse : BotResponseDataModel
         DataFormatter = LoadData();
     }
 
-    private BotResponseDataFormatter LoadData()
+    private BotResponseCollection LoadData()
     {
-        return JsonConvert.DeserializeObject<BotResponseDataFormatter>(File.ReadAllText(ResponseJsonFilePath))!;
+        return JsonConvert.DeserializeObject<BotResponseCollection>(File.ReadAllText(ResponseJsonFilePath))!;
     }
 
     public ResponseContent GetResponse(string request)

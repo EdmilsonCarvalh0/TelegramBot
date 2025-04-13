@@ -1,6 +1,4 @@
 using Domain.Item;
-using TelegramBot.Data;
-using TelegramBot.Domain.Item;
 
 namespace TelegramBot.Application;
 

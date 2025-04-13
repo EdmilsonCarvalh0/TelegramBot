@@ -1,6 +1,6 @@
-using TelegramBot.Data;
 using TelegramBot.Application;
 using TelegramBot.Infrastructure;
+using TelegramBot.Infrastructure.Telegram;
 
 namespace TelegramBot.UserInterface;
 

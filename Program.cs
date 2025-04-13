@@ -8,8 +8,8 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using TelegramBot.Application;
 using TelegramBot.Application.Handlers;
-using TelegramBot.Data;
 using TelegramBot.Infrastructure;
+using TelegramBot.Infrastructure.Telegram;
 using TelegramBot.Service;
 using TelegramBot.UserInterface;
 

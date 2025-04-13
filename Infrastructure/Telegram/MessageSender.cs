@@ -1,9 +1,8 @@
 using Telegram.Bot;
-using Telegram.Bot.Types.Enums;
 using TelegramBot.Application;
+using TelegramBot.Application.Bot;
 
-namespace TelegramBot.Infrastructure;
-
+namespace TelegramBot.Infrastructure.Telegram;
 
 public class MessageSender
 {

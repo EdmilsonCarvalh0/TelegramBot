@@ -1,4 +1,3 @@
-using TelegramBot.Data;
 using TelegramBot.Domain;
 using Domain.Item;
 
@@ -9,18 +8,13 @@ public class SearchResultHandler
     private List<Item> PrimaryResult { get; set; } = [];
     private string FinalResult { get; set; } = string.Empty;
     private SearchStatus FinalStatus { get; set; }
-    private Dictionary<SearchStatus, Action> Scenario
-    {
-        get
+    private Dictionary<SearchStatus, Action> Scenario =>
+        new()
         {
-            return new Dictionary<SearchStatus, Action>
-            {
-                {SearchStatus.NotFound, ItemNotFound},
-                {SearchStatus.Found, ItemFound},
-                {SearchStatus.MoreThanOne, MoreThanOneItem}
-            };
-        }
-    }
+            {SearchStatus.NotFound, ItemNotFound},
+            {SearchStatus.Found, ItemFound},
+            {SearchStatus.MoreThanOne, MoreThanOneItem}
+        };
 
     private SearchStatus CheckPrimaryResultStatus(int quantityOfItens)
     {
