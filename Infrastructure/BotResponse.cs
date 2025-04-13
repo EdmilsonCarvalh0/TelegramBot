@@ -7,26 +7,26 @@ namespace TelegramBot.Infrastructure;
 
 public class BotResponse
 {
-    public BotResponseCollection DataFormatter { get; } = new();
-    private string ResponseJsonFilePath;
+    private BotResponseCollection ResponseCollection { get; }
+    private readonly string _responseJsonFilePath;
 
     public BotResponse(string filePath)
     {
-        ResponseJsonFilePath = filePath;
-        DataFormatter = LoadData();
+        _responseJsonFilePath = filePath;
+        ResponseCollection = LoadData();
     }
 
     private BotResponseCollection LoadData()
     {
-        return JsonConvert.DeserializeObject<BotResponseCollection>(File.ReadAllText(ResponseJsonFilePath))!;
+        return JsonConvert.DeserializeObject<BotResponseCollection>(File.ReadAllText(_responseJsonFilePath))!;
     }
 
     public ResponseContent GetResponse(string request)
     {
         return new ResponseContent {
-            Text = DataFormatter.Responses[request].Text,
-            KeyboardMarkup = DataFormatter.Responses[request].KeyboardMarkup,
-            UserState = DataFormatter.Responses[request].UserState
+            Text = ResponseCollection.Responses[request].Text,
+            KeyboardMarkup = ResponseCollection.Responses[request].KeyboardMarkup,
+            UserState = ResponseCollection.Responses[request].UserState
         };
     }
 }
