@@ -1,6 +1,8 @@
 using Domain.Item;
 using TelegramBot.Domain;
-using TelegramBot.Service;
+using TelegramBot.Domain.Item;
+
+namespace TelegramBot.Service;
 
 public interface IItemRepository
 {
@@ -10,7 +12,7 @@ public interface IItemRepository
     void AddItemInEditingArea(string itemToBeChanged);
     void AddAttributeToBeChangedInEditingArea(string attributeToBeChanged);
     UserState VerifyNumberReferencingItem(int referenceNumber, string operation);
-    void AddItemInList(string items);
+    void AddItemInList(List<InputItem> inputItems);
     SearchResult RemoveItemFromList(string item);
     void CreateNewList(string items);
 }

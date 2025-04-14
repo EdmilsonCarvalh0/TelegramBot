@@ -93,11 +93,8 @@ public class JsonItemRepository : IItemRepository
         _editingArea.SetAttributeToBeChanged(attributeToBeChanged);
     }
 
-    public void AddItemInList(string userItem)
+    public void AddItemInList(List<InputItem> inputItems)
     {
-        InputProcessor processor= new(userItem);
-        var inputItems = processor.ProcessInput();
-        
         foreach (var input in inputItems)
         {
             var item = ItemFactory.Create(

@@ -85,7 +85,8 @@ public class MessageHandler : IUpdateHandlers
 
     private void HandleWaitingToAddOfItem()
     {
-        _handlerContext.ItemRepository.AddItemInList(_handlerContext.Context!.Message!.Text!);
+        var inputItems = _handlerContext.InputItemService.ProcessRawInput(_handlerContext.Context!.Message!.Text!);
+        _handlerContext.ItemRepository.AddItemInList(inputItems);
         _handlerContext.StateManager.ResetAdditionalInfo(_handlerContext.Context!.UserId);
         
         _responseInfo.Subject = "Item Added";
@@ -192,8 +193,8 @@ public class MessageHandler : IUpdateHandlers
 
     private void HandleAssistantListItems()
     {
-                var item = _handlerContext.Context!.Message!.Text!;
-        bool wasRemoved = _handlerContext.ShoppingAssistant.RemoveItemFromShoppingList(item);
+        var item = _handlerContext.Context!.Message!.Text!;
+        var wasRemoved = _handlerContext.ShoppingAssistant.RemoveItemFromShoppingList(item);
 
         if (!wasRemoved)
         {
@@ -204,6 +205,8 @@ public class MessageHandler : IUpdateHandlers
 
         if (_handlerContext.ShoppingAssistant.ChekIfListIsEmpty())
         {
+            _handlerContext.ShoppingAssistant.UpdatePurchasedItemsWithNewOnes();
+            
             _responseInfo.Subject = "Off Shopping";
             _handlerContext.StateManager.ResetAdditionalInfo(_handlerContext.Context!.UserId);
             return;
