@@ -8,6 +8,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using TelegramBot.Application;
 using TelegramBot.Application.Handlers;
+using TelegramBot.Domain.Item;
 using TelegramBot.Infrastructure;
 using TelegramBot.Infrastructure.Telegram;
 using TelegramBot.Service;
@@ -74,6 +75,7 @@ namespace TelegramBot
                         services.AddSingleton<Message>();
                         services.AddSingleton<HandlerContext>();
                         services.AddSingleton<IUpdateHandlerFactory, UpdateHandlerFactory>();
+                        services.AddSingleton<IInputItemService, InputItemService>();
                         services.AddScoped<IEditingArea, EditingArea>();
                         services.AddScoped<BotRequestContextFactory>();
                     }
