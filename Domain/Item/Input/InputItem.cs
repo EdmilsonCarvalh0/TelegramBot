@@ -1,6 +1,6 @@
-using System.Globalization;
+using TelegramBot.Domain.Item.Input.Utils;
 
-namespace TelegramBot.Domain.Item;
+namespace TelegramBot.Domain.Item.Input;
 
 public class InputItem
 {
@@ -30,11 +30,7 @@ public class InputItem
             throw new ArgumentException("Forneça um item com Nome, Marca e Preço.");
         }
 
-        if (!decimal.TryParse(_itemAttributes[2], NumberStyles.Any, CultureInfo.InvariantCulture, out var price))
-        {
-            throw new ArgumentException("Forneça um preço válido.");
-        }
-        
+        decimal price = DecimalParser.ParseFlexible(_itemAttributes[2]);
         LoadAttributes(price);
     }
     
