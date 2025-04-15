@@ -1,6 +1,6 @@
-using System.Globalization;
+using System.Text.RegularExpressions;
 
-namespace TelegramBot.Domain.Item;
+namespace TelegramBot.Domain.Item.Input;
 
 public class InputProcessor
 {
@@ -31,10 +31,9 @@ public class InputProcessor
     {
         foreach (var line in linesWithUnprocessedItems)
         {
-            var itemAttributes = line
-                .Trim()
-                .Split(" - ")
-                .ToList();
+            var itemAttributes = Regex.Split(line.Trim(), @"\s*[-,;:|/\\&#!]\s*")
+                                                    .Select(attr => attr.Trim())
+                                                    .ToList();
             
             InputItem inputItemValid = new(itemAttributes);
             _inputItemsValid.Add(inputItemValid);
