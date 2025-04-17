@@ -1,17 +1,22 @@
-﻿using Application.Handlers;
-using Application.Handlers.Interface;
-using Domain.Item;
+﻿using Domain.Item;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using TelegramBot.Application;
+using TelegramBot.Application.DTOs;
 using TelegramBot.Application.Handlers;
-using TelegramBot.Domain.Item;
+using TelegramBot.Application.Handlers.Interface;
+using TelegramBot.Domain.Item.Input;
 using TelegramBot.Infrastructure;
+using TelegramBot.Infrastructure.Json;
+using TelegramBot.Infrastructure.Json.JsonStorage;
 using TelegramBot.Infrastructure.Telegram;
 using TelegramBot.Service;
+using TelegramBot.Service.ItemRepository;
+using TelegramBot.Service.ShoppingAssistant;
+using TelegramBot.Service.ShoppingAssistant.Utils;
 using TelegramBot.UserInterface;
 
 namespace TelegramBot
@@ -21,12 +26,12 @@ namespace TelegramBot
         static async Task Main(string[] args)
         {
             var builder = Host.CreateDefaultBuilder(args)
-                .ConfigureAppConfiguration((context, config) =>
+                .ConfigureAppConfiguration((config) =>
                     {
                         config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
                     }
                 )
-                .ConfigureServices((context, services) =>
+                .ConfigureServices((services) =>
                     {
                         services.AddSingleton<ITelegramBotClient>(provider =>
                         {
@@ -45,25 +50,18 @@ namespace TelegramBot
                             return new ChatIdIdentifier(long.Parse(userId));
                         });
                         services.AddSingleton<SearchResultHandler>();
-                        services.AddSingleton<IItemRepository, JsonItemRepository>(provider =>
+                        services.AddSingleton<FilePathProvider>(provider =>
                         {
                             var configuration = provider.GetRequiredService<IConfiguration>();
-                            var searchResultHandler = provider.GetRequiredService<SearchResultHandler>();
-                            var serviceProvider = provider.GetRequiredService<IServiceProvider>();
-
-                            var filePath = configuration["FilePaths:ItemsRepository"] 
-                                        ?? throw new InvalidOperationException("Caminho de arquivo para repositório de itens não encontrado.");
-                                        
-                            return new JsonItemRepository(searchResultHandler, serviceProvider, filePath);
-                        });
-                        services.AddSingleton<BotResponse>(provider =>
-                        {
-                            var configuration = provider.GetRequiredService<IConfiguration>();
-                            var filePath = configuration["FilePaths:ResponsesRepository"]
+                            var botResponseFilePath = configuration["FilePaths:ResponsesRepository"]
                                         ?? throw new InvalidOperationException("Caminho de arquivo para repositório de informações de resposta não encontrado.");
+                            var itemsFilePath = configuration["FilePaths:ItemsRepository"]
+                                        ?? throw new InvalidOperationException("Caminho de arquivo para repositório de itens não encontrado.");
                             
-                            return new BotResponse(filePath);
+                            return new FilePathProvider(itemsFilePath ,botResponseFilePath);
                         });
+                        services.AddSingleton<IItemRepository, JsonItemRepository>();
+                        services.AddSingleton<BotResponse>();
                         services.AddSingleton<ShoppingAssistantMode>();
                         services.AddSingleton<BotConnection>();
                         services.AddSingleton<UpdateHandlers>();
@@ -76,6 +74,8 @@ namespace TelegramBot
                         services.AddSingleton<HandlerContext>();
                         services.AddSingleton<IUpdateHandlerFactory, UpdateHandlerFactory>();
                         services.AddSingleton<IInputItemService, InputItemService>();
+                        services.AddSingleton<IJsonFileReader, JsonFileReader>();
+                        services.AddSingleton<StagingArea>();
                         services.AddScoped<IEditingArea, EditingArea>();
                         services.AddScoped<BotRequestContextFactory>();
                     }
