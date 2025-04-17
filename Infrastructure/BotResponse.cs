@@ -1,24 +1,25 @@
-using Newtonsoft.Json;
-using TelegramBot.Application;
 using TelegramBot.Application.Bot;
+using TelegramBot.Infrastructure.Json;
 using TelegramBot.Infrastructure.JsonStorage;
+using FileType = TelegramBot.Infrastructure.Json.JsonStorage.FileType;
 
 namespace TelegramBot.Infrastructure;
 
 public class BotResponse
 {
     private BotResponseCollection ResponseCollection { get; }
-    private readonly string _responseJsonFilePath;
+    private readonly IJsonFileReader _fileReader;
 
-    public BotResponse(string filePath)
+
+    public BotResponse(IJsonFileReader fileReader)
     {
-        _responseJsonFilePath = filePath;
+        _fileReader = fileReader;
         ResponseCollection = LoadData();
     }
 
     private BotResponseCollection LoadData()
     {
-        return JsonConvert.DeserializeObject<BotResponseCollection>(File.ReadAllText(_responseJsonFilePath))!;
+        return _fileReader.ReadFromFile<BotResponseCollection>(FileType.BotResponses);
     }
 
     public ResponseContent GetResponse(string request)
