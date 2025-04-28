@@ -1,4 +1,4 @@
-namespace Domain.Item;
+namespace TelegramBot.Domain.Item.ValueObjects;
 
 public class Brand
 {
@@ -16,7 +16,7 @@ public class Brand
 
     public Brand(string value)
     {
-        _value = value;
+        Value = value;
     }
 
     public override string ToString() => Value;
