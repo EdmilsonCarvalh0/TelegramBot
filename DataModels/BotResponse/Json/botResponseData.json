@@ -141,15 +141,15 @@
             "keyboardMarkup": null,
             "userState": "OnShoppingMode"
         },
-      "Discard Wrong Item": {
-        "text": "Então pode mandar o nome certo dessa vez:",
-        "keyboardMarkup": null,
-        "userState": "OnShoppingMode"
-      },
-      "Off Shopping": {
-        "text": "Chegamos ao fim!\nCaso você queira inserir mais itens, basta ir ao menu e inserir na lista, ela já foi salva.\nEspero ter ajudado da melhor forma!",
-        "keyboardMarkup": null,
-        "userState": "None"
-      }
+        "Discard Wrong Item": {
+            "text": "Então pode mandar o nome certo dessa vez:",
+            "keyboardMarkup": null,
+            "userState": "OnShoppingMode"
+        },
+        "Off Shopping": {
+            "text": "Chegamos ao fim!\nCaso você queira inserir mais itens, basta ir ao menu e inserir na lista, ela já foi salva.\nEspero ter ajudado da melhor forma!",
+            "keyboardMarkup": null,
+            "userState": "None"
+        }
     }
 }
