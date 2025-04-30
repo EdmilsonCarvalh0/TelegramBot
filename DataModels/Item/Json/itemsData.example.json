@@ -1,9 +1,11 @@
 [
   {
-    "month": "",
-    "day": 0,
-    "hour": "--:--",
-    "itemDataFormatter": {
+    "ShoppingDateTime": {
+      "month": "",
+      "day": 0,
+      "hour": "--:--"
+    },
+    "ItemDataFormatter": {
       "items": [
         {
           "id": {
