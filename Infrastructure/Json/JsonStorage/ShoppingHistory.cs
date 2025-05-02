@@ -1,4 +1,4 @@
-using TelegramBot.Domain.Item;
+using TelegramBot.DataModels.Item.Snapshot;
 
 namespace TelegramBot.Infrastructure.Json.JsonStorage;
 
@@ -13,15 +13,19 @@ public class ShoppingHistory
 
     public ShoppingListSnapshot? GetByMonth(string month)
     {
-        var snapshots = _jsonFileReader.ReadFromFile<List<ShoppingListSnapshot>>(FileType.Items);
-        
-        return snapshots.FirstOrDefault(s => s.Month == month);
+        var snapshots = GetSnapShots();
+        return snapshots.FirstOrDefault(s => s.ShoppingDateTime.Month == month);
+    }
+
+    public List<ShoppingDateTime> GetAllTheDatesFromTheExistingLists()
+    {
+        var snapshots = GetSnapShots();
+        return snapshots.Select(s => s.ShoppingDateTime).ToList();
     }
 
     public void SavePurchasedItems(ShoppingListSnapshot snapshot)
     {
         var snapshots = GetSnapShots();
-        
         snapshots.Add(snapshot);
         
         _jsonFileReader.WriteToFile(FileType.Items, snapshots);
