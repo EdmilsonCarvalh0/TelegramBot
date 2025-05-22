@@ -1,15 +1,21 @@
 using System.Globalization;
+using System.Linq.Expressions;
+using Newtonsoft.Json;
 
 namespace TelegramBot.DataModels.Item.Snapshot;
 
 public class ShoppingDateTime
 {
-    public string Month { get;  set; }
-    public int Day { get; set; }
-    public string Hour { get; set; }
+    [JsonProperty]
+    public string Month { get; private set; }
+    
+    [JsonProperty]
+    public int Day { get; private set; }
+    
+    [JsonProperty]
+    public string Hour { get; private set; }
 
-    public static ShoppingDateTime Default { get; set; } = new("Desconhecido", 0, "--:--");
-
+    [JsonConstructor]
     public ShoppingDateTime(string month, int day, string hour)
     {
         Month = month;
@@ -23,6 +29,11 @@ public class ShoppingDateTime
         Month = now.ToString("MMMM", new CultureInfo("pt-BR"));
         Day = now.Day;
         Hour = now.ToString("HH:mm");
+    }
+
+    public static ShoppingDateTime GetDefault()
+    {
+        return new ShoppingDateTime("Desconhecido", 0, "--:--");
     }
 
     public override string ToString()
