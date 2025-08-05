@@ -1,100 +1,97 @@
+using Application.Handlers.Interface;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using TelegramBot.Application.Handlers;
+using TelegramBot.Application.Bot;
 
-namespace TelegramBot.Infrastructure
+namespace TelegramBot.Infrastructure.Telegram;
+
+public class BotConnection
 {
-    public class BotConnection
+    private readonly ITelegramBotClient _bot;
+    private readonly IUpdateHandlers _handlers;
+    private readonly IResponseManager _responseManager;
+    private readonly IMessageSender _messageSender;
+    private readonly IHostApplicationLifetime _appLifetime;
+    private readonly IServiceScopeFactory _scopeFactory;
+
+    public BotConnection(ITelegramBotClient bot, IUpdateHandlers handlers, IResponseManager responseManager, 
+                        IMessageSender messageSender, IHostApplicationLifetime appLifetime, IServiceScopeFactory scopeFactory)
     {
-        private readonly ITelegramBotClient _bot;
-        private readonly UpdateHandlers _handlers;
-        private readonly IHostApplicationLifetime _appLifetime;
-        private readonly IServiceScopeFactory _scopeFactory;
+        _bot = bot;
+        _handlers = handlers;
+        _responseManager = responseManager;
+        _messageSender = messageSender;
+        _appLifetime = appLifetime;
+        _scopeFactory = scopeFactory;
+    }
 
-        public BotConnection(ITelegramBotClient bot, UpdateHandlers handlers, IHostApplicationLifetime appLifetime, IServiceScopeFactory scopeFactory)
+    public void Start()
+    {
+        _bot.StartReceiving(
+            HandleUpdateAsync,
+            HandleErrorAsync,
+            new ReceiverOptions
+            {
+                AllowedUpdates = Array.Empty<UpdateType>()
+            },
+            cancellationToken: _appLifetime.ApplicationStopping
+        );
+    }
+
+    private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+    {
+        var context = CreateContext(update, cancellationToken);
+        try
         {
-            _bot = bot;
-            _handlers = handlers;
-            _appLifetime = appLifetime;
-            _scopeFactory = scopeFactory;
+            var response = ProcessUpdate(context);
+            await SendResponseAsync(response, context.UserId, cancellationToken);
         }
 
-        public void Start()
+        catch (Exception e)
         {
-            _bot.StartReceiving(
-                HandleUpdateAsync,
-                HandleErrorAsync,
-                new ReceiverOptions
-                {
-                    AllowedUpdates = Array.Empty<UpdateType>()
-                },
-                cancellationToken: _appLifetime.ApplicationStopping
-            );
+            await HandleExceptionAsync(e, context.UserId, cancellationToken);
         }
+    }
 
-        private async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
-        {
-            using var scope = _scopeFactory.CreateScope();
-            var contextFactory = scope.ServiceProvider.GetRequiredService<BotRequestContextFactory>();
+    private BotRequestContext CreateContext(Update update, CancellationToken cancellationToken)
+    {
+        using var scope = _scopeFactory.CreateScope();
+        var contextFactory = scope.ServiceProvider.GetRequiredService<BotRequestContextFactory>();
+        long userId = update.CallbackQuery?.From.Id ?? update.Message?.Chat.Id ?? 0;
+        return contextFactory.Create(userId, update);
+    }
 
-            long userId = update.CallbackQuery?.From.Id ?? update.Message?.Chat.Id ?? 0;
-            var context = contextFactory.Create(_bot, userId, update, cancellationToken);
+    private ResponseContent ProcessUpdate(BotRequestContext context)
+    {
+        var responseInfo = _handlers.DelegateUpdates(context);
+        return _responseManager.ProcessResponse(responseInfo);
+    }
 
-            _handlers.Start(context);
+    private async Task SendResponseAsync(ResponseContent response, long userId, CancellationToken cancellationToken)
+    {
+        await _messageSender.SendMessageAsync(response, userId, cancellationToken);
+    }
 
-            await _handlers.DelegateUpdates(update);
-        }
+    private async Task HandleExceptionAsync(Exception e, long userId, CancellationToken cancellationToken)
+    {
+        ResponseContent responseContent = new ResponseContent();
+        responseContent.Text = e.ToString();
+        await _messageSender.SendMessageAsync(responseContent, userId, cancellationToken);
+    }
 
-        private Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
-        {
-            Console.WriteLine($"Erro recebido: {exception.Message}\nData: {exception.StackTrace}");
-            return Task.CompletedTask;
-        }
+    private Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+    {
+        Console.WriteLine($"Erro recebido: {exception.Message}\nData: {exception.StackTrace}");
+        return Task.CompletedTask;
+    }
 
-        public async Task DisplayBotInfoAsync()
-        {
-            var me = await _bot.GetMe();
-            Console.WriteLine($"\n--> Bot iniciado: @{me.Username} <--\n");
-        }
-
-        public InlineKeyboardMarkup StartService()
-        {
-            throw new NotImplementedException();
-        }
-
-        public InlineKeyboardMarkup GetOptionsOfListUpdate()
-        {
-            throw new NotImplementedException();
-        }
-
-        public string AddItemInShoppingData(string item)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string SendItemToUpdateList(string item)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string SendItemToRemoveFromList(string item)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string ShowList()
-        {
-            throw new NotImplementedException();
-        }
-
-        public string GetItemsToCreatelist(string item)
-        {
-            throw new NotImplementedException();
-        }
+    public async Task DisplayBotInfoAsync()
+    {
+        var me = await _bot.GetMe();
+        Console.WriteLine($"\n--> Bot iniciado: @{me.Username} <--\n");
     }
 }
