@@ -2,14 +2,15 @@ using TelegramBot.Domain.Item.Input;
 
 namespace TelegramBot.Service.ShoppingAssistant.Utils;
 
+// AVALIAR INTERFACE ADEQUADA PARA TODAS AS STAGING AREAS
 public interface IStagingArea
 {
-    List<InputItem> GetPurchasedInputItems();
-    void SaveNewInputItems(List<InputItem> inputItems);
+    List<ItemInput> GetPurchasedInputItems();
+    void SaveNewInputItems(List<ItemInput> inputItems);
     List<string> GetItemsToBuy();
     void UpdateListOfItemsToBuy(string item);
-    InputItem? GetItemNotListed();
-    void ReserveItemNotListed(InputItem item);
+    ItemInput? GetItemNotListed();
+    void ReserveItemNotListed(ItemInput item);
     void SaveItemNotListed();
     void SaveItemsToBuy(List<string> items);
 }

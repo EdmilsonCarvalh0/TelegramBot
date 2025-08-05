@@ -1,7 +1,8 @@
 ﻿using Newtonsoft.Json;
 using Telegram.Bot.Types.ReplyMarkups;
-using TelegramBot.Domain;
+using TelegramBot.Application.Handlers;
 using TelegramBot.Infrastructure;
+using TelegramBot.Infrastructure.Json.JsonConverters;
 
 namespace TelegramBot.Application.Bot
 {
@@ -15,6 +16,6 @@ namespace TelegramBot.Application.Bot
         public InlineKeyboardMarkup? KeyboardMarkup { get; set; }
 
         [JsonProperty("userState")]
-        public UserState UserState { get; set; }
+        public InteractionState UserState { get; set; }
     }
 }

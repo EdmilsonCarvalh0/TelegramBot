@@ -1,13 +1,12 @@
-
-using Telegram.Bot.Polling;
+using TelegramBot.Application.DTOs;
+using TelegramBot.Application.Handlers.Interface;
+using TelegramBot.DataModels.Item.Snapshot;
 using TelegramBot.Domain;
-using Telegram.Bot;
-using Telegram.Bot.Types;
-using Application.Handlers.Interface;
+using TelegramBot.Domain.Item.Input;
 
-namespace TelegramBot.Application;
+namespace TelegramBot.Application.Handlers;
 
-public class MessageHandler : IUpdateHandlers
+public class MessageHandler : IHandler
 {
     private readonly HandlerContext _handlerContext;
     private readonly ResponseInfoToSendToTheUser _responseInfo = new();
@@ -40,13 +39,10 @@ public class MessageHandler : IUpdateHandlers
                 break;
 
             case "waiting_for_number_that_references_to_update":
-                HandleNumberReferencingItem();
-                break;
-
             case "waiting_for_number_that_references_to_remove":
                 HandleNumberReferencingItem();
                 break;
-                
+
             case "waiting_item_to_remove":
                 HandleWaitingItemToRemove();
                 break;
@@ -70,10 +66,10 @@ public class MessageHandler : IUpdateHandlers
     private void ProcessMenuRequest()
     {
         var context = _handlerContext.Context!;
-        var stateManager = _handlerContext.StateManager!;
+        var stateManager = _handlerContext.StateManager;
         var userState = stateManager.GetUserStateData(context.UserId);
 
-        if (userState.State == UserState.None)
+        if (userState.State == InteractionState.None)
         {
             string messageContent = context.Message!.Text!;
 
@@ -85,7 +81,7 @@ public class MessageHandler : IUpdateHandlers
 
     private void HandleWaitingToAddOfItem()
     {
-        var inputItems = _handlerContext.InputItemService.ProcessRawInput(_handlerContext.Context!.Message!.Text!);
+        var inputItems = ItemInputService.ProcessRawInput(_handlerContext.Context!.Message!.Text!);
         _handlerContext.ItemRepository.AddItemInList(inputItems);
         _handlerContext.StateManager.ResetAdditionalInfo(_handlerContext.Context!.UserId);
         
@@ -104,7 +100,7 @@ public class MessageHandler : IUpdateHandlers
     private void HandleWaitingForNameAttributeToUpdated()
     {
         var nameAttribute = _handlerContext.Context!.Message!.Text!;
-        var searchResult = _handlerContext.ItemRepository.GetItemInRepository(nameAttribute!);
+        var searchResult = _handlerContext.ItemRepository.GetItemInRepository(nameAttribute);
 
         if (searchResult.Status == SearchStatus.NotFound)
         {
@@ -124,7 +120,7 @@ public class MessageHandler : IUpdateHandlers
         var genderVerified = CheckAttributeGender(nameAttribute);
         _responseInfo.SubjectContextData = $"{genderVerified} {nameAttribute}";
 
-        _handlerContext.ItemRepository.AddItemInEditingArea(nameAttribute!);
+        _handlerContext.ItemRepository.AddItemInEditingArea(nameAttribute);
         _responseInfo.Subject = "Update Item";
     }
 
@@ -167,19 +163,19 @@ public class MessageHandler : IUpdateHandlers
 
         int referenceNumber = Convert.ToInt32(inputNumber);
 
-        UserState response = _handlerContext.ItemRepository.VerifyNumberReferencingItem(referenceNumber, stateData.AdditionalInfo);
+        var response = _handlerContext.ItemRepository.VerifyNumberReferencingItem(referenceNumber, stateData.AdditionalInfo);
 
         switch (response)
         {
-            case UserState.None:
+            case InteractionState.None:
                 _responseInfo.Subject = "Invalid Number";
                 break;
 
-            case UserState.UpdateItem:
+            case InteractionState.UpdateItem:
                 _responseInfo.Subject = "Update Item";
                 break;
 
-            case UserState.DeleteItem:
+            case InteractionState.DeleteItem:
                 _responseInfo.Subject = "Deleted Item OK";
                 _handlerContext.StateManager.ResetAdditionalInfo(_handlerContext.Context!.UserId);
                 break;
@@ -193,29 +189,36 @@ public class MessageHandler : IUpdateHandlers
 
     private void HandleAssistantListItems()
     {
-        var item = _handlerContext.Context!.Message!.Text!;
-        var wasRemoved = _handlerContext.ShoppingAssistant.RemoveItemFromShoppingList(item);
-
+        var inputItems = ItemInputService.ProcessRawInput(_handlerContext.Context!.Message!.Text!);
+        
+        var wasRemoved = _handlerContext.ShoppingAssistant.RemoveItemFromShoppingList(inputItems[0]);
         if (!wasRemoved)
         {
             _responseInfo.Subject = "Item Not Listed";
-            _handlerContext.ShoppingAssistant.ReserveItemNotListed(item);
+            _handlerContext.ShoppingAssistant.ReserveNewItem(inputItems[0]);
             return;
         }
+        
+        _handlerContext.ShoppingAssistant.AddInputItemToPurchasedList(inputItems);
 
-        if (_handlerContext.ShoppingAssistant.ChekIfListIsEmpty())
+        var total = _handlerContext.ShoppingAssistant.GetTotalPrice();
+        
+        var isEmpty = _handlerContext.ShoppingAssistant.CheckIfListIsEmpty();
+        if (isEmpty)
         {
-            _handlerContext.ShoppingAssistant.UpdatePurchasedItemsWithNewOnes();
+            _handlerContext.ShoppingAssistant.PrepareForCompletion();
+            _handlerContext.ShoppingAssistant.FinalizeAndSaveList();
             
             _responseInfo.Subject = "Off Shopping";
+            _responseInfo.SubjectContextData = $"{total:C2}";
+            
             _handlerContext.StateManager.ResetAdditionalInfo(_handlerContext.Context!.UserId);
             return;
         }
 
-        string list = ProcessListInShoppingToShow();
-
+        var list = ProcessListInShoppingToShow();
         _responseInfo.Subject = "On Shopping";
-        _responseInfo.SubjectContextData = list;
+        _responseInfo.SubjectContextData = list + $"\n\nTotal: {total:C2}";
     }
 
     private void HandleWithTheListOfItemsToBeBuiyng()
@@ -224,6 +227,7 @@ public class MessageHandler : IUpdateHandlers
         List<string> listItems = [.. items.Trim().Split(", ")];
 
         _handlerContext.ShoppingAssistant.LoadList(listItems);
+        _handlerContext.ShoppingAssistant.BeginShoppingSession();
         
         _responseInfo.Subject = "Prepared List";
         _responseInfo.SubjectContextData = ProcessListInShoppingToShow();
@@ -243,7 +247,7 @@ public class MessageHandler : IUpdateHandlers
 
     private string ProcessListInRepositoryToShow()
     {
-        var items = _handlerContext.ItemRepository.GetListOfItems();
+        var items = _handlerContext.ItemRepository.GetListOfItems(new ShoppingDateTime("abril", 17, "09:32"));
         string list = string.Empty;
 
         foreach(var item in items)
@@ -261,19 +265,9 @@ public class MessageHandler : IUpdateHandlers
 
         for(int i = 0; i < itemsToBuy.Count; i++)
         {
-            list += $"    {i+1}. {char.ToUpper(itemsToBuy[i][0]) + itemsToBuy[i][1..].ToLower()}\n";
+            list += $"  {i+1}. {char.ToUpper(itemsToBuy[i][0]) + itemsToBuy[i][1..].ToLower()}\n";
         }
 
         return list;
-    }
-
-    public Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, HandleErrorSource source, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
     }
 }

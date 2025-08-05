@@ -1,6 +1,7 @@
 using TelegramBot.Application.Bot;
+using TelegramBot.DataModels.BotResponse;
 using TelegramBot.Infrastructure.Json;
-using TelegramBot.Infrastructure.JsonStorage;
+using TelegramBot.Infrastructure.Json.JsonStorage;
 using FileType = TelegramBot.Infrastructure.Json.JsonStorage.FileType;
 
 namespace TelegramBot.Infrastructure;

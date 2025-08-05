@@ -13,15 +13,14 @@ public class BotRequestContextFactory
         _serviceProvider = serviceProvider;
     }
 
-    public BotRequestContext Create(ITelegramBotClient botClient, long userId, Update update, CancellationToken cancellationToken)
+    // TODO: Verificar os casos de uso onde o usuário pode enviar um update diferente de message e callback
+    // Open Closed Principle?
+    public BotRequestContext Create(long userId, Update update)
     {
-        ArgumentNullException.ThrowIfNull(botClient, nameof(botClient));
         ArgumentNullException.ThrowIfNull(update, nameof(update));
 
-        return new BotRequestContext(botClient,
-                                     new ChatIdIdentifier(userId), 
+        return new BotRequestContext(new ChatIdIdentifier(userId), 
                                      update.CallbackQuery,
-                                     update.Message,
-                                     cancellationToken);
+                                     update.Message);
     }
 }

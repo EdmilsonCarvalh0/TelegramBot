@@ -9,7 +9,7 @@
             "text": "Olá, bem vindo ao Bot de Compras Mensais!\nEscolha uma opção:",
             "keyboardMarkup": [
                 [
-                    {"text": "Ver lista", "callbackData": "Ver lista"},
+                    {"text": "Ver listas", "callbackData": "Ver listas"},
                     {"text": "Atualizar lista", "callbackData": "Atualizar lista"},
                     {"text": "Criar nova lista", "callbackData": "Criar nova lista"}
                 ],
@@ -71,9 +71,14 @@
             "userState": "None"
         },
         "Show List": {
-            "text": "Essa é a sua lista atual:\n\n{0}",
+            "text": "Lista escolhida: \n\n{0}",
             "keyboardMarkup": null,
             "userState": "None"
+        },
+        "Choose List": {
+            "text": "Existem as seguintes listas: ",
+            "keyboardMarkup": null,
+            "userState": "Running"
         },
         "Adicionar um item":  {
             "text": "Ótimo! Para fazer a inserção você pode enviar um ou mais itens se desejar.\nLembrando que apenas o nome é obrigatório, mas é ideal que você informe a Marca e o Preço também para uma melhor experiência!\n\nVamos lá! Para inserir o item, siga a seguinte extrutura:\nProduto - Marca - Preco\nProduto - Marca - Preco\n\nAgora, por favor, informe os itens que deseja adicionar:",
@@ -147,7 +152,7 @@
             "userState": "OnShoppingMode"
         },
         "Off Shopping": {
-            "text": "Chegamos ao fim!\nCaso você queira inserir mais itens, basta ir ao menu e inserir na lista, ela já foi salva.\nEspero ter ajudado da melhor forma!",
+            "text": "Chegamos ao fim!\n\nO total deu {0}\n\nCaso você queira inserir mais itens, basta ir ao menu e inserir na lista, ela já foi salva.\nEspero ter ajudado da melhor forma!",
             "keyboardMarkup": null,
             "userState": "None"
         }

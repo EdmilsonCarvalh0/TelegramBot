@@ -4,7 +4,7 @@ using TelegramBot.Application.Bot;
 
 namespace TelegramBot.Infrastructure.Telegram;
 
-public class MessageSender
+public class MessageSender : IMessageSender
 {
     private readonly ITelegramBotClient _botClient;
     private readonly ChatIdIdentifier _chatId;
@@ -15,15 +15,22 @@ public class MessageSender
         _chatId = chatId;
     }
 
-    public async Task SendMessageAsync(ResponseContent responseContent, CancellationToken cancellationToken)
+    public async Task SendMessageAsync(ResponseContent responseContent, long userId, CancellationToken cancellationToken)
     {
         await _botClient.SendMessage(
-            chatId: _chatId.BotId,
+            chatId: userId,
             text: responseContent.Text,
             replyMarkup: responseContent.KeyboardMarkup,
             cancellationToken: cancellationToken
         );
+        
+        //await _botClient.SendMessage(
+        //    chatId: _chatId.BotId,
+        //    text: responseContent.Text,
+        //    replyMarkup: responseContent.KeyboardMarkup,
+        //    cancellationToken: cancellationToken
+        //);
 
-        UserStateManager.SetState(_chatId.BotId, responseContent.UserState); // novo state precisa ser definido aqui?
+        //UserStateManager.SetState(userId, responseContent.UserState); // novo state precisa ser definido aqui?
     }
 }

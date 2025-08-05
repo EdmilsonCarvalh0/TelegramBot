@@ -1,7 +1,10 @@
-namespace TelegramBot.Application;
+using Telegram.Bot.Types.ReplyMarkups;
+
+namespace TelegramBot.Application.DTOs;
 
 public class ResponseInfoToSendToTheUser
 {
-    public string? Subject;
-    public string? SubjectContextData;
+    public Enum? Subject { get; set; }
+    public string? SubjectContextData { get; set; }
+    public InlineKeyboardMarkup? KeyboardMarkup { get; set; }
 }

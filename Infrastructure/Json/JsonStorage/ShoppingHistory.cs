@@ -11,10 +11,10 @@ public class ShoppingHistory
         _jsonFileReader = jsonFileReader;
     }
 
-    public ShoppingListSnapshot? GetByMonth(string month)
+    public ShoppingListSnapshot? GetByMonth(ShoppingDateTime shoppingDateTime)
     {
         var snapshots = GetSnapShots();
-        return snapshots.FirstOrDefault(s => s.ShoppingDateTime.Month == month);
+        return snapshots.FirstOrDefault(s => s.ShoppingDateTime.Equals(shoppingDateTime));
     }
 
     public List<ShoppingDateTime> GetAllTheDatesFromTheExistingLists()

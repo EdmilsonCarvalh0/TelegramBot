@@ -1,11 +1,12 @@
-using Application.Handlers.Interface;
-using Telegram.Bot;
-using Telegram.Bot.Polling;
-using Telegram.Bot.Types;
+using TelegramBot.Application.DTOs;
+using TelegramBot.Application.Handlers.Interface;
+using TelegramBot.DataModels.Item.Snapshot;
+using TelegramBot.UserInterface;
+using TelegramBot.UserInterface.Interfaces;
 
-namespace TelegramBot.Application;
+namespace TelegramBot.Application.Handlers;
 
-public class CallbackHandler : IUpdateHandlers
+public class CallbackHandler : IHandler
 {
     private readonly HandlerContext _handlerContext;
     private readonly ResponseInfoToSendToTheUser _responseInfo = new();
@@ -21,52 +22,59 @@ public class CallbackHandler : IUpdateHandlers
 
         _handlerContext.StateManager!.ShowUserState(context!.UserId);
 
+        // TODO: Precisa ser revisado para ser inserido no switch
+        if (_handlerContext.StateManager.GetUserStateData(context.UserId).AdditionalInfo == "waiting_for_the_date_of_the_chosen_list")
+        {
+            HandleSendOfList();
+            _handlerContext.StateManager.ResetAdditionalInfo(context.UserId);
+            return _responseInfo;
+        }
+
         switch (context.CallbackQuery!.Data)
         {
-            case "Ver lista":
-                HandleSendOfList();
-                break;
-                
-            case "Atualizar lista":
-                HandleToUpdateList();
-                break;
-
-            case "Adicionar um item":
-                HandleToAddItem();
-                break;
-
-            case "Alterar um item":
-                HandleItemChange();
-                break;
-
-            case "Nome":
-                HandleAttributeChange();
-                break;
-                
-            case "Marca":
-                HandleAttributeChange();
-                break;
-                
-            case "Preço":
-                HandleAttributeChange();
-                break;
-
-            case "Remover um item":
-                HandleItemRemove();
+            case "Ver listas":
+                HandleWithThePresentationOfExistingLists();
                 break;
             
-            case "Criar nova lista":
-                HandleCreatingNewList();
+            case "waiting_for_the_date_of_the_chosen_list":
+                HandleSendOfList();
                 break;
+            // Revisar \/
+            case "waiting_for_number_that_references_to_update":
+                HandleSendOfList();
+                break;
+            
+            //case "Atualizar lista":
+            //    HandleToUpdateList();
+            //    break;
+
+            //case "Adicionar um item":
+            //    HandleToAddItem();
+            //    break;
+
+            //case "Alterar um item":
+            //    HandleItemChange();
+            //    break;
+
+            //case "Nome":
+            //case "Marca":
+            //case "Preço":
+            //    HandleAttributeChange();
+            //    break;
+
+            //case "Remover um item":
+            //    HandleItemRemove();
+            //    break;
+            
+            //case "Criar nova lista":
+            //    HandleCreatingNewList();
+            //    break;
             
             case "Modo Ficando Mais Pobre":
                 HandleStartOfShoppingMode();
                 break;
             
             case "Sim":
-                HandleShoppingModeConfirmation();
-                break;
-            
             case "Não":
                 HandleShoppingModeConfirmation();
                 break;
@@ -85,17 +93,38 @@ public class CallbackHandler : IUpdateHandlers
 
     private void HandleSendOfList()
     {
-        var items = _handlerContext.ItemRepository.GetListOfItems();
+        var callbackData = _handlerContext.Context!.CallbackQuery!.Data!;
         
+        // TODO: Encapsular lógica de tratamento de Date em uma function
+        List<string> info = callbackData.Split([" de ", " às "], StringSplitOptions.None).ToList();
+
+        // TODO: Refatorar e remover a dependência da classe concreta
+        ShoppingDateTime shoppingDateTime = new ShoppingDateTime(info[1].ToLower(), Convert.ToInt32(info[0]), info[2]);
+        
+        var items = _handlerContext.ItemRepository.GetListOfItems(shoppingDateTime);
+
+        // TODO: Implementar classe que trate de preparação de itens para exibição
+        //       camada UserInterface?
         string list = string.Empty;
 
-        foreach(var item in items)
+        foreach(var item in items.Values)
         {
             list += item.ToString();
         }
-
-        _responseInfo.SubjectContextData = list;
+        
+        _responseInfo.SubjectContextData = $"{callbackData}\n\n{list}";
         _responseInfo.Subject = "Show List";
+    }
+
+    private void HandleWithThePresentationOfExistingLists()
+    {
+        var dates = _handlerContext.ItemRepository.GetAllTheDates();
+
+        _responseInfo.KeyboardMarkup = _handlerContext.KeyboardFactory.Create(dates, 2);
+
+        _responseInfo.Subject = "Choose List";
+        
+        _handlerContext.StateManager.SetAdditionalInfo(_handlerContext.Context!.UserId, "waiting_for_the_date_of_the_chosen_list");
     }
 
     private void HandleToUpdateList()
@@ -133,11 +162,6 @@ public class CallbackHandler : IUpdateHandlers
         _handlerContext.StateManager.SetAdditionalInfo(_handlerContext.Context!.UserId, "waiting_item_to_remove");
     }
 
-    private void HandleCreatingNewList()
-    {
-
-    }
-
     private void HandleStartOfShoppingMode()
     {
         _responseInfo.Subject = "Modo Ficando Mais Pobre";
@@ -159,12 +183,13 @@ public class CallbackHandler : IUpdateHandlers
 
     private void HandleWithUnlistedItem()
     {
+        _handlerContext.ShoppingAssistant.SaveNewItem();
         _responseInfo.Subject = "Inserting New Item";
 
         var itemName = _handlerContext.ShoppingAssistant.GetItemReserved();
-        string genderVerified = CheckItemGender(itemName);
+        string genderVerified = CheckItemGender(itemName.Name);
 
-        _responseInfo.SubjectContextData = $"{genderVerified} {itemName}";
+        _responseInfo.SubjectContextData = $"{genderVerified} {itemName.Name}";
     }
 
     private void HandleWrongItemName()
@@ -175,15 +200,5 @@ public class CallbackHandler : IUpdateHandlers
     private string CheckItemGender(string item)
     {
         return item[item.Length -1] == 'a' ? "a nova" : "o novo";
-    }
-
-    public Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, HandleErrorSource source, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
     }
 }

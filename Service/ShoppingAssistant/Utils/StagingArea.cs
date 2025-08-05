@@ -1,7 +1,5 @@
-using Domain.Item;
-using TelegramBot.Domain.Item;
 using TelegramBot.Domain.Item.Input;
-using TelegramBot.Infrastructure.Json;
+using TelegramBot.Domain.ItemEntity;
 using TelegramBot.Infrastructure.Json.JsonStorage;
 
 namespace TelegramBot.Service.ShoppingAssistant.Utils;
@@ -9,9 +7,9 @@ namespace TelegramBot.Service.ShoppingAssistant.Utils;
 public class StagingArea : IStagingArea
 {
     private List<string> _itemsToBuy;
-    private List<InputItem> _purchasedInputItems;
-    private readonly ItemDataFormatter _purchasedItems;
-    private InputItem? _itemNotListed;
+    private List<ItemInput> _purchasedInputItems;
+    private readonly ItemList _purchasedItems;
+    private ItemInput? _itemNotListed;
 
     public StagingArea(ShoppingHistory shoppingHistory)
     {
@@ -21,9 +19,9 @@ public class StagingArea : IStagingArea
         _itemsToBuy = new();
     }
 
-    public List<InputItem> GetPurchasedInputItems() => _purchasedInputItems;
+    public List<ItemInput> GetPurchasedInputItems() => _purchasedInputItems;
 
-    public void SaveNewInputItems(List<InputItem> inputItems)
+    public void SaveNewInputItems(List<ItemInput> inputItems)
     {
         inputItems.ForEach(item => _purchasedInputItems.Add(item));
     }
@@ -35,9 +33,9 @@ public class StagingArea : IStagingArea
         _itemsToBuy.Remove(item);
     }
     
-    public InputItem? GetItemNotListed() => _itemNotListed;
+    public ItemInput? GetItemNotListed() => _itemNotListed;
 
-    public void ReserveItemNotListed(InputItem item)
+    public void ReserveItemNotListed(ItemInput item)
     {
         _itemNotListed = item;
     }

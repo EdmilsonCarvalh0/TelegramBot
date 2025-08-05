@@ -1,0 +1,402 @@
+[
+  {
+    "ShoppingDateTime": {
+      "Month": "abril",
+      "Day": 17,
+      "Hour": "09:32"
+    },
+    "Total": 0.0,
+    "ItemList": {
+      "values": [
+        {
+          "id": {
+            "Value": 1
+          },
+          "nome": {
+            "Value": "Feijão"
+          },
+          "marca": {
+            "Value": "Tio joão"
+          },
+          "preco": {
+            "Value": 8.40
+          }
+        },
+        {
+          "id": {
+            "Value": 2
+          },
+          "nome": {
+            "Value": "Cuscuz"
+          },
+          "marca": {
+            "Value": "Coringa"
+          },
+          "preco": {
+            "Value": 2.50
+          }
+        },
+        {
+          "id": {
+            "Value": 3
+          },
+          "nome": {
+            "Value": "Leite"
+          },
+          "marca": {
+            "Value": "Lassereníssima"
+          },
+          "preco": {
+            "Value": 7.30
+          }
+        },
+        {
+          "id": {
+            "Value": 4
+          },
+          "nome": {
+            "Value": "Biscoito"
+          },
+          "marca": {
+            "Value": "Salt"
+          },
+          "preco": {
+            "Value": 4.6
+          }
+        },
+        {
+          "id": {
+            "Value": 5
+          },
+          "nome": {
+            "Value": "Macarrão"
+          },
+          "marca": {
+            "Value": "Favorita"
+          },
+          "preco": {
+            "Value": 4.8
+          }
+        },
+        {
+          "id": {
+            "Value": 6
+          },
+          "nome": {
+            "Value": "Arroz"
+          },
+          "marca": {
+            "Value": "Pop"
+          },
+          "preco": {
+            "Value": 4.7
+          }
+        },
+        {
+          "id": {
+            "Value": 7
+          },
+          "nome": {
+            "Value": "Café"
+          },
+          "marca": {
+            "Value": "Maratá"
+          },
+          "preco": {
+            "Value": 15.7
+          }
+        },
+        {
+          "id": {
+            "Value": 8
+          },
+          "nome": {
+            "Value": "Açúcar"
+          },
+          "marca": {
+            "Value": "Nota10"
+          },
+          "preco": {
+            "Value": 3.90
+          }
+        },
+        {
+          "id": {
+            "Value": 9
+          },
+          "nome": {
+            "Value": "Café"
+          },
+          "marca": {
+            "Value": "Santa clara"
+          },
+          "preco": {
+            "Value": 16.3
+          }
+        },
+        {
+          "id": {
+            "Value": 10
+          },
+          "nome": {
+            "Value": "Requeijão"
+          },
+          "marca": {
+            "Value": "Betânia"
+          },
+          "preco": {
+            "Value": 8.9
+          }
+        },
+        {
+          "id": {
+            "Value": 11
+          },
+          "nome": {
+            "Value": "Café"
+          },
+          "marca": {
+            "Value": "Kimimo"
+          },
+          "preco": {
+            "Value": 15.90
+          }
+        },
+        {
+          "id": {
+            "Value": 12
+          },
+          "nome": {
+            "Value": "Queijo"
+          },
+          "marca": {
+            "Value": "Piracanjuba"
+          },
+          "preco": {
+            "Value": 6.50
+          }
+        },
+        {
+          "id": {
+            "Value": 13
+          },
+          "nome": {
+            "Value": "Pão"
+          },
+          "marca": {
+            "Value": "Bauducco"
+          },
+          "preco": {
+            "Value": 6.90
+          }
+        },
+        {
+          "id": {
+            "Value": 14
+          },
+          "nome": {
+            "Value": "Cerveja"
+          },
+          "marca": {
+            "Value": "Itaipava"
+          },
+          "preco": {
+            "Value": 2.7
+          }
+        },
+        {
+          "id": {
+            "Value": 15
+          },
+          "nome": {
+            "Value": "Refrigerante"
+          },
+          "marca": {
+            "Value": "Coca-cola"
+          },
+          "preco": {
+            "Value": 9.0
+          }
+        },
+        {
+          "id": {
+            "Value": 16
+          },
+          "nome": {
+            "Value": "Farinha"
+          },
+          "marca": {
+            "Value": "Dona benta"
+          },
+          "preco": {
+            "Value": 4.6
+          }
+        },
+        {
+          "id": {
+            "Value": 17
+          },
+          "nome": {
+            "Value": "Requeijão"
+          },
+          "marca": {
+            "Value": "Betânia"
+          },
+          "preco": {
+            "Value": 7.8
+          }
+        },
+        {
+          "id": {
+            "Value": 18
+          },
+          "nome": {
+            "Value": "Manteiga"
+          },
+          "marca": {
+            "Value": "Delicata"
+          },
+          "preco": {
+            "Value": 6.49
+          }
+        }
+      ]
+    }
+  },
+  {
+    "ShoppingDateTime": {
+      "Month": "julho",
+      "Day": 2,
+      "Hour": "18:03"
+    },
+    "Total": 0.0,
+    "ItemDataFormatter": {
+      "items": [
+        {
+          "id": {
+            "Value": 0
+          },
+          "nome": {
+            "Value": "Manteiga"
+          },
+          "marca": {
+            "Value": "Qualy"
+          },
+          "preco": {
+            "Value": 6.0
+          }
+        },
+        {
+          "id": {
+            "Value": 1
+          },
+          "nome": {
+            "Value": "Cuscuz"
+          },
+          "marca": {
+            "Value": "Coringa"
+          },
+          "preco": {
+            "Value": 2.49
+          }
+        },
+        {
+          "id": {
+            "Value": 2
+          },
+          "nome": {
+            "Value": "Leite"
+          },
+          "marca": {
+            "Value": "Betânia"
+          },
+          "preco": {
+            "Value": 6.89
+          }
+        },
+        {
+          "id": {
+            "Value": 3
+          },
+          "nome": {
+            "Value": "Queijo"
+          },
+          "marca": {
+            "Value": "Piracanjuba"
+          },
+          "preco": {
+            "Value": 7.59
+          }
+        }
+      ]
+    }
+  },
+  {
+    "ShoppingDateTime": {
+      "Month": "julho",
+      "Day": 2,
+      "Hour": "19:01"
+    },
+    "Total": 54.0,
+    "ItemDataFormatter": {
+      "items": [
+        {
+          "id": {
+            "Value": 0
+          },
+          "nome": {
+            "Value": "Pão"
+          },
+          "marca": {
+            "Value": "Padeiro"
+          },
+          "preco": {
+            "Value": 4.0
+          }
+        },
+        {
+          "id": {
+            "Value": 1
+          },
+          "nome": {
+            "Value": "Ovo"
+          },
+          "marca": {
+            "Value": "Galinha"
+          },
+          "preco": {
+            "Value": 17.0
+          }
+        },
+        {
+          "id": {
+            "Value": 2
+          },
+          "nome": {
+            "Value": "Açúcar"
+          },
+          "marca": {
+            "Value": "Cristal"
+          },
+          "preco": {
+            "Value": 18.0
+          }
+        },
+        {
+          "id": {
+            "Value": 3
+          },
+          "nome": {
+            "Value": "Café"
+          },
+          "marca": {
+            "Value": "Marata"
+          },
+          "preco": {
+            "Value": 15.0
+          }
+        }
+      ]
+    }
+  }
+]
